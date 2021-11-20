@@ -4,16 +4,18 @@
 
 
 def main():
-    input_dict = {'apple': 'red', 'banana': 'yellow',
-                  'carrot': 'orange', 'tomato': 'red', 'lemon': 'yellow'}
-    output_dict = dict()
-    unique_values = set(input_dict.values())
+    input_dict = {'apple': ('red',), 'banana': 'yellow',
+                  'carrot': ['orange', ], 'tomato': ('red',), 'lemon': 'yellow'}
 
-    for unique_value in unique_values:
-        for key in input_dict.keys():
-            if input_dict[key] == unique_value:
-                output_dict[key] = unique_value
-                break
+    unique_values = list()
+    output_dict = dict()
+
+    for key in input_dict.keys():
+        value = input_dict[key]
+
+        if value not in unique_values:
+            unique_values.append(value)
+            output_dict[key] = value
 
     print('[>] result:', output_dict)
 
