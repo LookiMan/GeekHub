@@ -36,7 +36,7 @@ def get_middle(data, number_of_characters):
     center = len(data) // 2
     half_char = number_of_characters // 2
 
-    return data[center - half_char: center + half_char]
+    return data[center - half_char: center + number_of_characters-1]
 
 
 def get_end(data, number_of_characters):

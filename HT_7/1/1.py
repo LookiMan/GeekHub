@@ -33,14 +33,25 @@ python3 -m pip install -r requirements.txt
 
 """
 
-
 import getpass
 
 from colorama import init, Fore
 
 import utils
 
+
 init(autoreset=True)
+
+_USERNAME = ''
+
+
+def get_current_username():
+    return _USERNAME
+
+
+def set_current_username(username):
+
+    _USERNAME
 
 
 def test_system():
@@ -53,21 +64,6 @@ def test_system():
         exit(1)
     finally:
         fp.close()
-
-
-def login_require(function):
-    def login():
-        print(Fore.CYAN + f'[>] ================')
-
-        username = input(Fore.CYAN + '[<] ім\'я користувача: ').strip()
-        password = getpass.getpass(prompt=Fore.CYAN + '[<] пароль: ').strip()
-
-        if [username, utils.create_password_hash(password)] in utils.get_users():
-            function(username)
-        else:
-            print(Fore.RED + '[!] Логін або пароль введено неправильно ')
-
-    return login
 
 
 def safe_input(prompt, validator):
@@ -84,19 +80,18 @@ def safe_input(prompt, validator):
             return raw_input
 
 
-def sub_menu():
+def sub_menu(username):
     print(Fore.YELLOW + '[>] ==================')
     print(Fore.YELLOW + '[1] Породовжити роботу')
     print(Fore.YELLOW + '[2] вихід')
     command = safe_input('[<] введіть число', lambda v: int(v) in (1, 2))
 
     if command == '1':
-        main_screen()
+        main_screen(username)
     elif command == '2':
         close_session()
 
 
-@login_require
 def balance_view_screen(username):
     balance = utils.load_user_balance(username)
     print(Fore.GREEN + '[>] ==================')
@@ -104,17 +99,20 @@ def balance_view_screen(username):
     utils.append_user_transactions(username, ('переглянув баланс', balance))
 
 
-@login_require
 def balance_replenishment_screen(username):
     balance = int(utils.load_user_balance(username))
     contribution = int(safe_input('[<] сума внесення', int))
-    balance += contribution
 
-    utils.save_user_balance(username, str(balance))
-    utils.append_user_transactions(username, ('внесення коштів', contribution))
+    if contribution < 1:
+        print(Fore.RED + f'[!] Сума внесення повинна бути більша за нуль')
+    else:
+        balance += contribution
+
+        utils.save_user_balance(username, str(balance))
+        utils.append_user_transactions(
+            username, ('внесення коштів', contribution))
 
 
-@login_require
 def balance_withdraw_screen(username):
     balance = int(utils.load_user_balance(username))
     withdraw = int(safe_input('[<] сума для зняття', int))
@@ -122,6 +120,9 @@ def balance_withdraw_screen(username):
     if withdraw > balance:
         print(
             Fore.RED + '[!] сума для зняття не може перевищувати суму на балансі')
+    elif withdraw < 0:
+        print(
+            Fore.RED + '[!] сума для зняття не може бути меншою за нуль')
     else:
         balance -= withdraw
 
@@ -129,7 +130,19 @@ def balance_withdraw_screen(username):
     utils.append_user_transactions(username, ('зняття коштів', withdraw))
 
 
-def main_screen():
+def login_screen():
+    print(Fore.CYAN + f'[>] ================')
+
+    username = input(Fore.CYAN + '[<] ім\'я користувача: ').strip()
+    password = getpass.getpass(prompt=Fore.CYAN + '[<] пароль: ').strip()
+
+    if [username, utils.create_password_hash(password)] in utils.get_users():
+        return username
+    else:
+        print(Fore.RED + '[!] Логін або пароль введено неправильно ')
+
+
+def main_screen(username):
     print(Fore.YELLOW + '[>] ================')
     print(Fore.YELLOW + '[1] Перегляд балансу')
     print(Fore.YELLOW + '[2] Поповнити баланс')
@@ -139,18 +152,18 @@ def main_screen():
     command = safe_input('[<] введіть число', lambda v: int(v) in range(1, 5))
 
     if command == '1':
-        balance_view_screen()
-        sub_menu()
+        balance_view_screen(username)
+        sub_menu(username)
     elif command == '2':
-        balance_replenishment_screen()
-        sub_menu()
+        balance_replenishment_screen(username)
+        sub_menu(username)
     elif command == '3':
-        balance_withdraw_screen()
-        sub_menu()
+        balance_withdraw_screen(username)
+        sub_menu(username)
     elif command == '4':
         close_session()
     else:
-        main_screen()
+        main_screen(username)
 
 
 def close_session():
@@ -160,7 +173,15 @@ def close_session():
 
 def start():
     test_system()
-    main_screen()
+
+    for i in range(3):
+        username = login_screen()
+
+        if username:
+            main_screen(username)
+        else:
+            print(Fore.YELLOW + f'[i] Залишилось спроб: {2-i}')
+            close_session()
 
 
 def main():
