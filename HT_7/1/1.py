@@ -42,17 +42,6 @@ import utils
 
 init(autoreset=True)
 
-_USERNAME = ''
-
-
-def get_current_username():
-    return _USERNAME
-
-
-def set_current_username(username):
-
-    _USERNAME
-
 
 def test_system():
     fp = open('./log.txt', 'a')
@@ -181,7 +170,8 @@ def start():
             main_screen(username)
         else:
             print(Fore.YELLOW + f'[i] Залишилось спроб: {2-i}')
-            close_session()
+
+    close_session()
 
 
 def main():
