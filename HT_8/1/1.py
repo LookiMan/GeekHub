@@ -87,7 +87,7 @@ def post_menu(function: Callable) -> Callable:
 
         print(Fore.YELLOW + "[>] ==================")
         print(Fore.YELLOW + "[1] Породовжити роботу")
-        print(Fore.YELLOW + "[2] вихід")
+        print(Fore.YELLOW + "[2] Вихід")
         command = safe_input("[<] введіть число", lambda v: int(v) in (1, 2))
 
         if command == "1":
