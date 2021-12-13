@@ -4,7 +4,7 @@ import json
 import hashlib
 import logging
 from datetime import datetime
-from typing import Union, Optional, Tuple, Any
+from typing import Union, Tuple, Any
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
