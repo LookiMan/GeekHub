@@ -32,7 +32,7 @@ def save_quotes_to_db(filename: str, quote_data: dict) -> None:
     connection.close()
 
 
-def get_html_code_of_page(url: str, params: dict = {}) -> str:
+def get_html_code_of_page(url: str, params: dict = None) -> str:
     responce = requests.get(url, params=params)
 
     return responce.text
