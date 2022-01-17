@@ -96,7 +96,8 @@ class VikkaSpider(scrapy.Spider):
 
             yield scrapy.Request(url, callback=self.parse_new)
 
-        for href in response.css('a.page-numbers::attr("href")').getall():
+        href = response.css('a.page-numbers.next::attr("href")').get()
+        if href:
             yield scrapy.Request(href, callback=self.parse_page)
 
     def parse_new(self, response):
