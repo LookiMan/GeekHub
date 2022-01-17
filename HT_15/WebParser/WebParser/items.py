@@ -9,8 +9,12 @@ def serialize_list(value: list) -> str:
     return ', '.join(value)
 
 
+def serialize_text(value: list) -> str:
+    return ' '.join(value)
+
+
 class WebparserItem(Item):
     url = Field()
     title = Field()
-    text = Field()
+    text = Field(serializer=serialize_text)
     tags = Field(serializer=serialize_list)

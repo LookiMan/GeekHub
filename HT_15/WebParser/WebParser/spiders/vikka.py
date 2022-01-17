@@ -41,7 +41,7 @@ DATE_MASK = "%Y/%m/%d"
 
 def safe_input(prompt, *, validator):
     """
-    Безпечне отримання вводу від корисувача 
+    Безпечне отримання вводу від корисувача
     """
     while True:
         raw_input = input(f"{prompt}: ").strip()
@@ -57,7 +57,7 @@ def safe_input(prompt, *, validator):
 
 def is_valid_date(string):
     """
-    Перевірка отриманої строки 
+    Перевірка отриманої строки
     """
     date = datetime.strptime(string, DATE_MASK)
 
@@ -91,17 +91,20 @@ class VikkaSpider(scrapy.Spider):
         yield scrapy.Request(f'https://www.vikka.ua/{self.date}/', callback=self.parse_page)
 
     def parse_page(self, response):
-        for href in response.css('a.more-link-style::attr("href")').extract():
+        for href in response.css('a.more-link-style::attr("href")').getall():
             url = response.urljoin(href)
 
             yield scrapy.Request(url, callback=self.parse_new)
+
+        for href in response.css('a.page-numbers::attr("href")').getall():
+            yield scrapy.Request(href, callback=self.parse_page)
 
     def parse_new(self, response):
         item = items.WebparserItem()
 
         item["url"] = response.request.url
         item["title"] = response.css("h1.post-title::text").get()
-        item["text"] = response.css("div.entry-content p::text").getall()
+        item["text"] = response.css("div.entry-content ::text").getall()
         item["tags"] = [
             "#"+tag for tag in response.css("a.post-tag::text").getall()]
 
