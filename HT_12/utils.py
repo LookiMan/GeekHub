@@ -4,7 +4,7 @@ import sqlite3
 
 import requests
 
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup
 
 
 _about_authors_data_cahce = {}
