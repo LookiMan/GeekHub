@@ -12,7 +12,10 @@ https://chromedriver.chromium.org/downloads
 """
 import os
 from pathlib import Path
+
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 
@@ -28,11 +31,21 @@ class Robot(object):
 
     def start_robot(self):
         self.open_tab(self.url)
+        self.await_element_to_be_clickable("input.exportInput")
         self.fill_the_form("Владислав")
         self.screenshot_form("Filled form.png")
         self.submit_form()
+        self.await_element_to_be_clickable("div.freebirdFormviewerViewResponseConfirmationMessage")
         self.screenshot_form("Submited form.png")
         self.close_tab()
+        return
+
+    def await_element_to_be_clickable(self, css_selector, timeout=10):
+        wait = WebDriverWait(self.wd, timeout)
+        try:
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector)))
+        except:
+            raise BaseException(f"Element with css selector: '{css_selector}' not found!")
         return
 
     def open_tab(self, url):
@@ -71,6 +84,8 @@ class Robot(object):
 
 def main():
     options = webdriver.ChromeOptions()
+    options.add_argument("no-sandbox")
+    options.add_experimental_option('useAutomationExtension', False)
     service = ChromeService(executable_path=CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=options)
 
