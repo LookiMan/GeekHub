@@ -103,6 +103,8 @@ def start_scraping(category, tag=None):
         exclude = [obj.job_id for obj in models.Job.objects.all()]
     elif category in ("newstories", "showstories"):
         exclude = [obj.story_id for obj in models.Story.objects.all()]
+    else:
+        exclude = []
 
     for story_id in get_stories_id_by_category_name(category):
         if story_id not in exclude:
