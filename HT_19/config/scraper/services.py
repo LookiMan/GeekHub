@@ -97,13 +97,21 @@ class DjangoExporter(object):
 def start_scraping(category, tag=None):
     exporter = DjangoExporter(category)
 
+    if category == "askstories":
+        exclude = [obj.ask_id for obj in models.Ask.objects.all()]
+    elif category == "jobstories":
+        exclude = [obj.job_id for obj in models.Job.objects.all()]
+    elif category in ("newstories", "showstories"):
+        exclude = [obj.story_id for obj in models.Story.objects.all()]
+
     for story_id in get_stories_id_by_category_name(category):
-        story = get_story_by_id(story_id)
+        if story_id not in exclude:
+            story = get_story_by_id(story_id)
+            if story:
+                if tag and story.get("text"):
+                    story["text"] = replace_tags(tag, story["text"])
 
-        if tag and story.get("text"):
-            story["text"] = replace_tags(tag, story["text"])
-
-        exporter.process_item(story)
+                exporter.process_item(story)
 
     exporter.close()
     return
