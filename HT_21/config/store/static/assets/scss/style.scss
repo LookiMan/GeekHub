@@ -1,0 +1,110 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap");
+
+body {
+	font-family: "Montserrat", sans-serif;
+}
+
+header {
+	margin-bottom: 100px;
+}
+
+ul.messages {
+	list-style-type: none;
+	padding-left: 0;
+
+	li {
+		text-decoration: none;
+	}
+}
+
+.container {
+	min-height: 90vh;
+}
+
+.bcontainer {
+	margin: auto;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.horizontal-align {
+	display: block;
+	width: 350px;
+	height: 200px;
+	margin: auto;
+}
+
+.vertical-align {
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	transform: translate(0, -50%);
+}
+
+.card-title {
+	height: 48px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.card-text {
+	height: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#loginForm {
+	width: 350px;
+	border: 1px solid #c8c8c8;
+	border-radius: 5px;
+	padding: 15px;
+
+	label {
+		display: flex;
+		justify-content: center;
+	}
+
+	input {
+		width: 100%;
+		margin-top: 5px;
+		margin-bottom: 25px;
+	}
+
+	select {
+		width: 100%;
+		display: block;
+		margin-top: 10px;
+		margin-bottom: 10px;
+		padding: 5px;
+	}
+}
+
+#editForm {
+	border: 1px solid #c8c8c8;
+	border-radius: 5px;
+	padding: 10px;
+
+	label {
+		display: flex;
+		justify-content: center;
+	}
+
+	textarea {
+		width: 100%;
+		margin-bottom: 25px;
+	}
+
+	input {
+		width: 100%;
+		margin-top: 5px;
+		margin-bottom: 25px;
+	}
+
+	select {
+		width: 100%;
+		display: block;
+		margin-top: 5px;
+		margin-bottom: 25px;
+		padding: 5px;
+	}
+}

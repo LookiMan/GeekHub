@@ -1,0 +1,28 @@
+{% extends "./base.html" %}
+
+
+{% block body %}
+    {% load static %}
+
+    <div class="container">
+        <noscript>
+            <div class="alert alert-warning my-3 text-center shadow-sm" role="alert">
+                Для корректной работы сайта включите javascript
+            </div>
+        </noscript>
+
+        {% if form %}   
+            <form id="editForm" class="shadow" method="POST" action="">
+                <div>
+                    {{ form }}
+                </div>
+                
+                <div class="content-center my-3">
+                    <button class="btn btn-primary w-100" type="submit">Редактировать</button>
+                </div>
+                {% csrf_token %}
+            </form>
+        {% endif %}
+
+    </div>
+{% endblock %}

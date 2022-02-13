@@ -1,0 +1,51 @@
+{% extends "./base.html" %}
+
+{% block body %}
+    {% load static %}
+
+    <div class="container">
+
+        <noscript>
+            <div class="alert alert-warning my-3 text-center shadow-sm" role="alert">
+                Для корректной работы сайта включите javascript
+            </div>
+        </noscript>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li {% if message.tags %} class="alert alert-{{message.tags}} my-3 text-center shadow-sm" {% endif %}>
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if cart %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Название торвара</th>
+                        <th scope="col" class="text-center">Количество</th>
+                        <th scope="col" class="text-center">Цена</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in cart.products %}
+                        <tr>
+                            <td>{{product.name}}</td>
+                            <td class="text-center">{{product.quantity}}</td>
+                            <td class="text-center">{{product.price}}</td>
+                            <td><a href="{% url 'store:remove_from_cart' pk=product.pk %}" type="button" class="btn btn-danger text-center">Удалить</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning my-3 text-center shadow-sm">
+                Корзина пустая
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
