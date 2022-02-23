@@ -36,7 +36,7 @@
 
 `sudo systemctl start rabbitmq-server`
 
-`systemctl status rabbitmq-server will report service status as observed by systemd (or similar service manager):`
+systemctl status rabbitmq-server will report service status as observed by systemd (or similar service manager):
 
 # check on service status as observed by service manager
 
