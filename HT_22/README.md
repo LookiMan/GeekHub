@@ -12,7 +12,7 @@
 
 `sudo apt install erlang`
 
-## test erlang
+## Test erlang
 
 `erl`
 
