@@ -21,7 +21,7 @@ def index(request):
                 "date": datetime.now(),
             }
 
-            tasks.start_scraping(rubric_name)
+            tasks.start_scraping.delay(rubric_name)
 
             return render(request, "./scraper/index.html", context)
         else:

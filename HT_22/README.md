@@ -45,3 +45,5 @@
 ## Start celery instance
 
 `celery -A config worker --loglevel=INFO`
+
+`celery -A config.celery worker -Q celery,scraper -l INFO`
