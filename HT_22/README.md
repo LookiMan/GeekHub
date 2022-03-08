@@ -12,7 +12,7 @@
 
 `sudo apt install erlang`
 
-# test erlang
+## Test erlang
 
 `erl`
 
@@ -28,17 +28,17 @@
 
 ## To start and stop the server, use the systemctl tool. The service name is rabbitmq-server:
 
-# stop the local node
+## stop the local node
 
 `sudo systemctl stop rabbitmq-server`
 
-# start it back
+## start it back
 
 `sudo systemctl start rabbitmq-server`
 
-`systemctl status rabbitmq-server will report service status as observed by systemd (or similar service manager):`
+systemctl status rabbitmq-server will report service status as observed by systemd (or similar service manager):
 
-# check on service status as observed by service manager
+## check on service status as observed by service manager
 
 `sudo systemctl status rabbitmq-server`
 
