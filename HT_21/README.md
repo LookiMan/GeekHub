@@ -10,7 +10,7 @@
 SUPERUSER:
 
     login: user
-    passwordL user
+    password: user
 
 USER:
 
