@@ -30,31 +30,29 @@ Run this command:
 this automatically update the following to:
 
 
-`
+```
 CELERY_ACCEPT_CONTENT = ['**']
 CELERY_BROKER_URL = "**"
 CELERY_TIMEZONE = "**"
 CELERY_RESULT_BACKEND = "**"
-`
-
+```
 
 to this:
 
-
-`
+```
 accept_content = ['**']
 CELERY_broker_url = "**"
 timezone = "**"
 result_backend = "**"
-`
+```
 
 # Project root:
 
-`GeekHub\FinalProject`
+`GeekHub/FinalProject`
 
 # Activate virtual environment:
 
-`../../Scripts\Activate.ps1`
+`../../Scripts/Activate.ps1`
 
 # Run Ngrok:
 
@@ -68,6 +66,6 @@ result_backend = "**"
 
 # Run sass:
 
-`cd "chat\static\assets"`
+`cd chat/static/assets`
 
 `sass --watch scss:css`
