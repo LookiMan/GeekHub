@@ -1,0 +1,96 @@
+{% extends "./base.html" %}
+
+
+{% load static %}
+
+<noscript>
+  <div class="alert alert-warning my-3 text-center shadow-sm" role="alert">
+    Для корректной работы сайта включите javascript
+  </div>
+</noscript>
+
+{% block main %}
+  <input type="hidden" id="jwt-token" value="{{request.user.token}}"></input>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="uploadFileModalForm" tabindex="-1" aria-labelledby="uploadFileModalFormLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Выберите файл для загрузки</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img id="previewImage" src="">
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Выберите файл</label>
+          <input class="form-control" type="file" id="formFile">
+        </div>
+        <div class="mb-3">
+          <input id="caption-input" class="form-control" placeholder="Коментарий..."></input>
+        </div>
+        <div class="form-check">
+          <input id="sendAsFileCheck" class="form-check-input" type="checkbox" value="" >
+          <label class="form-check-label" for="sendAsFileCheck">
+            Отправить как файл
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <input id="uploadUrl" type="hidden" value="{% url 'chat:upload_file' %}">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button id="send" type="button" class="btn btn-primary">Отправить</button>
+      </div>
+      </div>
+    </div>
+    </div>
+
+  <div class="container mt-5">
+    <div class="row shadow">
+
+      {% if message %}
+        <div class="alert alert-success my-3 text-center shadow-sm" role="alert">
+          {{ message }}
+        </div>
+      {% endif %}
+      <div id="aside-chats-menu" class="col-4 mx-0 px-0">
+        <!-- Здесь функция loadChats с файла main.js получит от сервера список чатов и отрендерит их -->
+        <div id="aside-chats-menu-spiner" class="centered-container-aside-chats-menu">
+          <div id="chat-spiner" class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-8 mx-0 px-0">
+        <div class="control-panel d-inline-flex bg-light">
+          <span id="chat-title" class="fw-bold" style="margin: auto;">Chat Name</span>
+          <a type="button" class="more-actions"><i class="bi bi-three-dots-vertical"></i></a>
+        </div>
+        <div id="chat-and-message" style="background-image: url(&quot;{% static 'assets/images/background.jpg' %}&quot;);">
+          <!--  -->
+          <div id="chat-spiner"  class="centered-container-chat">
+            <div id="chat-spiner" class="d-flex justify-content-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="input-area">
+          <button class="button file-select-button" data-bs-toggle="modal" data-bs-target="#uploadFileModalForm">
+            <i class="bi bi-file-earmark"></i>
+          </button>
+          <textarea id="chat-message-input" class="chat-input" placeholder="Ваш текст..."></textarea>
+          <button id="chat-message-submit" class="button send-button">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

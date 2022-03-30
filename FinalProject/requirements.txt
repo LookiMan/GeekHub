@@ -1,0 +1,19 @@
+# Django
+Django==3.2.12
+channels==3.0.4
+djangochannelsrestframework==0.3.0
+djangorestframework==3.13.1
+djangorestframework-jwt==1.11.0
+daphne==3.0.2
+Twisted==20.3.0
+asgi-redis==1.4.3
+asgiref==3.5.0
+channels-redis==3.4.0
+pillow==9.0.1
+
+# Tasks
+celery==5.2.3
+redis==4.1.4
+
+# Telegram
+pyTelegramBotAPI==4.4.0

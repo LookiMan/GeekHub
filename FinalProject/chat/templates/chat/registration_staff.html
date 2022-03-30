@@ -1,0 +1,37 @@
+{% extends "./base.html" %}
+
+
+{% block main %}
+  {% load static %}
+
+  <div class="container">
+    <noscript>
+      <div class="alert alert-warning my-3 text-center shadow-sm" role="alert">
+        Для корректной работы сайта включите javascript
+      </div>
+    </noscript>
+
+    {% if messages %}
+      <ul class="messages">
+      {% for message in messages %}
+        <li {% if message.tags %} class="alert alert-{{message.tags}} my-3 text-center shadow-sm" {% endif %}>
+          {{ message }}
+        </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if form %}
+      <form id="registration-form" class="shadow" method="POST" action="">
+        <div>
+          {{ form }}
+        </div>
+        
+        <div class="content-center my-3">
+          <button class="btn btn-primary w-100" type="submit">Зарегистроровать</button>
+        </div>
+        {% csrf_token %}
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

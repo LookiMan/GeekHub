@@ -1,0 +1,15 @@
+__pycache__
+*db.sqlite3
+*logs.txt
+src/
+dev/
+media/
+
+chat/migrations/*
+!chat/migrations/__init__.py
+
+chat/photos/*
+!chat/photos/default/
+
+telegram_bot/migrations/*
+!telegram_bot/migrations/__init__.py
