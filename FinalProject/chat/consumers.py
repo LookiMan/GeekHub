@@ -1,4 +1,3 @@
-from email.mime import message
 import json
 
 from channels.db import database_sync_to_async
@@ -60,7 +59,7 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     @message_activity.serializer
     def message_activity(self, instance: Message, action, **kwargs):
-        return dict(data=MessageSerializer(instance).data, action=action.value, pk=str(instance.pk))
+        return dict(data=MessageSerializer(instance).data, action=action.value, pk=instance.pk)
 
     @ database_sync_to_async
     def get_chat(self, ucid):

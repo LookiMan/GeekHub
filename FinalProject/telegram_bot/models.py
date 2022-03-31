@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from django.db import models
 
 from telegram_bot.utils import set_default_image
@@ -7,12 +5,10 @@ from chat.models import Staff
 
 
 class User(models.Model):
-    uuid = models.UUIDField(
+    uuid = models.AutoField(
         "uuid",
-        max_length=255,
-        primary_key=True,
+        primary_key=True, 
         unique=True,
-        default=uuid4,
         help_text="Уникальный идентификатор пользователя в базе данных",
     )
 
@@ -94,11 +90,10 @@ class User(models.Model):
 
 
 class Chat(models.Model):
-    ucid = models.UUIDField(
+    ucid = models.AutoField(
         "ucid",
-        primary_key=True,
+        primary_key=True, 
         unique=True,
-        default=uuid4,
         help_text="Уникальный идентификатор чата в базе данных",
     )
 
@@ -170,11 +165,10 @@ class Chat(models.Model):
 
 
 class Message(models.Model):
-    umid = models.UUIDField(
+    umid = models.AutoField(
         "umid",
-        primary_key=True,
+        primary_key=True, 
         unique=True,
-        default=uuid4,
         help_text="Уникальный идентификатор сообщения в базе данных",
     )
 

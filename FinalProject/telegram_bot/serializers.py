@@ -1,15 +1,7 @@
 from rest_framework import serializers
 
-from chat.models import Staff
+from chat.serializers import StaffSerializer
 from telegram_bot.models import User, Chat, Message
-
-
-
-class StaffSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Staff
-        fields = ("id", "username", "first_name", "last_name")
 
 
 class ClientSerializer(serializers.ModelSerializer):
