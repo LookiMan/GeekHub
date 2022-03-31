@@ -10,8 +10,6 @@ from config.settings import TELEGRAM_BOT_TOKEN, WEBHOOK_HOST
 from config.celery import app
 from django.utils.safestring import mark_safe
 
-from chat.utils import action_logger
-
 from telegram_bot.models import User, Chat, Message
 from telegram_bot import utils
 
@@ -60,7 +58,7 @@ def _download_file_from_telegram(file_id):
     utils.save_file(content, file_id)
 
 
-@action_logger
+
 @async_to_sync
 async def notify_staff_about_new_chat(chat_id):
     channel_layer = get_channel_layer()
@@ -72,7 +70,7 @@ async def notify_staff_about_new_chat(chat_id):
     )
 
 
-@action_logger
+
 def send_text_message_to_client(chat, text, staff=None):
     message = bot.send_message(
         chat.id,
@@ -89,7 +87,7 @@ def async_send_text_message_to_client(chat, text, staff):
     send_text_message_to_client(chat, text, staff)
 
 
-@action_logger
+
 def send_photo_to_client(staff, chat, file, caption=None):
     message = bot.send_photo(chat.id, file, caption=mark_safe(caption))
 
@@ -97,7 +95,7 @@ def send_photo_to_client(staff, chat, file, caption=None):
     process_staff_message(chat, message, staff)
 
 
-@action_logger
+
 def send_document_to_client(staff, chat, file, caption=None):
     message = bot.send_document(chat.id, file, caption=mark_safe(caption))
 
@@ -105,7 +103,7 @@ def send_document_to_client(staff, chat, file, caption=None):
     process_staff_message(chat, message, staff)
 
 
-@action_logger
+
 def send_welcome_message(message):
     first_name = message.chat.first_name or ""
     last_name = message.chat.last_name or ""
@@ -119,7 +117,7 @@ def send_welcome_message(message):
     )
 
 
-@action_logger
+
 def send_message_to_user_about_blocking(message):
     send_text_message_to_client(
         message.chat.id,
@@ -127,7 +125,7 @@ def send_message_to_user_about_blocking(message):
     )
 
 
-@action_logger
+
 def send_message_to_user_about_unblocking(message):
     send_text_message_to_client(
         message.chat.id,
@@ -135,7 +133,7 @@ def send_message_to_user_about_unblocking(message):
     )
 
 
-@action_logger
+
 def get_or_create_telegram_user(message):
     return User.objects.get_or_create(
         id=message.from_user.id,
@@ -147,7 +145,7 @@ def get_or_create_telegram_user(message):
     )
 
 
-@action_logger
+
 def get_or_create_telegram_chat(telegram_user, message):
     return Chat.objects.get_or_create(
         id=message.chat.id,
@@ -159,7 +157,7 @@ def get_or_create_telegram_chat(telegram_user, message):
     )
 
 
-@action_logger
+
 def create_telegram_message(chat, user, message, staff=None):
     document = message.document.file_id if message.document else None
     file_name = message.document.file_name if message.document else None
@@ -188,7 +186,7 @@ def create_telegram_message(chat, user, message, staff=None):
     )
 
 
-@action_logger
+
 def get_telegram_user(message):
     telegram_user, is_new = get_or_create_telegram_user(message)
 
@@ -204,7 +202,7 @@ def get_telegram_user(message):
     return telegram_user
 
 
-@action_logger
+
 @bot.message_handler(content_types=IGNORED_CONTENT_TYPES)
 def process_ignored_content_types(message):
     text = "⚠️ На данный момент \nбот поддерживает "\
@@ -216,7 +214,7 @@ def process_ignored_content_types(message):
     send_text_message_to_client(message.chat.id, text)
 
 
-@action_logger
+
 def process_user_message(message):
     telegram_user, _ = get_or_create_telegram_user(message)
     telegram_chat, is_new_chat = get_or_create_telegram_chat(telegram_user, message)
@@ -227,14 +225,14 @@ def process_user_message(message):
         notify_staff_about_new_chat(str(telegram_chat.ucid))
 
 
-@action_logger
+
 def process_staff_message(telegram_chat, message, staff):
     telegram_user, _ = get_or_create_telegram_user(message)
 
     create_telegram_message(telegram_chat, telegram_user, message, staff)
 
 
-@action_logger
+
 @bot.message_handler(commands=["start"])
 def process_received_start_commant(message):
     telegram_user = get_telegram_user(message)
@@ -245,7 +243,7 @@ def process_received_start_commant(message):
         process_user_message(message)
 
 
-@action_logger
+
 @bot.message_handler(content_types=["text"])
 def process_received_text_message(message):
     telegram_user = get_telegram_user(message)
@@ -256,7 +254,7 @@ def process_received_text_message(message):
         process_user_message(message)
 
 
-@action_logger
+
 @bot.message_handler(content_types=["photo"])
 def process_received_photo_message(message):
     telegram_user = get_telegram_user(message)
@@ -268,7 +266,7 @@ def process_received_photo_message(message):
         process_user_message(message)
 
 
-@action_logger
+
 @bot.message_handler(content_types=["document"])
 def process_received_document_message(message):
     telegram_user = get_telegram_user(message)
@@ -286,7 +284,7 @@ def process_telegram_event(update):
     bot.process_new_updates([update])
 
 
-@action_logger
+
 def download_user_photo(user_id):
     response = bot.get_user_profile_photos(user_id)
 
@@ -303,7 +301,7 @@ def download_user_photo(user_id):
     return None
 
 
-@action_logger
+
 def debug_telegram_bot():
     bot.remove_webhook()
     bot.polling()
