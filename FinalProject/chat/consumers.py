@@ -1,3 +1,4 @@
+from email.mime import message
 import json
 
 from channels.db import database_sync_to_async
@@ -6,9 +7,8 @@ from djangochannelsrestframework.observer.generics import (
     ObserverModelInstanceMixin, action)
 from djangochannelsrestframework.observer import model_observer
 
-from chat.models import Chat, Message
-from chat.serializers import MessageSerializer, ChatSerializer
-
+from telegram_bot.models import Chat, Message
+from telegram_bot.serializers import MessageSerializer, ChatSerializer
 from telegram_bot.tasks import async_send_text_message_to_client
 
 
@@ -23,9 +23,18 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     @action()
     async def send_text_message(self, message, **kwargs):
-        chat = await self.get_chat(pk=kwargs["ucid"])
-        staff = self.scope["user"]
-        await async_send_text_message_to_client(chat, message, staff)
+        ucid = kwargs.get("ucid")
+        try:
+            chat = await self.get_chat(ucid=ucid)
+        except:
+            data = {
+                "action": "error",
+                "text": f"Chat with ucid \"{ucid}\" not found",
+            }
+            await self.send(text_data=json.dumps(data))
+        else:
+            staff = self.scope["user"]
+            await async_send_text_message_to_client(chat, message, staff)
 
     @action()
     async def subscribe_to_messages_in_chat(self, ucid, **kwargs):
@@ -51,11 +60,11 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     @message_activity.serializer
     def message_activity(self, instance: Message, action, **kwargs):
-        return dict(data=MessageSerializer(instance).data, action=action.value, pk=instance.pk)
+        return dict(data=MessageSerializer(instance).data, action=action.value, pk=str(instance.pk))
 
     @ database_sync_to_async
-    def get_chat(self, pk: int) -> Chat:
-        return Chat.objects.get(pk=pk)
+    def get_chat(self, ucid):
+        return Chat.objects.get(ucid=ucid)
 
     async def notify_staff(self, event):
         data = {

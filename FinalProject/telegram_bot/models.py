@@ -1,13 +1,13 @@
 from uuid import uuid4
 
-from django.conf import settings
 from django.db import models
 
 from telegram_bot.utils import set_default_image
+from chat.models import Staff 
 
 
-class TelegramUser(models.Model):
-    uuid = models.CharField(
+class User(models.Model):
+    uuid = models.UUIDField(
         "uuid",
         max_length=255,
         primary_key=True,
@@ -76,11 +76,6 @@ class TelegramUser(models.Model):
         help_text="Дата сохранения пользователя в базу данных",
     )
 
-    @property
-    def image_url(self):
-        return settings.PHOTOS_URL + self.image.name
-
-
     def delete(self, *args, **kwargs):
         if self.image:
             self.image.delete(save=False)
@@ -98,10 +93,9 @@ class TelegramUser(models.Model):
         verbose_name_plural = "Telegram пользователи"
 
 
-class TelegramChat(models.Model):
-    ucid = models.CharField(
+class Chat(models.Model):
+    ucid = models.UUIDField(
         "ucid",
-        max_length=255,
         primary_key=True,
         unique=True,
         default=uuid4,
@@ -116,7 +110,7 @@ class TelegramChat(models.Model):
     is_closed = models.BooleanField(
         "is_closed",
         default=False,
-        help_text="Является ли пользователь чат закрытым",
+        help_text="Является ли чат закрытым",
     )
 
     first_name = models.CharField(
@@ -149,10 +143,20 @@ class TelegramChat(models.Model):
     )
 
     user = models.ForeignKey(
-        TelegramUser,
+        User,
         on_delete=models.CASCADE,
         null=True,
     )
+
+    staff = models.ForeignKey(
+        Staff,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="chats"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         first_name = self.first_name or ""
@@ -165,10 +169,9 @@ class TelegramChat(models.Model):
         verbose_name_plural = "Telegram чаты"
 
 
-class TelegramMessage(models.Model):
-    umid = models.CharField(
+class Message(models.Model):
+    umid = models.UUIDField(
         "umid",
-        max_length=255,
         primary_key=True,
         unique=True,
         default=uuid4,
@@ -180,10 +183,29 @@ class TelegramMessage(models.Model):
         help_text="Идентификатор сообщения в telegram",
     )
 
-    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
-    chat = models.ForeignKey(TelegramChat, on_delete=models.CASCADE)
+    chat = models.ForeignKey(
+        Chat, 
+        on_delete=models.CASCADE,
+        related_name="messages"
+    )
 
-    reply_to_message = models.ForeignKey("TelegramMessage", on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
+    staff = models.ForeignKey(
+        Staff,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
+    reply_to_message = models.ForeignKey(
+        "Message", 
+        on_delete=models.SET_NULL, 
+        null=True,
+    )
 
     text = models.TextField(
         "text",
@@ -216,6 +238,8 @@ class TelegramMessage(models.Model):
         null=True,
         help_text="Описание файла/фото от пользователя",
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def delete(self, *args, **kwargs):
         if self.photo:

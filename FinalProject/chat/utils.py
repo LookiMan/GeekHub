@@ -1,5 +1,4 @@
 import logging
-import traceback
 from typing import Callable
 
 from django.conf import settings

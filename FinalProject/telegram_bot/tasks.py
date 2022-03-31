@@ -8,11 +8,11 @@ from channels.layers import get_channel_layer
 
 from config.settings import TELEGRAM_BOT_TOKEN, WEBHOOK_HOST
 from config.celery import app
+from django.utils.safestring import mark_safe
 
-from chat.models import Chat, Message
 from chat.utils import action_logger
 
-from telegram_bot.models import TelegramUser, TelegramChat, TelegramMessage
+from telegram_bot.models import User, Chat, Message
 from telegram_bot import utils
 
 
@@ -76,7 +76,7 @@ async def notify_staff_about_new_chat(chat_id):
 def send_text_message_to_client(chat, text, staff=None):
     message = bot.send_message(
         chat.id,
-        text=text,
+        text=mark_safe(text),
         reply_markup=None,
         parse_mode="HTML"
     )
@@ -91,18 +91,18 @@ def async_send_text_message_to_client(chat, text, staff):
 
 @action_logger
 def send_photo_to_client(staff, chat, file, caption=None):
-    message = bot.send_photo(chat.id, file, caption=caption)
+    message = bot.send_photo(chat.id, file, caption=mark_safe(caption))
 
     _download_file_from_telegram(message.photo[-1].file_id)
-    process_staff_message(message, staff, chat)
+    process_staff_message(chat, message, staff)
 
 
 @action_logger
 def send_document_to_client(staff, chat, file, caption=None):
-    message = bot.send_document(chat.id, file, caption=caption)
+    message = bot.send_document(chat.id, file, caption=mark_safe(caption))
 
     _download_file_from_telegram(message.document.file_id)
-    process_staff_message(message, staff, chat)
+    process_staff_message(chat, message, staff)
 
 
 @action_logger
@@ -137,7 +137,7 @@ def send_message_to_user_about_unblocking(message):
 
 @action_logger
 def get_or_create_telegram_user(message):
-    return TelegramUser.objects.get_or_create(
+    return User.objects.get_or_create(
         id=message.from_user.id,
         is_bot=message.from_user.is_bot,
         first_name=message.from_user.first_name,
@@ -149,9 +149,10 @@ def get_or_create_telegram_user(message):
 
 @action_logger
 def get_or_create_telegram_chat(telegram_user, message):
-    return TelegramChat.objects.get_or_create(
+    return Chat.objects.get_or_create(
         id=message.chat.id,
         first_name=message.chat.first_name,
+        last_name=message.chat.last_name,
         username=message.chat.username,
         type=message.chat.type,
         user=telegram_user,
@@ -159,18 +160,7 @@ def get_or_create_telegram_chat(telegram_user, message):
 
 
 @action_logger
-def get_or_create_chat(client, message):
-    return Chat.objects.get_or_create(
-        id=message.chat.id,
-        first_name=message.chat.first_name,
-        last_name=message.chat.last_name,
-        username=message.chat.username,
-        client=client,
-    )
-
-
-@action_logger
-def create_telegram_message(user, chat, message):
+def create_telegram_message(chat, user, message, staff=None):
     document = message.document.file_id if message.document else None
     file_name = message.document.file_name if message.document else None
     photo = message.photo[-1].file_id if message.photo else None
@@ -178,35 +168,7 @@ def create_telegram_message(user, chat, message):
 
     if message.reply_to_message:
         try:
-            reply_to_message = TelegramMessage.objects.get(id=message.reply_to_message.message_id, user=user, chat=chat)
-        except TelegramMessage.DoesNotExist:
-            reply_to_message = None
-    else:
-        reply_to_message = None
-
-    return TelegramMessage.objects.create(
-        id=message.message_id,
-        user=user,
-        chat=chat,
-        text=message.text,
-        photo=photo,
-        document=document,
-        file_name=file_name,
-        caption=caption,
-        reply_to_message=reply_to_message,
-    )
-
-
-@action_logger
-def create_chat_message(telegram_user, chat, message, staff=None):
-    document = message.document.file_id if message.document else None
-    file_name = message.document.file_name if message.document else None
-    photo = message.photo[-1].file_id if message.photo else None
-    caption = message.caption if message.caption else None
-
-    if message.reply_to_message:
-        try:
-            reply_to_message = Message.objects.get(id=message.reply_to_message.message_id, chat=chat)
+            reply_to_message = Message.objects.get(id=message.reply_to_message.message_id, user=user, chat=chat)
         except Message.DoesNotExist:
             reply_to_message = None
     else:
@@ -215,14 +177,14 @@ def create_chat_message(telegram_user, chat, message, staff=None):
     return Message.objects.create(
         id=message.message_id,
         chat=chat,
-        user=telegram_user,
+        user=user,
         text=message.text,
         photo=photo,
         document=document,
         file_name=file_name,
         caption=caption,
+        reply_to_message=reply_to_message,
         staff=staff,
-        reply_to_message=reply_to_message
     )
 
 
@@ -257,26 +219,19 @@ def process_ignored_content_types(message):
 @action_logger
 def process_user_message(message):
     telegram_user, _ = get_or_create_telegram_user(message)
-    telegram_chat, _ = get_or_create_telegram_chat(telegram_user, message)
+    telegram_chat, is_new_chat = get_or_create_telegram_chat(telegram_user, message)
 
-    create_telegram_message(telegram_user, telegram_chat, message)
-
-    chat, is_new_chat = get_or_create_chat(telegram_user, message)
-
-    create_chat_message(telegram_user, chat, message)
+    create_telegram_message(telegram_chat, telegram_user, message)
 
     if is_new_chat:
-        notify_staff_about_new_chat(str(chat.ucid))
+        notify_staff_about_new_chat(str(telegram_chat.ucid))
 
 
 @action_logger
-def process_staff_message(chat, message, staff):
+def process_staff_message(telegram_chat, message, staff):
     telegram_user, _ = get_or_create_telegram_user(message)
-    telegram_chat, _ = get_or_create_telegram_chat(telegram_user, message)
 
-    create_telegram_message(telegram_user, telegram_chat, message)
-
-    create_chat_message(telegram_user, chat, message, staff)
+    create_telegram_message(telegram_chat, telegram_user, message, staff)
 
 
 @action_logger

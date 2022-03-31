@@ -9,6 +9,17 @@ var chatSocket;
 var connected = false;
 
 
+function storageSet(key, object) {
+	localStorage.setItem(key, JSON.stringify(object));
+}
+
+
+function storageGet(key) {
+    const raw = localStorage.getItem(key);
+	return JSON.parse(raw);
+}
+
+
 function setupWebSocket() {
     const requestId = new Date().getTime();
     const token = $('#jwt-token').val();
@@ -18,11 +29,11 @@ function setupWebSocket() {
 
         chatSocket.onopen = event => {
             console.info('websocket opened!');
-            const chats = storageGet("allChats");
+            const chats = storageGet('allChats');
 
             chatSocket.send(
                 JSON.stringify({
-                    action: "join_to_chats",
+                    action: 'join_to_chats',
                     request_id: requestId,
                 })
             );
@@ -49,6 +60,7 @@ function setupWebSocket() {
 
         chatSocket.onmessage = event => {
             const data = JSON.parse(event.data);
+            console.log(data);
 
             switch (data.action) {
                 case "create_new_chat":
@@ -58,7 +70,7 @@ function setupWebSocket() {
                     console.log(data.data)
                     for (let message of data?.data?.messages || []) {
                         processRetrievedMessage(message);
-                        console.log(data.action, data.data);
+                        console.log(data.action, message);
                     }
                     break;
                 case "create":
@@ -102,17 +114,6 @@ function setupWebSocket() {
     });
 
     $('#chat-message-submit').on('click', sendMessage.bind(chatSocket));
-}
-
-
-function storageSet(key, object) {
-	return localStorage.getItem(key, JSON.stringify(object));
-}
-
-
-function storageGet(key) {
-    const raw = localStorage.getItem(key);
-	return JSON.parse(raw);
 }
 
 
@@ -230,7 +231,7 @@ function renderChatItem(chat) {
 
     const li = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
                 <div>
-                    <img class="telegram-user-image" src="${chat.client.image_url}" alt="">
+                    <img class="telegram-user-image" src="${chat.user.image}" alt="">
                 </div>
                 <div class="preview-container ms-2 me-auto">
                     <div class="fw-bold">${firstName} ${lastName}</div>
@@ -298,7 +299,7 @@ function renderNewChatItem(chat_id) {
 
 function renderChatMessages(messages) {
     $.each(messages, function(index, message) { 
-        if (message?.employee === null) {
+        if (message?.staff === null) {
             appendClientMessage(message);
         } else {
             appendManagerMessage(message);
@@ -384,7 +385,7 @@ function processRetrievedMessage(message) {
 function updateChatListItem(message) {
     const ucid = message.chat.ucid;
     const activeChatUcid = storageGet('activeChatUcid');
-    const previewMessagePreffix = message?.employee === null ? 'Клиент:' : 'Вы:';
+    const previewMessagePreffix = message?.staff === null ? 'Клиент:' : 'Вы:';
     const lastMessageText = makePreviewText(message);
     
     const receivedMessages = storageGet('receivedMessages');
@@ -427,13 +428,13 @@ function processReceivedMessage(message) {
     storageSet('chatsMessages', chatsMessages);
 
     if (activeChatUcid === ucid) {
-        if (message?.employee === null) {
+        if (message?.staff === null) {
             appendClientMessage(message);
         } else {
             appendManagerMessage(message);
         }
     
-    } else if (message.employee === null) {
+    } else if (message?.staff === null) {
         //
         let messages = receivedMessages[ucid] || {};
         messages[message.id] = message;

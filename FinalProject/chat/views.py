@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.http import Http404, HttpResponseNotFound
 
 from chat.forms import LoginStaffForm, RegisterStaffForm, ChangeStaffInfoForm
-from chat.models import Chat, Staff
-
+from chat.models import Staff
+from telegram_bot.models import Chat
 
 @login_required
 def index(request):

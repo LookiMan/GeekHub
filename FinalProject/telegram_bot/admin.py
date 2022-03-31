@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from telegram_bot.models import TelegramUser, TelegramChat, TelegramMessage
+from telegram_bot.models import User, Chat, Message
 
 
 class CustomModelAdmin(admin.ModelAdmin):
@@ -15,8 +15,8 @@ class CustomModelAdmin(admin.ModelAdmin):
             ))
 
 
-@admin.register(TelegramUser)
-class TelegramUserAdmin(CustomModelAdmin):
+@admin.register(User)
+class UserAdmin(CustomModelAdmin):
     readonly_fields = ("uuid", "id", "is_bot")
 
     list_display = (
@@ -63,7 +63,7 @@ class TelegramUserAdmin(CustomModelAdmin):
 
     def preview_user_image(self, obj):
         if obj.image:
-            return mark_safe(f'<div> <img src="{obj.image_url}" style="width: 50px; height: 50px; background-size: cover; border-radius: 50%;"></div>')
+            return mark_safe(f'<div> <img src="{obj.image.url}" style="width: 50px; height: 50px; background-size: cover; border-radius: 50%;"></div>')
         else:
             return '[Фото не загружено]'
 
@@ -76,8 +76,8 @@ class TelegramUserAdmin(CustomModelAdmin):
     make_unblocked.short_description = "Отметить выбранных пользователей как разблокированых"
 
 
-@admin.register(TelegramChat)
-class TelegramChatAdmin(CustomModelAdmin):
+@admin.register(Chat)
+class ChatAdmin(CustomModelAdmin):
     readonly_fields = ("ucid", "id")
 
     actions = ("make_closed", "make_opened")
@@ -91,6 +91,6 @@ class TelegramChatAdmin(CustomModelAdmin):
     make_opened.short_description = "Отметить выбранные чаты как открытые"
 
 
-@admin.register(TelegramMessage)
-class TelegramMessageAdmin(CustomModelAdmin):
+@admin.register(Message)
+class MessageAdmin(CustomModelAdmin):
     readonly_fields = ("umid", "id")

@@ -1,18 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from chat.models import Staff, Chat, Message
+from chat.models import Staff
 from chat.forms import CustomStaffCreationForm, CustomStaffChangeForm
-
-
-@admin.register(Chat)
-class ChatAdmin(admin.ModelAdmin):
-    readonly_fields = ("ucid", "id",)
-
-
-@admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    readonly_fields = ("umid", "id",)
 
 
 @admin.register(Staff)

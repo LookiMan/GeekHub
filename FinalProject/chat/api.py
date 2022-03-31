@@ -6,12 +6,12 @@ from rest_framework.status import HTTP_201_CREATED
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 
-from chat.models import Chat, Message
 from chat.forms import UploadFileForm
-from chat.serializers import ChatSerializer, MessageSerializer
 
 from chat.utils import logger
 
+from telegram_bot.models import Chat, Message
+from telegram_bot.serializers import ChatSerializer, MessageSerializer
 from telegram_bot.tasks import send_photo_to_client, send_document_to_client
 
 
@@ -71,7 +71,6 @@ def upload_file(request):
         caption = form.cleaned_data.get("caption")
         employee = request.user
         chat = Chat.objects.get(ucid=form.cleaned_data.get("chat_id"))
-
 
         if photo:
             send_photo_to_client(
