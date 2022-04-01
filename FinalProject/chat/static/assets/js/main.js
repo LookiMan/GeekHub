@@ -44,14 +44,14 @@ function setupWebSocket() {
                 chatSocket.send(
                     JSON.stringify({
                         ucid: chat.ucid,
-                        action: "retrieve",
+                        action: 'retrieve',
                         request_id: requestId,
                     })
                 );
                 chatSocket.send(
                     JSON.stringify({
                         ucid: chat.ucid,
-                        action: "subscribe_to_messages_in_chat",
+                        action: 'subscribe_to_messages_in_chat',
                         request_id: requestId,
                     })
                 );
@@ -63,18 +63,21 @@ function setupWebSocket() {
             console.log(data);
 
             switch (data.action) {
-                case "create_new_chat":
+                case 'create_new_chat':
                     renderNewChatItem(data.telegram_chat_id);
 
-                case "retrieve":
+                case 'retrieve':
                     console.log(data.data)
                     for (let message of data?.data?.messages || []) {
                         processRetrievedMessage(message);
                         console.log(data.action, message);
                     }
                     break;
-                case "create":
+                case 'create':
                     processReceivedMessage(data.data);
+                    console.log(data.action, data.data);
+                    break;
+                case 'update':
                     console.log(data.action, data.data);
                     break;
                 default:
@@ -118,29 +121,63 @@ function setupWebSocket() {
 
 
 function asideChatMenuClickHandler(event) {
-    let chats = storageGet("chatsMessages");
-    let receivedMessages = storageGet("receivedMessages");
     let target = $(event.currentTarget);
-
-    const ucid = $(target).data("chat-ucid");
-
+    const chats = storageGet('chatsMessages');
+    const ucid = $(target).data('chat-ucid');
+    const chat = chats[ucid];
+    
+    let receivedMessages = storageGet('receivedMessages');
+    
     if (ucid === null) {
-        console.error("Attribute 'data-chat-ucid' not found in target element!");
+        console.error('Attribute \"data-chat-ucid\" not found in target element');
         return;
     } else {
-        loadChatMessages(ucid);
+        renderChat(ucid);
     }
 
-    $("li.active-aside-chat-menu-tab")?.removeClass("active-aside-chat-menu-tab");
-    $(target).addClass("active-aside-chat-menu-tab");
+    if (chat === null) {
+        console.error(`Chat with ucid \"${ucid}\" not found in chatsMessages`);
+        return;      
+    }
+
+    $('li.active-aside-chat-menu-tab')?.removeClass('active-aside-chat-menu-tab');
+    $(target).addClass('active-aside-chat-menu-tab');
 
     let badge = $(`li[data-chat-ucid=${ucid}] span.badge`);
-    badge.removeClass("bg-danger");
-    badge.addClass("bg-primary");
-    badge.text($(chats[ucid]).length);
+    badge.removeClass('bg-danger');
+    badge.addClass('bg-primary');
+    badge.text($().length);
 
     delete receivedMessages[ucid];
-    storageSet("receivedMessages", receivedMessages);
+    storageSet('receivedMessages', receivedMessages);
+}
+
+
+function makePreviewText(message) {
+    if (message.photo) {
+        return '[фото 🖼]';
+    } else if (message.document) {
+        return `[файл 📁] ${message.file_name}`;
+    } else if (message.text) {
+        return message.text;
+    } else {
+        return'[нет сообщений]';
+    }
+}
+
+
+function makeReplyText(message) {
+    const username = message?.staff ? "Вы" : message.user.first_name;
+
+    if (message.photo) {
+        return `<i><strong>${username}:</strong></i> [фото 🖼]`;
+    } else if (message.document) {
+        return `<i><strong>${username}:</strong></i> [файл 📁] ${message.file_name}`;
+    } else if (message.text) {
+        return `<i><strong>${username}:</strong></i> ${message.text}`;
+    } else {
+        return'[сообщение удалено]';
+    }
 }
 
 
@@ -150,7 +187,7 @@ function renderChatMessage(message, userType) {
 
     if (message.reply_to_message) {
         replyBlock = `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
-                            ${makePreviewText(message.reply_to_message)}
+                            ${makeReplyText(message.reply_to_message)}
                         </div>`;
     } else {
         replyBlock = '';
@@ -205,19 +242,6 @@ function appendClientMessage(message) {
 
     $(chat).append(messageBlock);
     chat.scrollTop = chat.scrollHeight;
-}
-
-
-function makePreviewText(message) {
-    if (message.photo) {
-        return '[фото 🖼]';
-    } else if (message.document) {
-        return `[файл 📁] ${message.file_name}`;
-    } else if (message.text) {
-        return message.text;
-    } else {
-        return'[нет сообщений]';
-    }
 }
 
 
@@ -277,7 +301,7 @@ function renderNewChatItem(chat_id) {
             chatSocket.send(
                 JSON.stringify({
                     ucid: chat.ucid,
-                    action: "subscribe_to_messages_in_chat",
+                    action: 'subscribe_to_messages_in_chat',
                     request_id: requestId,
                 })
             );
@@ -285,7 +309,7 @@ function renderNewChatItem(chat_id) {
             chatSocket.send(
                 JSON.stringify({
                     ucid: chat.ucid,
-                    action: "retrieve",
+                    action: 'retrieve',
                     request_id: requestId,
                 })
             );
@@ -337,7 +361,7 @@ function loadChats() {
 }
 
 
-function loadChatMessages(ucid) {
+function renderChat(ucid) {
     const allChats = storageGet('allChats');
     const chat = allChats[ucid];
 
@@ -413,7 +437,7 @@ function processReceivedMessage(message) {
     const activeChatUcid = storageGet('activeChatUcid');
 
     let receivedMessages = storageGet('receivedMessages');
-    let chatsMessages = storageGet("chatsMessages");
+    let chatsMessages = storageGet('chatsMessages');
 
     if (ucid === null) {
         console.error('Received message does not have a "ucid" key');

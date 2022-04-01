@@ -157,7 +157,7 @@ def create_telegram_message(chat, user, message, staff=None):
     if message.reply_to_message:
         try:
             reply_to_message = Message.objects.get(
-                id=message.reply_to_message.message_id, user=user, chat=chat)
+                id=message.reply_to_message.message_id, chat=chat)
         except Message.DoesNotExist:
             reply_to_message = None
     else:
