@@ -23,12 +23,13 @@
 
     {% if form %}
       <form id="registration-form" class="shadow" method="POST" action="">
+        <h5 class="text-center">Редактирование профиля сотрудника</h5>
         <div>
           {{ form }}
         </div>
         
         <div class="content-center my-3">
-          <button class="btn btn-primary w-100" type="submit">Зарегистроровать</button>
+          <button class="btn btn-primary w-100" type="submit">Сохранить</button>
         </div>
         {% csrf_token %}
       </form>

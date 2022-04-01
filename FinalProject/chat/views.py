@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import Http404, HttpResponseNotFound
+from django.urls import reverse_lazy
 
 from chat.forms import LoginStaffForm, RegisterStaffForm, ChangeStaffInfoForm
 from chat.models import Staff
@@ -64,10 +65,10 @@ def registration_staff(request):
                 first_name="Мои заметки",
                 last_name=None,
                 username=None,
-                client=None,
+                staff=staff,
             )
 
-            return redirect('chat:edit', kwargs={"pk": 30})
+            return redirect(reverse_lazy('chat:edit', kwargs={"pk": staff.pk}))
 
         else:
             context["form"] = RegisterStaffForm()
@@ -104,6 +105,6 @@ def change_staff(request, pk):
                 for error in form.errors.values():
                     messages.warning(request, error)
         else:
-            context["form"] = ChangeStaffInfoForm()
+            context["form"] = ChangeStaffInfoForm(instance=staff)
 
-        return render(request, "./chat/change_staff.html", context)
+        return render(request, "./chat/edit_staff.html", context)
