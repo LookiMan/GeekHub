@@ -21,8 +21,11 @@ django.setup()
 @database_sync_to_async
 def get_user(token):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY,
-                             algorithms=settings.ALGORITHM)
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=settings.ALGORITHM
+        )
     except:
         return AnonymousUser()
 

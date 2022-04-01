@@ -1,7 +1,4 @@
 import logging
-from typing import Callable
-
-from django.conf import settings
 
 
 logger = logging.getLogger()

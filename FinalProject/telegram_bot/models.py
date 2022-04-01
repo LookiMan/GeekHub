@@ -1,13 +1,13 @@
 from django.db import models
 
 from telegram_bot.utils import set_default_image
-from chat.models import Staff 
+from chat.models import Staff
 
 
 class User(models.Model):
     uuid = models.AutoField(
         "uuid",
-        primary_key=True, 
+        primary_key=True,
         unique=True,
         help_text="Уникальный идентификатор пользователя в базе данных",
     )
@@ -92,7 +92,7 @@ class User(models.Model):
 class Chat(models.Model):
     ucid = models.AutoField(
         "ucid",
-        primary_key=True, 
+        primary_key=True,
         unique=True,
         help_text="Уникальный идентификатор чата в базе данных",
     )
@@ -167,7 +167,7 @@ class Chat(models.Model):
 class Message(models.Model):
     umid = models.AutoField(
         "umid",
-        primary_key=True, 
+        primary_key=True,
         unique=True,
         help_text="Уникальный идентификатор сообщения в базе данных",
     )
@@ -178,13 +178,13 @@ class Message(models.Model):
     )
 
     chat = models.ForeignKey(
-        Chat, 
+        Chat,
         on_delete=models.CASCADE,
         related_name="messages"
     )
 
     user = models.ForeignKey(
-        User, 
+        User,
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -196,8 +196,8 @@ class Message(models.Model):
     )
 
     reply_to_message = models.ForeignKey(
-        "Message", 
-        on_delete=models.SET_NULL, 
+        "Message",
+        on_delete=models.SET_NULL,
         null=True,
     )
 

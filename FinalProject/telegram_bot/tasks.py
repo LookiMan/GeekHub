@@ -58,7 +58,6 @@ def _download_file_from_telegram(file_id):
     utils.save_file(content, file_id)
 
 
-
 @async_to_sync
 async def notify_staff_about_new_chat(chat_id):
     channel_layer = get_channel_layer()
@@ -68,7 +67,6 @@ async def notify_staff_about_new_chat(chat_id):
             "chat_id": chat_id,
         }
     )
-
 
 
 def send_text_message_to_client(chat, text, staff=None):
@@ -87,7 +85,6 @@ def async_send_text_message_to_client(chat, text, staff):
     send_text_message_to_client(chat, text, staff)
 
 
-
 def send_photo_to_client(staff, chat, file, caption=None):
     message = bot.send_photo(chat.id, file, caption=mark_safe(caption))
 
@@ -95,13 +92,11 @@ def send_photo_to_client(staff, chat, file, caption=None):
     process_staff_message(chat, message, staff)
 
 
-
 def send_document_to_client(staff, chat, file, caption=None):
     message = bot.send_document(chat.id, file, caption=mark_safe(caption))
 
     _download_file_from_telegram(message.document.file_id)
     process_staff_message(chat, message, staff)
-
 
 
 def send_welcome_message(message):
@@ -117,7 +112,6 @@ def send_welcome_message(message):
     )
 
 
-
 def send_message_to_user_about_blocking(message):
     send_text_message_to_client(
         message.chat.id,
@@ -125,13 +119,11 @@ def send_message_to_user_about_blocking(message):
     )
 
 
-
 def send_message_to_user_about_unblocking(message):
     send_text_message_to_client(
         message.chat.id,
         "✅ Вы разблокированы ✅",
     )
-
 
 
 def get_or_create_telegram_user(message):
@@ -145,7 +137,6 @@ def get_or_create_telegram_user(message):
     )
 
 
-
 def get_or_create_telegram_chat(telegram_user, message):
     return Chat.objects.get_or_create(
         id=message.chat.id,
@@ -157,7 +148,6 @@ def get_or_create_telegram_chat(telegram_user, message):
     )
 
 
-
 def create_telegram_message(chat, user, message, staff=None):
     document = message.document.file_id if message.document else None
     file_name = message.document.file_name if message.document else None
@@ -166,7 +156,8 @@ def create_telegram_message(chat, user, message, staff=None):
 
     if message.reply_to_message:
         try:
-            reply_to_message = Message.objects.get(id=message.reply_to_message.message_id, user=user, chat=chat)
+            reply_to_message = Message.objects.get(
+                id=message.reply_to_message.message_id, user=user, chat=chat)
         except Message.DoesNotExist:
             reply_to_message = None
     else:
@@ -186,7 +177,6 @@ def create_telegram_message(chat, user, message, staff=None):
     )
 
 
-
 def get_telegram_user(message):
     telegram_user, is_new = get_or_create_telegram_user(message)
 
@@ -202,7 +192,6 @@ def get_telegram_user(message):
     return telegram_user
 
 
-
 @bot.message_handler(content_types=IGNORED_CONTENT_TYPES)
 def process_ignored_content_types(message):
     text = "⚠️ На данный момент \nбот поддерживает "\
@@ -214,10 +203,10 @@ def process_ignored_content_types(message):
     send_text_message_to_client(message.chat.id, text)
 
 
-
 def process_user_message(message):
     telegram_user, _ = get_or_create_telegram_user(message)
-    telegram_chat, is_new_chat = get_or_create_telegram_chat(telegram_user, message)
+    telegram_chat, is_new_chat = get_or_create_telegram_chat(
+        telegram_user, message)
 
     create_telegram_message(telegram_chat, telegram_user, message)
 
@@ -225,12 +214,10 @@ def process_user_message(message):
         notify_staff_about_new_chat(str(telegram_chat.ucid))
 
 
-
 def process_staff_message(telegram_chat, message, staff):
     telegram_user, _ = get_or_create_telegram_user(message)
 
     create_telegram_message(telegram_chat, telegram_user, message, staff)
-
 
 
 @bot.message_handler(commands=["start"])
@@ -243,7 +230,6 @@ def process_received_start_commant(message):
         process_user_message(message)
 
 
-
 @bot.message_handler(content_types=["text"])
 def process_received_text_message(message):
     telegram_user = get_telegram_user(message)
@@ -252,7 +238,6 @@ def process_received_text_message(message):
         send_message_to_user_about_blocking()
     else:
         process_user_message(message)
-
 
 
 @bot.message_handler(content_types=["photo"])
@@ -264,7 +249,6 @@ def process_received_photo_message(message):
     else:
         _download_file_from_telegram(message.photo[-1].file_id)
         process_user_message(message)
-
 
 
 @bot.message_handler(content_types=["document"])
@@ -284,7 +268,6 @@ def process_telegram_event(update):
     bot.process_new_updates([update])
 
 
-
 def download_user_photo(user_id):
     response = bot.get_user_profile_photos(user_id)
 
@@ -299,7 +282,6 @@ def download_user_photo(user_id):
         return utils.save_user_image(content, file_id + extention)
 
     return None
-
 
 
 def debug_telegram_bot():

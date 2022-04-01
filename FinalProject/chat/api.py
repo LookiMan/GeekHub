@@ -23,7 +23,7 @@ def get_chat(request, ucid):
     except Chat.DoesNotExist:
         return Response(f'Chat not found', status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
-        logger.error(exc)
+        logger.exception(f'{exc}. Payload: ucid: {ucid}')
         return Response('Unclassified error', status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         serializer = ChatSerializer(chat)
@@ -38,7 +38,7 @@ def get_chats(request):
     except Chat.DoesNotExist:
         return Response(f'Chats not found', status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
-        logger.error(exc)
+        logger.exception(exc)
         return Response('Unclassified error', status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         serializer = ChatSerializer(chats, many=True)
@@ -47,13 +47,13 @@ def get_chats(request):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def get_messages(request, chat_pk, offset):
+def get_messages(request, ucid, offset):
     try:
-        messages = Message.objects.filter(chat=chat_pk).exclude(id__lte=offset)
+        messages = Message.objects.filter(chat=ucid).exclude(id__lte=offset)
     except Message.DoesNotExist:
         return Response(f'Messages not found', status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
-        logger.error(f'{exc}. Payload: chat_pk: {chat_pk}; offset: {offset};')
+        logger.exception(f'{exc}. Payload: ucid: {ucid}; offset: {offset};')
         return Response('Unclassified error', status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         serializer = MessageSerializer(messages, many=True)
@@ -74,17 +74,17 @@ def upload_file(request):
 
         if photo:
             send_photo_to_client(
-                employee, 
-                chat, 
-                photo, 
+                employee,
+                chat,
+                photo,
                 caption
             )
 
         elif document:
             send_document_to_client(
-                employee, 
-                chat, 
-                document, 
+                employee,
+                chat,
+                document,
                 caption
             )
 

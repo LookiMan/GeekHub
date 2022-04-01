@@ -118,8 +118,8 @@ class UploadFileForm(forms.Form):
 
     photo = forms.FileField(required=False)
     document = forms.FileField(required=False)
-    
+
     caption = forms.CharField(
-        max_length=255, 
+        max_length=255,
         required=False,
     )

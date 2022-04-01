@@ -28,7 +28,7 @@ def telegram_webhook(request, token):
             process_telegram_event.delay(update)
 
     except Exception as exc:
-        logger.error(exc)
+        logger.exception(exc)
         return Response(
             'Unclassified error',
             status=HTTP_500_INTERNAL_SERVER_ERROR

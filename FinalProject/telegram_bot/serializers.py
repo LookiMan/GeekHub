@@ -19,8 +19,8 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = (
-            "umid", "id", "chat", "user", "staff", "reply_to_message", 
-            "text", "photo", "document", "file_name", "caption", 
+            "umid", "id", "chat", "user", "staff", "reply_to_message",
+            "text", "photo", "document", "file_name", "caption",
             "created_at_formatted"
         )
         depth = 2
