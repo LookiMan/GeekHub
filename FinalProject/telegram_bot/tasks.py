@@ -74,20 +74,21 @@ async def notify_staff_about_new_chat(chat):
     )
 
 
-def send_text_message_to_client(chat, text):
+def send_text_message_to_client(chat, text, reply_to_message_id=None):
     message = bot.send_message(
         chat.id,
         text=mark_safe(text),
         reply_markup=None,
-        parse_mode="HTML"
+        parse_mode="HTML", 
+        reply_to_message_id=reply_to_message_id
     )
 
     process_message(chat, message)
 
 
 @sync_to_async
-def async_send_text_message_to_client(chat, text):
-    send_text_message_to_client(chat, text)
+def async_send_text_message_to_client(chat, text, reply_to_message_id):
+    send_text_message_to_client(chat, text, reply_to_message_id)
 
 
 def send_photo_to_client(chat, file, caption=None):

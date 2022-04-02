@@ -127,7 +127,7 @@ function asideChatMenuClickHandler(event) {
     const ucid = $(target).data('chat-ucid');
     const chat = chats[ucid];
     
-    let receivedMessages = storageGet('receivedMessages');
+    let unreadMessages = storageGet('unreadMessages');
     
     if (ucid === null) {
         console.error('Attribute \"data-chat-ucid\" not found in target element');
@@ -144,13 +144,12 @@ function asideChatMenuClickHandler(event) {
     $('li.active-aside-chat-menu-tab')?.removeClass('active-aside-chat-menu-tab');
     $(target).addClass('active-aside-chat-menu-tab');
 
-    let badge = $(`li[data-chat-ucid=${ucid}] span.badge`);
-    badge.removeClass('bg-danger');
-    badge.addClass('bg-primary');
-    badge.text($().length);
+    delete unreadMessages[ucid];
+    storageSet('unreadMessages', unreadMessages);
 
-    delete receivedMessages[ucid];
-    storageSet('receivedMessages', receivedMessages);
+    updateAmountMessagesBadge(ucid);
+    updateSiteTitle();
+
 }
 
 
@@ -184,6 +183,7 @@ function makeReplyText(message) {
 
 function renderChatMessage(message, userType) {
     const captionBlock = message.caption ? `<div class="telegram-text-message">${message.caption}</div>` : "";
+    var messageBody;
     var replyBlock;
 
     if (message.reply_to_message) {
@@ -195,7 +195,7 @@ function renderChatMessage(message, userType) {
     }
 
     if (message.photo) {  
-        return $(`<div class="message-in-chat" data-message-id="${message.id}">
+        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
                             <div class="message-${userType}">
                                 ${replyBlock}
                                 <div class="telegram-photo-message">
@@ -206,7 +206,7 @@ function renderChatMessage(message, userType) {
                         </div>`);
         
     } else if (message.document) {
-        return $(`<div class="message-in-chat" data-message-id="${message.id}">
+        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
                             <div class="message-${userType}">
                                 ${replyBlock}
                                 <div class="telegram-document-message">
@@ -216,7 +216,7 @@ function renderChatMessage(message, userType) {
                             </div>
                         </div>`);
     } else {
-        return $(`<div class="message-in-chat" data-message-id="${message.id}">
+        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
                         <div class="message-${userType}">
                             ${replyBlock}
                             <div class="telegram-text-message">
@@ -225,6 +225,10 @@ function renderChatMessage(message, userType) {
                         </div>
                     </div>`);                   
     }
+
+    messageBody.on("click", setReplyMessage);
+
+    return messageBody;
 }
 
 
@@ -249,7 +253,8 @@ function appendClientMessage(message) {
 function renderNote(chat) {
     $('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
     //
-    renderChatItem(chat);
+    renderNoteItem(chat);
+    updateAmountMessagesBadge(chat.ucid);
     //
     const requestId = new Date().getTime();
     //
@@ -271,6 +276,29 @@ function renderNote(chat) {
 }
 
 
+function renderNoteItem(chat) {
+    const ol = $('#aside-chats-menu > ol');
+
+    const firstName = chat.first_name;
+    const lastMessageText = makePreviewText(chat.last_message);
+    const lastMessagePreffix = 'Вы';
+
+    const li = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
+                <div>
+                    <img class="telegram-note-image" src="/static/assets/images/note.png" alt="">
+                </div>
+                <div class="preview-container ms-2 me-auto">
+                    <div class="fw-bold">${firstName}</div>
+                    <div class="preview"><strong>${lastMessagePreffix}</strong> ${lastMessageText}</div>
+                </div>
+                <span class="badge bg-primary rounded-pill">0</span>
+            </li>`);
+
+    $(li).click(asideChatMenuClickHandler);
+    $(ol).append(li);
+}
+
+
 function renderChatItem(chat) {
     const ol = $('#aside-chats-menu > ol');
 
@@ -278,11 +306,10 @@ function renderChatItem(chat) {
     const lastName = chat.last_name || '';
     const lastMessagePreffix = chat.last_message?.employee !== null ? 'Вы:' : 'Клиент:';
     const lastMessageText = makePreviewText(chat.last_message);
-    const image = chat?.user ? chat?.user.image : "/static/assets/images/note.jpg";
 
     const li = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
                 <div>
-                    <img class="telegram-user-image" src="${image}" alt="">
+                    <img class="telegram-user-image" src="${chat.user.image}" alt="">
                 </div>
                 <div class="preview-container ms-2 me-auto">
                     <div class="fw-bold">${firstName} ${lastName}</div>
@@ -298,7 +325,7 @@ function renderChatItem(chat) {
 
 function renderChatList(chats) {
     //$('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
-
+    
     $.each(chats, function (index, chat) {
         renderChatItem(chat);
     });
@@ -457,29 +484,56 @@ function processRetrievedMessage(message) {
 }
 
 
-function updateChatListItem(message) {
-    const ucid = message.chat.ucid;
-    const activeChatUcid = storageGet('activeChatUcid');
-    const previewMessagePreffix = message?.staff === null ? 'Клиент:' : 'Вы:';
-    const lastMessageText = makePreviewText(message);
-    
-    const receivedMessages = storageGet('receivedMessages');
-    const chatsMessages = storageGet('chatsMessages');
+function updateAmountMessagesBadge(ucid) {
+    const activeChatUcid = storageGet('activeChatUcid'); 
 
     let badge = $(`li[data-chat-ucid=${ucid}] span.badge`);
-    let preview = $(`li[data-chat-ucid=${ucid}] div.preview`);
 
     if (activeChatUcid === ucid) {
+        const chatsMessages = storageGet('chatsMessages');
+        const messages = chatsMessages[ucid] || {};
+
         badge.removeClass('bg-danger');
         badge.addClass('bg-primary');
-        badge.text($(chatsMessages[ucid]).length);
+        badge.text(Object.keys(messages).length);
     } else {
+        const unreadMessages = storageGet('unreadMessages');
+        const messages = unreadMessages[ucid] || {};
+
         badge.removeClass('bg-primary');
         badge.addClass('bg-danger');
-        badge.text($(receivedMessages[ucid]).length);
+        badge.text(Object.keys(messages).length);
     }
+} 
+
+
+function updateSiteTitle() {
+    const unreadMessages = storageGet('unreadMessages');
+    let amountUnreadMessages = 0;
+
+    $.each(unreadMessages, function(ucid, messages) {
+        amountUnreadMessages += Object.keys(messages).length;
+    })
+
+    if (amountUnreadMessages === 0) {
+        document.title = 'SUPPORT';
+    } else {
+        document.title = `SUPPORT (${amountUnreadMessages})`;
+    }
+}
+
+
+function updateChatListItem(message) {
+    const ucid = message.chat.ucid;
+
+    const previewMessagePreffix = message?.staff === null ? 'Клиент:' : 'Вы:';
+    const lastMessageText = makePreviewText(message);
+
+    let preview = $(`li[data-chat-ucid=${ucid}] div.preview`);
 
     preview.html(`<strong>${previewMessagePreffix}</strong> ${lastMessageText}`);
+
+    updateAmountMessagesBadge(ucid);
 }
 
 
@@ -487,7 +541,7 @@ function processReceivedMessage(message) {
     const ucid = message.chat.ucid;
     const activeChatUcid = storageGet('activeChatUcid');
 
-    let receivedMessages = storageGet('receivedMessages');
+    let unreadMessages = storageGet('unreadMessages');
     let chatsMessages = storageGet('chatsMessages');
 
     if (ucid === null) {
@@ -511,14 +565,15 @@ function processReceivedMessage(message) {
     
     } else if (message?.staff === null) {
         //
-        let messages = receivedMessages[ucid] || {};
+        let messages = unreadMessages[ucid] || {};
         messages[message.id] = message;
         //
-        receivedMessages[ucid] = messages;
-        storageSet('receivedMessages', receivedMessages);
+        unreadMessages[ucid] = messages;
+        storageSet('unreadMessages', unreadMessages);
     }
 
     updateChatListItem(message);
+    updateSiteTitle();
 }
 
 
@@ -526,6 +581,13 @@ function sendMessage(chatSocket) {
     const ucid = storageGet('activeChatUcid');
     const requestId = new Date().getTime();
     const message = $('#chat-message-input').val().trim();
+    var replyToMessageId;
+
+    replyToMessage = storageGet('replyToMessage');
+
+    if (replyToMessage && replyToMessage.ucid == ucid) {
+        replyToMessageId = replyToMessage.messageId;
+    }
 
     if (message.length === 0) {
         return;
@@ -533,6 +595,7 @@ function sendMessage(chatSocket) {
         chatSocket.send(JSON.stringify({
             ucid: ucid,
             text: message,
+            reply_to_message_id: replyToMessageId,
             action: "send_text_message",
             request_id: requestId,
         }));
@@ -575,11 +638,38 @@ function sendFile() {
 }
 
 
+function setReplyMessage(event) {
+    const ucid = storageGet('activeChatUcid');
+    const messageId = $(event.currentTarget).data('message-id');
+
+    storageSet('replyToMessage', {
+        ucid: ucid,
+        messageId: messageId,
+    });
+
+    const chatsMessages = storageGet('chatsMessages');
+    const messages = chatsMessages[ucid] || {};
+
+    $('div.reply-message span').text(makePreviewText(messages[messageId]));
+}
+
+
+function unetReplyMessage(chatId, messageId) {
+    storageSet('replyToMessage', {
+        chatId: 0,
+        messageId: messageId,
+    });
+}
+
+
+
 function setupData() {
     // 
-    storageSet('receivedMessages', {});
+    storageSet('unreadMessages', {});
     // 
     storageSet('chatsMessages', {});
+    //
+    storageSet('replyToMessage', {});
 }
 
 
