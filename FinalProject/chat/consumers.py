@@ -1,4 +1,4 @@
-import json
+import time
 
 from channels.db import database_sync_to_async
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
@@ -21,8 +21,10 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         await self.add_group("chat")
 
     @action()
-    async def send_text_message(self, message, **kwargs):
+    async def send_text_message(self, text, **kwargs):
         ucid = kwargs.get("ucid")
+        reply_to_message_id = kwargs.get("reply_to_message_id")
+
         try:
             chat = await self.get_chat(ucid=ucid)
         except:
@@ -30,10 +32,12 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
                 "action": "error",
                 "text": f"Chat with ucid \"{ucid}\" not found",
             }
-            await self.send(text_data=json.dumps(data))
+            await self.send_json(data)
         else:
-            staff = self.scope["user"]
-            await async_send_text_message_to_client(chat, message, staff)
+            if chat.is_note:
+                await self.create_text_note(chat, text, reply_to_message_id)
+            else:
+                await async_send_text_message_to_client(chat, text)
 
     @action()
     async def subscribe_to_messages_in_chat(self, ucid, **kwargs):
@@ -59,15 +63,41 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     @message_activity.serializer
     def message_activity(self, instance: Message, action, **kwargs):
-        return dict(data=MessageSerializer(instance).data, action=action.value, pk=instance.pk)
+        return dict(data=MessageSerializer(instance).data, action=action.value, umid=instance.umid)
 
     @ database_sync_to_async
     def get_chat(self, ucid):
         return Chat.objects.get(ucid=ucid)
 
+    @ database_sync_to_async
+    def create_text_note(self, chat, text, reply_to_message_id):
+        if reply_to_message_id:
+            try:
+                reply_to_message = Message.objects.get(
+                    id=reply_to_message_id,
+                    chat=chat,
+                )
+            except Message.DoesNotExist:
+                reply_to_message = None
+        else:
+            reply_to_message = None
+
+        Message.objects.create(
+            id=int(time.time()*10),
+            chat=chat,
+            user=None,
+            staff=chat.staff,
+            reply_to_message=reply_to_message,
+            text=text,
+            photo=None,
+            document=None,
+            file_name=None,
+            caption=None,
+        )
+
     async def notify_staff(self, event):
         data = {
             "action": "create_new_chat",
-            "telegram_chat_id": event["chat_id"],
+            "data": event,
         }
-        await self.send(text_data=json.dumps(data))
+        await self.send_json(data)

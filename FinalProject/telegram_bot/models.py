@@ -108,6 +108,12 @@ class Chat(models.Model):
         help_text="Является ли чат закрытым",
     )
 
+    is_note = models.BooleanField(
+        "is_note",
+        default=False,
+        help_text="Является ли чат заметкой",
+    )
+
     first_name = models.CharField(
         "first_name",
         max_length=128,
@@ -134,13 +140,16 @@ class Chat(models.Model):
         "type",
         max_length=32,
         blank=True,
+        null=True,
         help_text="Тип чата",
     )
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        blank=True,
         null=True,
+        related_name="chats"
     )
 
     staff = models.ForeignKey(
@@ -186,18 +195,21 @@ class Message(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
+        blank=True,
         null=True,
     )
 
     staff = models.ForeignKey(
         Staff,
         on_delete=models.SET_NULL,
+        blank=True,
         null=True,
     )
 
     reply_to_message = models.ForeignKey(
         "Message",
         on_delete=models.SET_NULL,
+        blank=True,
         null=True,
     )
 

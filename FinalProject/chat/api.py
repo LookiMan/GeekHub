@@ -26,6 +26,31 @@ def get_chat(request, ucid):
         logger.exception(f'{exc}. Payload: ucid: {ucid}')
         return Response('Unclassified error', status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
+
+        if not chat.staff:
+            chat.staff = request.user
+            chat.save()
+
+        serializer = ChatSerializer(chat)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_note(request):
+    try:
+        chat, _ = Chat.objects.get_or_create(
+            id=0,
+            first_name="Мои заметки",
+            last_name=None,
+            username=None,
+            is_note=True,
+            staff=request.user,
+        )
+    except Exception as exc:
+        logger.exception(exc)
+        return Response('Unclassified error', status=HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
         serializer = ChatSerializer(chat)
         return Response(serializer.data)
 
@@ -34,7 +59,7 @@ def get_chat(request, ucid):
 @permission_classes((IsAuthenticated,))
 def get_chats(request):
     try:
-        chats = Chat.objects.all()
+        chats = Chat.objects.all().exclude(is_note=True)
     except Chat.DoesNotExist:
         return Response(f'Chats not found', status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
@@ -66,28 +91,29 @@ def upload_file(request):
     form = UploadFileForm(request.POST, request.FILES)
 
     if form.is_valid():
-        photo = form.cleaned_data.get("photo")
-        document = form.cleaned_data.get("document")
-        caption = form.cleaned_data.get("caption")
-        employee = request.user
-        chat = Chat.objects.get(ucid=form.cleaned_data.get("chat_id"))
+        ucid = form.cleaned_data.get("ucid")
 
-        if photo:
-            send_photo_to_client(
-                employee,
-                chat,
-                photo,
-                caption
+        try:
+            chat = Chat.objects.get(ucid=ucid)
+        except Chat.DoesNotExist:
+            Response({
+                "code": 400, "errors":  {
+                    "chat": f"Чат с ucid '{ucid}' не найден"
+                }
+            },
+                status=HTTP_400_BAD_REQUEST
             )
+        else:
+            photo = form.cleaned_data.get("photo")
+            document = form.cleaned_data.get("document")
+            caption = form.cleaned_data.get("caption")
 
-        elif document:
-            send_document_to_client(
-                employee,
-                chat,
-                document,
-                caption
-            )
+            if photo:
+                send_photo_to_client(chat, photo, caption)
 
-        return Response({"code": 200}, status=HTTP_201_CREATED)
+            elif document:
+                send_document_to_client(chat, document, caption)
+
+            return Response({"code": 200}, status=HTTP_201_CREATED)
 
     return Response({"code": 400, "errors": form.errors}, status=HTTP_400_BAD_REQUEST)

@@ -64,7 +64,8 @@ function setupWebSocket() {
 
             switch (data.action) {
                 case 'create_new_chat':
-                    renderNewChatItem(data.telegram_chat_id);
+                    console.log(data);
+                    renderNewChatItem(data.data.ucid);
 
                 case 'retrieve':
                     console.log(data.data)
@@ -245,17 +246,43 @@ function appendClientMessage(message) {
 }
 
 
+function renderNote(chat) {
+    $('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
+    //
+    renderChatItem(chat);
+    //
+    const requestId = new Date().getTime();
+    //
+    chatSocket.send(
+        JSON.stringify({
+            ucid: chat.ucid,
+            action: 'subscribe_to_messages_in_chat',
+            request_id: requestId,
+        })
+    );
+    //
+    chatSocket.send(
+        JSON.stringify({
+            ucid: chat.ucid,
+            action: 'retrieve',
+            request_id: requestId,
+        })
+    );
+}
+
+
 function renderChatItem(chat) {
     const ol = $('#aside-chats-menu > ol');
 
     const firstName = chat.first_name;
     const lastName = chat.last_name || '';
-    const lastMessagePreffix = chat.last_message.employee !== null ? 'Вы:' : 'Клиент:';
+    const lastMessagePreffix = chat.last_message?.employee !== null ? 'Вы:' : 'Клиент:';
     const lastMessageText = makePreviewText(chat.last_message);
+    const image = chat?.user ? chat?.user.image : "/static/assets/images/note.jpg";
 
     const li = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
                 <div>
-                    <img class="telegram-user-image" src="${chat.user.image}" alt="">
+                    <img class="telegram-user-image" src="${image}" alt="">
                 </div>
                 <div class="preview-container ms-2 me-auto">
                     <div class="fw-bold">${firstName} ${lastName}</div>
@@ -270,7 +297,7 @@ function renderChatItem(chat) {
 
 
 function renderChatList(chats) {
-    $('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
+    //$('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
 
     $.each(chats, function (index, chat) {
         renderChatItem(chat);
@@ -278,9 +305,9 @@ function renderChatList(chats) {
 }
 
 
-function renderNewChatItem(chat_id) {
+function renderNewChatItem(ucid) {
     $.ajax({
-        url: `http://127.0.0.1:8000/chat/api/v1/chat/${chat_id}`, // TODO 
+        url: `http://127.0.0.1:8000/chat/api/v1/new_chat/${ucid}`, // TODO 
         method: 'get',
         headers: {
 		    'content-type': 'application/json',
@@ -334,6 +361,30 @@ function renderChatMessages(messages) {
 
 function loadChats() {
     $.ajax({
+        url: 'http://127.0.0.1:8000/chat/api/v1/note', // TODO 
+        method: 'get',
+        headers: {
+		    'content-type': 'application/json',
+		    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        success: function (note) {
+            //
+            let allChats = {};
+            //
+            allChats[note.ucid] = note;
+            //
+            storageSet('allChats', allChats);
+            //
+            $('#aside-chats-menu-spiner').remove();
+            //
+            renderNote(note);
+        },
+        error: function(data) {
+            console.error(data);
+        }
+    });
+
+    $.ajax({
         url: 'http://127.0.0.1:8000/chat/api/v1/chats', // TODO 
         method: 'get',
         headers: {
@@ -342,7 +393,7 @@ function loadChats() {
         },
         success: function (rawChatsList) {
             //
-            let allChats = {};
+            let allChats = storageGet('allChats');
             //
             $.each(rawChatsList, function (index, chat) {
                 allChats[chat.ucid] = chat;
@@ -481,13 +532,46 @@ function sendMessage(chatSocket) {
     } else {
         chatSocket.send(JSON.stringify({
             ucid: ucid,
-            message: message,
+            text: message,
             action: "send_text_message",
             request_id: requestId,
         }));
         // Очищаем поле для ввода текста
         $('#chat-message-input').val('');
     }
+}
+
+
+function sendFile() {
+    var fileData = $('input[type=file]').prop('files')[0];
+    var formData = new FormData();
+
+    if ($('#sendAsFileCheck').is(":checked")) {
+        formData.append('document', fileData);
+
+    } else if (fileData.type.startsWith('image')) {
+        formData.append('photo', fileData);
+
+    } else {
+        formData.append('document', fileData);
+    }
+
+    formData.append('caption', $('#caption-input').val());
+    formData.append('ucid', storageGet("activeChatUcid"));
+
+    $.ajax({
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        url: $('#uploadUrl').val(),
+        cache: false,
+        contentType: false,
+        enctype: 'multipart/form-data',
+        processData: false,
+        data: formData,
+        type: 'post',
+    });
+
 }
 
 
@@ -503,42 +587,7 @@ function setupEvents() {
     //
     $('li.aside-chat-tab').first().click();
 
-    $('input[type=file]').change(function(){
-        console.log(this.files);
-    });
-
-    $('#send').on('click', function() { 
-        const imageMimeTypes = ["image/png", "image/jpeg"];
-
-        var file_data = $('input[type=file]').prop('files')[0];
-        var form_data = new FormData();
-
-        if ($('#sendAsFileCheck').is(":checked")) {
-            form_data.append('document', file_data);
-
-        } else if ($.inArray(file_data.type, imageMimeTypes) != -1) {
-            form_data.append('photo', file_data);
-
-        } else {
-            form_data.append('document', file_data);
-        }
-
-        form_data.append('caption', $('#caption-input').val());
-        form_data.append('chat_id', storageGet("activeChatUcid"));
-
-        $.ajax({
-            headers: {
-                'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
-            },
-            url: $('#uploadUrl').val(),
-            cache: false,
-            contentType: false,
-            enctype: 'multipart/form-data',
-            processData: false,
-            data: form_data,
-            type: 'post',
-        });
-    });
+    $('#send').on('click', sendFile);
 }
 
 

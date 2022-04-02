@@ -114,7 +114,7 @@ class CustomStaffChangeForm(UserChangeForm):
 
 
 class UploadFileForm(forms.Form):
-    chat_id = forms.CharField()
+    ucid = forms.CharField()
 
     photo = forms.FileField(required=False)
     document = forms.FileField(required=False)

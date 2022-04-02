@@ -27,17 +27,17 @@ def login_staff(request):
             login_data = form.cleaned_data
 
             user = authenticate(
-                username=login_data['login'],
-                password=login_data['password'],
+                username=login_data["login"],
+                password=login_data["password"],
             )
             if user:
                 login(request, user)
 
-                return redirect('chat:index')
+                return redirect("chat:index")
             else:
-                messages.warning(request, 'Неверный логин или пароль')
+                messages.warning(request, "Неверный логин или пароль")
         else:
-            messages.warning(request, 'Форма заполнена некорректно')
+            messages.warning(request, "Форма заполнена некорректно")
     else:
         context["form"] = LoginStaffForm()
 
@@ -47,10 +47,10 @@ def login_staff(request):
 def logout_staff(request):
     logout(request)
 
-    return redirect('chat:index')
+    return redirect("chat:index")
 
 
-@ user_passes_test(lambda staff: staff.is_superuser, login_url='chat:login')
+@ user_passes_test(lambda staff: staff.is_superuser, login_url="chat:login")
 def registration_staff(request):
     context = {}
 
@@ -60,15 +60,16 @@ def registration_staff(request):
         if form.is_valid():
             staff = form.save()
 
-            Chat.objects.get_or_create(
+            Chat.objects.create(
                 id=0,
                 first_name="Мои заметки",
                 last_name=None,
                 username=None,
+                is_note=True,
                 staff=staff,
             )
 
-            return redirect(reverse_lazy('chat:edit', kwargs={"pk": staff.pk}))
+            return redirect(reverse_lazy("chat:edit", kwargs={"pk": staff.pk}))
 
         else:
             context["form"] = RegisterStaffForm()
@@ -80,7 +81,7 @@ def registration_staff(request):
     return render(request, "./chat/registration_staff.html", context)
 
 
-@ user_passes_test(lambda staff: staff.is_superuser, login_url='chat:login')
+@ user_passes_test(lambda staff: staff.is_superuser, login_url="chat:login")
 def change_staff(request, pk):
     context = {}
 
@@ -96,7 +97,7 @@ def change_staff(request, pk):
             if form.is_valid():
                 form.save()
 
-                return redirect('chat:index')
+                return redirect("chat:index")
 
             else:
                 context["form"] = ChangeStaffInfoForm(

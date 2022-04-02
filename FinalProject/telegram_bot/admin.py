@@ -42,12 +42,12 @@ class UserAdmin(CustomModelAdmin):
     fieldsets = (
         ("Персональные данные", {
             "fields":
-                (("first_name", "last_name"),)
+                (("first_name", "last_name", "username"),)
         }
         ),
         ("Профиль", {
             "fields":
-                (("username", "image", "language_code"),)
+                (("image", "language_code", "is_blocked"),)
         }
         ),
         ("Персональние данные", {
