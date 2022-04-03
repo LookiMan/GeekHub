@@ -1,13 +1,26 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap");
-html, body {
+html,
+body {
   font-family: "Montserrat", sans-serif;
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
 }
 
 header .container {
   max-width: 100%;
+  padding: 7px 0;
+}
+header .container .navbar-brand {
+  margin: 0 1rem;
+}
+header .container .d-inline-flex {
+  margin: 0 1rem;
+}
+header .navbar {
+  margin: 0;
+  padding: 0;
 }
 
 .row {
@@ -79,6 +92,7 @@ ul.messages li {
   overflow-y: auto;
   border: 1px solid #dbdbdd;
   background: #ffffff;
+  height: calc(100vh - 54px);
 }
 #aside-chats-menu .centered-container-aside-chats-menu {
   display: flex;
@@ -123,16 +137,18 @@ ul.messages li {
 
 #chat-and-message {
   width: 100%;
-  height: calc(100vh - 57px - 50px - 44px - 52px);
+  height: calc(100vh - 54px - 50px - 54px);
   overflow-y: auto;
   border: 1px solid #dbdbdd;
   background: #ebebeb;
 }
 #chat-and-message .centered-container-chat {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 500px;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #c8c8c8;
+  border-radius: 0.25rem;
+  padding: 15px;
+  margin: 62% auto;
 }
 #chat-and-message .message-in-chat {
   overflow: hidden;
@@ -150,7 +166,7 @@ ul.messages li {
   border-radius: 0.25rem;
 }
 #chat-and-message .message-in-chat .message-client .telegram-reply-message {
-  background-color: #0074A2;
+  background-color: #0074a2;
   margin-top: 8px;
   padding: 4px 8px;
 }
@@ -182,7 +198,7 @@ ul.messages li {
   border-radius: 0.25rem;
 }
 #chat-and-message .message-in-chat .message-manager .telegram-reply-message {
-  background-color: #007B29;
+  background-color: #007b29;
   margin-top: 8px;
   padding: 4px 8px;
 }
@@ -204,6 +220,18 @@ ul.messages li {
   text-decoration: none;
   color: white;
 }
+#chat-and-message .reply-message {
+  position: sticky;
+  bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 10px 15px;
+  background-color: white;
+}
+#chat-and-message .reply-message i {
+  margin-right: 5px;
+}
 
 .control-panel {
   height: 50px;
@@ -220,21 +248,14 @@ ul.messages li {
 
 .input-area {
   width: 100%;
-  height: 52px;
+  height: 54px;
   border: 1px solid #dbdbdd;
   background: #ffffff;
-}
-.input-area .reply-message {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  padding: 10px 15px;
-  background-color: white;
 }
 .input-area .chat-input {
   float: left;
   width: calc(100% - 100px);
-  height: 100%;
+  height: 48px;
   padding: 10px 25px;
   resize: none;
   border: 0;
@@ -280,10 +301,11 @@ ul.messages li {
 
 #emoji-menu {
   overflow-y: auto;
-  height: calc(100vh - 57px);
+  height: calc(100vh - 54px);
   border: 1px solid #dbdbdd;
   flex: 0 0 auto;
   width: 25%;
+  user-select: none;
 }
 #emoji-menu .emoji {
   display: inline-block;

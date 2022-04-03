@@ -107,12 +107,23 @@ def upload_file(request):
             photo = form.cleaned_data.get("photo")
             document = form.cleaned_data.get("document")
             caption = form.cleaned_data.get("caption")
+            reply_to_message_id = form.cleaned_data.get("reply_to_message_id")
 
             if photo:
-                send_photo_to_client(chat, photo, caption)
+                send_photo_to_client(
+                    chat,
+                    photo,
+                    caption=caption,
+                    reply_to_message_id=reply_to_message_id
+                )
 
             elif document:
-                send_document_to_client(chat, document, caption)
+                send_document_to_client(
+                    chat,
+                    document,
+                    caption=caption,
+                    reply_to_message_id=reply_to_message_id
+                )
 
             return Response({"code": 200}, status=HTTP_201_CREATED)
 

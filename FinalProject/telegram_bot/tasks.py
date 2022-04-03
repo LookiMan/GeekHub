@@ -79,7 +79,7 @@ def send_text_message_to_client(chat, text, reply_to_message_id=None):
         chat.id,
         text=mark_safe(text),
         reply_markup=None,
-        parse_mode="HTML", 
+        parse_mode="HTML",
         reply_to_message_id=reply_to_message_id
     )
 
@@ -87,19 +87,29 @@ def send_text_message_to_client(chat, text, reply_to_message_id=None):
 
 
 @sync_to_async
-def async_send_text_message_to_client(chat, text, reply_to_message_id):
+def async_send_text_message_to_client(chat, text, reply_to_message_id=None):
     send_text_message_to_client(chat, text, reply_to_message_id)
 
 
-def send_photo_to_client(chat, file, caption=None):
-    message = bot.send_photo(chat.id, file, caption=mark_safe(caption))
+def send_photo_to_client(chat, file, *, caption=None, reply_to_message_id=None):
+    message = bot.send_photo(
+        chat.id,
+        file,
+        caption=mark_safe(caption),
+        reply_to_message_id=reply_to_message_id,
+    )
 
     _download_file_from_telegram(message.photo[-1].file_id)
     process_message(chat, message)
 
 
-def send_document_to_client(chat, file, caption=None):
-    message = bot.send_document(chat.id, file, caption=mark_safe(caption))
+def send_document_to_client(chat, file, *, caption=None, reply_to_message_id=None):
+    message = bot.send_document(
+        chat.id,
+        file,
+        caption=mark_safe(caption),
+        reply_to_message_id=reply_to_message_id,
+    )
 
     _download_file_from_telegram(message.document.file_id)
     process_message(chat, message)
@@ -210,7 +220,7 @@ def process_message(chat, message):
     file_name = message.document.file_name if message.document else None
     photo = message.photo[-1].file_id if message.photo else None
     caption = message.caption if message.caption else None
-    
+
     staff = chat.staff if message.from_user.is_bot else None
     user = chat.user if not message.from_user.is_bot else None
 

@@ -226,7 +226,7 @@ function renderChatMessage(message, userType) {
                     </div>`);                   
     }
 
-    messageBody.on("click", setReplyMessage);
+    messageBody.on("dblclick", setReplyMessage);
 
     return messageBody;
 }
@@ -585,8 +585,9 @@ function sendMessage(chatSocket) {
 
     replyToMessage = storageGet('replyToMessage');
 
-    if (replyToMessage && replyToMessage.ucid == ucid) {
+    if (replyToMessage && replyToMessage.ucid === ucid) {
         replyToMessageId = replyToMessage.messageId;
+        unsetReplyMessage();
     }
 
     if (message.length === 0) {
@@ -606,6 +607,8 @@ function sendMessage(chatSocket) {
 
 
 function sendFile() {
+    const ucid = storageGet('activeChatUcid');
+
     var fileData = $('input[type=file]').prop('files')[0];
     var formData = new FormData();
 
@@ -619,8 +622,18 @@ function sendFile() {
         formData.append('document', fileData);
     }
 
+    var replyToMessageId;
+
+    replyToMessage = storageGet('replyToMessage');
+
+    if (replyToMessage && replyToMessage.ucid === ucid) {
+        replyToMessageId = replyToMessage.messageId;
+        unsetReplyMessage();
+    }
+
     formData.append('caption', $('#caption-input').val());
     formData.append('ucid', storageGet("activeChatUcid"));
+    formData.append('reply_to_message_id', replyToMessageId)
 
     $.ajax({
         headers: {
@@ -634,33 +647,41 @@ function sendFile() {
         data: formData,
         type: 'post',
     });
-
 }
 
 
 function setReplyMessage(event) {
     const ucid = storageGet('activeChatUcid');
+    const lastRecord = storageGet('replyToMessage'); 
     const messageId = $(event.currentTarget).data('message-id');
 
-    storageSet('replyToMessage', {
-        ucid: ucid,
-        messageId: messageId,
-    });
+    if (lastRecord && lastRecord.messageId === messageId) {
+        unsetReplyMessage();
+    } else {
+        const chatsMessages = storageGet('chatsMessages');
+        const messages = chatsMessages[ucid] || {};
+        const replyMessage = $(`<div class="reply-message">
+                <i class="bi bi-x-lg" onclick="unsetReplyMessage();"></i>
+                 <span> ${makePreviewText(messages[messageId])}</span>
+            </div>`);
 
-    const chatsMessages = storageGet('chatsMessages');
-    const messages = chatsMessages[ucid] || {};
+        storageSet('replyToMessage', {
+            ucid: ucid,
+            messageId: messageId,
+        });
 
-    $('div.reply-message span').text(makePreviewText(messages[messageId]));
+        $('div#chat-and-message').append(replyMessage);
+    }
 }
 
 
-function unetReplyMessage(chatId, messageId) {
+function unsetReplyMessage() {
     storageSet('replyToMessage', {
         chatId: 0,
-        messageId: messageId,
+        messageId: 0,
     });
+    $('div#chat-and-message div.reply-message').remove();
 }
-
 
 
 function setupData() {
@@ -678,6 +699,12 @@ function setupEvents() {
     $('li.aside-chat-tab').first().click();
 
     $('#send').on('click', sendFile);
+
+    $('div#emoji-menu .emoji').click((event) => {
+        const input = $('#chat-message-input');
+        const text = input.val();
+        input.val(text + $(event.currentTarget).text());
+    })
 }
 
 
