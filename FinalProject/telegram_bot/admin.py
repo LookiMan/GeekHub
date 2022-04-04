@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from telegram_bot.models import User, Chat, Message
+from chat.models import Chat, Message
+from telegram_bot.models import User
 
 
 class CustomModelAdmin(admin.ModelAdmin):

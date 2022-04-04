@@ -12,7 +12,9 @@ from django.utils.safestring import mark_safe
 from config.settings import TELEGRAM_BOT_TOKEN, WEBHOOK_HOST
 from config.celery import app
 
-from telegram_bot.models import User, Chat, Message
+from chat.models import Chat, Message
+
+from telegram_bot.models import User
 from telegram_bot import utils
 
 

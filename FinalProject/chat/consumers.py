@@ -6,8 +6,8 @@ from djangochannelsrestframework.observer.generics import (
     ObserverModelInstanceMixin, action)
 from djangochannelsrestframework.observer import model_observer
 
-from telegram_bot.models import Chat, Message
-from telegram_bot.serializers import MessageSerializer, ChatSerializer
+from chat.models import Chat, Message
+from chat.serializers import MessageSerializer, ChatSerializer
 from telegram_bot.tasks import async_send_text_message_to_client
 
 

@@ -622,18 +622,15 @@ function sendFile() {
         formData.append('document', fileData);
     }
 
-    var replyToMessageId;
-
     replyToMessage = storageGet('replyToMessage');
 
     if (replyToMessage && replyToMessage.ucid === ucid) {
-        replyToMessageId = replyToMessage.messageId;
+        formData.append('reply_to_message_id', replyToMessage.messageId);
         unsetReplyMessage();
     }
 
     formData.append('caption', $('#caption-input').val());
     formData.append('ucid', storageGet("activeChatUcid"));
-    formData.append('reply_to_message_id', replyToMessageId)
 
     $.ajax({
         headers: {

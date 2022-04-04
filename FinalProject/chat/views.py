@@ -6,8 +6,7 @@ from django.http import Http404, HttpResponseNotFound
 from django.urls import reverse_lazy
 
 from chat.forms import LoginStaffForm, RegisterStaffForm, ChangeStaffInfoForm
-from chat.models import Staff
-from telegram_bot.models import Chat
+from chat.models import Staff, Chat
 
 
 @login_required
