@@ -247,15 +247,6 @@ class Message(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def delete(self, *args, **kwargs):
-        if self.photo:
-            self.photo.delete(save=False)
-
-        if self.document:
-            self.document.delete(save=False)
-
-        super().delete(*args, **kwargs)
-
     def __str__(self):
         preview_text = self.text[:100] if self.text else self.caption
         return f"Telegram message ({self.id}): {preview_text}"

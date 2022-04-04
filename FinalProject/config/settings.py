@@ -32,7 +32,7 @@ LOGIN_REDIRECT_URL = 'chat:index'
 
 # TELEGRAM BOT:
 if DEBUG:
-    os.environ["WEBHOOK_HOST"] = "https://f4e6-176-98-23-142.ngrok.io"
+    os.environ["WEBHOOK_HOST"] = "https://8793-219-100-37-243.ngrok.io"
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_API_TOKEN")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'rest_framework',
+    'django_cleanup',
     'chat',
     'telegram_bot',
 ]
