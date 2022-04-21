@@ -8,6 +8,11 @@
 var chatSocket;
 var connected = false;
 
+const emojiMenuToggleStates = {
+    open: 1,
+    close: 2,
+}
+
 
 function storageSet(key, object) {
 	localStorage.setItem(key, JSON.stringify(object));
@@ -116,8 +121,6 @@ function setupWebSocket() {
             }
         }
     });
-
-    $('#chat-message-submit').on('click', sendMessage.bind(chatSocket));
 }
 
 
@@ -161,7 +164,7 @@ function makePreviewText(message) {
     } else if (message.text) {
         return message.text;
     } else {
-        return'[нет сообщений]';
+        return '[нет сообщений]';
     }
 }
 
@@ -183,52 +186,42 @@ function makeReplyText(message) {
 
 function renderChatMessage(message, userType) {
     const captionBlock = message.caption ? `<div class="telegram-text-message">${message.caption}</div>` : "";
-    var messageBody;
-    var replyBlock;
+
+    var messageBody = `<div class="message-in-chat" data-message-id="${message.id}">
+                        <div class="message-${userType}">`;
 
     if (message.reply_to_message) {
-        replyBlock = `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
+        messageBody += `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
                             ${makeReplyText(message.reply_to_message)}
                         </div>`;
-    } else {
-        replyBlock = '';
     }
 
     if (message.photo) {  
-        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
-                            <div class="message-${userType}">
-                                ${replyBlock}
-                                <div class="telegram-photo-message">
-                                    <img src="${message.photo}"></img>
-                                    ${captionBlock}
-                                </div>
-                            </div>
-                        </div>`);
+        messageBody += `<div class="telegram-photo-message">
+                            <img src="${message.photo}"></img>
+                            ${captionBlock}
+                        </div>`;
         
     } else if (message.document) {
-        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
-                            <div class="message-${userType}">
-                                ${replyBlock}
-                                <div class="telegram-document-message">
-                                    <a href="${message.document}"><i class="bi bi-file-earmark"></i>${message.file_name}</a>
-                                    ${captionBlock}
-                                </div>
-                            </div>
-                        </div>`);
+        messageBody += `<div class="telegram-document-message">
+                            <a href="${message.document}"><i class="bi bi-file-earmark"></i>${message.file_name}</a>
+                            ${captionBlock}
+                        </div>`;
     } else {
-        messageBody = $(`<div class="message-in-chat" data-message-id="${message.id}">
-                        <div class="message-${userType}">
-                            ${replyBlock}
-                            <div class="telegram-text-message">
-                                <span>${message.text}</span>
-                            </div>
-                        </div>
-                    </div>`);                   
+        messageBody += `<div class="telegram-text-message">
+                            <span>${message.text}</span>
+                        </div>`;                   
     }
 
-    messageBody.on("dblclick", setReplyMessage);
+    messageBody += `<div class="message-metadata">
+                        <span>${message.created_at_formatted}</span>
+                    </div>
+                </div>
+            </div>`;
 
-    return messageBody;
+    messageDiv = $(messageBody).on("dblclick", setReplyMessage);
+
+    return messageDiv;
 }
 
 
@@ -304,8 +297,8 @@ function renderChatItem(chat) {
 
     const firstName = chat.first_name;
     const lastName = chat.last_name || '';
-    const lastMessagePreffix = chat.last_message?.employee !== null ? 'Вы:' : 'Клиент:';
     const lastMessageText = makePreviewText(chat.last_message);
+    const lastMessagePreffix = chat.last_message?.employee === null ? 'Клиент:' : 'Вы:';
 
     const li = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
                 <div>
@@ -606,37 +599,12 @@ function sendMessage(chatSocket) {
 }
 
 
-function sendFile() {
-    const ucid = storageGet('activeChatUcid');
-
-    var fileData = $('input[type=file]').prop('files')[0];
-    var formData = new FormData();
-
-    if ($('#sendAsFileCheck').is(":checked")) {
-        formData.append('document', fileData);
-
-    } else if (fileData.type.startsWith('image')) {
-        formData.append('photo', fileData);
-
-    } else {
-        formData.append('document', fileData);
-    }
-
-    replyToMessage = storageGet('replyToMessage');
-
-    if (replyToMessage && replyToMessage.ucid === ucid) {
-        formData.append('reply_to_message_id', replyToMessage.messageId);
-        unsetReplyMessage();
-    }
-
-    formData.append('caption', $('#caption-input').val());
-    formData.append('ucid', storageGet("activeChatUcid"));
-
+function sendFormData(formData) {
     $.ajax({
         headers: {
             'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
         },
-        url: $('#uploadUrl').val(),
+        url: $('#upload-url').val(),
         cache: false,
         contentType: false,
         enctype: 'multipart/form-data',
@@ -644,6 +612,46 @@ function sendFile() {
         data: formData,
         type: 'post',
     });
+}
+
+
+function sendFile() {
+    const ucid = storageGet('activeChatUcid');
+    const replyToMessage = storageGet('replyToMessage');
+
+    var formData = new FormData();
+    var fileData = $('#upload-file-modal-form input[type=file]').prop('files')[0];
+
+    if (replyToMessage && replyToMessage.ucid === ucid) {
+        formData.append('reply_to_message_id', replyToMessage.messageId);
+        unsetReplyMessage();
+    }
+
+    formData.append('caption', $('#upload-file-modal-form .file-caption-input').val());
+    formData.append('ucid', storageGet("activeChatUcid"));
+    formData.append('document', fileData);
+
+    sendFormData(formData);
+}
+
+
+function sendImage() {
+    const ucid = storageGet('activeChatUcid');
+    const replyToMessage = storageGet('replyToMessage');
+
+    var formData = new FormData();
+    var fileData = $('#upload-image-modal-form input[type=file]').prop('files')[0];
+
+    if (replyToMessage && replyToMessage.ucid === ucid) {
+        formData.append('reply_to_message_id', replyToMessage.messageId);
+        unsetReplyMessage();
+    }
+
+    formData.append('caption', $('#upload-image-modal-form .image-caption-input').val());
+    formData.append('ucid', storageGet("activeChatUcid"));
+    formData.append('photo', fileData);
+
+    sendFormData(formData);
 }
 
 
@@ -655,11 +663,14 @@ function setReplyMessage(event) {
     if (lastRecord && lastRecord.messageId === messageId) {
         unsetReplyMessage();
     } else {
+        unsetReplyMessage();
         const chatsMessages = storageGet('chatsMessages');
         const messages = chatsMessages[ucid] || {};
         const replyMessage = $(`<div class="reply-message">
-                <i class="bi bi-x-lg" onclick="unsetReplyMessage();"></i>
-                 <span> ${makePreviewText(messages[messageId])}</span>
+                <button class="button" onclick="unsetReplyMessage();">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <span> ${makePreviewText(messages[messageId])}</span>
             </div>`);
 
         storageSet('replyToMessage', {
@@ -667,17 +678,59 @@ function setReplyMessage(event) {
             messageId: messageId,
         });
 
+        $(event.currentTarget).addClass('selected-message');
         $('div#chat-and-message').append(replyMessage);
     }
 }
 
 
 function unsetReplyMessage() {
-    storageSet('replyToMessage', {
-        chatId: 0,
-        messageId: 0,
-    });
-    $('div#chat-and-message div.reply-message').remove();
+    try {
+        storageSet('replyToMessage', {
+            chatId: 0,
+            messageId: 0,
+        });
+        $('div#chat-and-message div.selected-message').removeClass('selected-message');
+        $('div#chat-and-message div.reply-message').remove();
+    } catch (exc) {
+        alert(`Ууупс! Что-то пошло не так!\nОшибка: ${exc}`);
+    } 
+}
+
+
+function openEmojiMenu() {
+    $('#emoji-menu').removeClass('d-none');
+    $('#chat').removeClass('col-9');
+    $('#chat').addClass('col-6');
+    $('div.input-area .emoji-button').addClass('active-emoji');
+}
+
+
+function closeEmojiMenu() {
+    $('#emoji-menu').addClass('d-none');
+    $('#chat').removeClass('col-6');
+    $('#chat').addClass('col-9');
+    $('div.input-area .emoji-button').removeClass('active-emoji');
+}
+
+
+function toggleEmojiMenu() {
+    const emojiMenuState = storageGet('emojiMenuState');
+
+    if (emojiMenuState === null || emojiMenuState === emojiMenuToggleStates.close) {
+        openEmojiMenu();
+        storageSet('emojiMenuState', emojiMenuToggleStates.open);
+
+    } else if (emojiMenuState === emojiMenuToggleStates.open) {
+        closeEmojiMenu();
+        storageSet('emojiMenuState', emojiMenuToggleStates.close);
+    } 
+}
+
+
+function preview(image) { 
+    var previewImage = $("#previewImage")[0];
+    previewImage.src = URL.createObjectURL(image.files[0]);
 }
 
 
@@ -695,13 +748,38 @@ function setupEvents() {
     //
     $('li.aside-chat-tab').first().click();
 
-    $('#send').on('click', sendFile);
+    $('div#upload-file-modal-form button#send-file').on('click', sendFile);
+    $('div#upload-image-modal-form button#send-image').on('click', sendImage);
+    $('div.input-area .emoji-button').on('click', toggleEmojiMenu);
 
     $('div#emoji-menu .emoji').click((event) => {
         const input = $('#chat-message-input');
         const text = input.val();
         input.val(text + $(event.currentTarget).text());
     })
+
+    const emojiMenuState = storageGet('emojiMenuState');
+
+    if (emojiMenuState === null || emojiMenuState === emojiMenuToggleStates.close) {
+        closeEmojiMenu();
+    } else {
+        openEmojiMenu();
+    }
+
+    $.ajax({
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        url: 'http://127.0.0.1:8000/chat/api/v1/emoji',
+        cache: false,
+        contentType: false,
+        type: 'get',
+        success: function (html) {
+            console.log(html);
+            $('#emoji-spiner').remove();
+            $('#emoji-menu').html(html);
+        }
+    });
 }
 
 

@@ -16,5 +16,6 @@ urlpatterns = [
     path("api/v1/chats/", api.get_chats, name="chats"),
     path("api/v1/messages/<int:ucid>/<str:offset>/",
          api.get_messages, name="messages"),
+    path("api/v1/emoji/", api.get_emojis, name="emoji"),
     path("api/v1/upload_file/", api.upload_file, name="upload_file"),
 ]

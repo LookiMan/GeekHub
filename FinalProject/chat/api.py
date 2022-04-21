@@ -1,6 +1,7 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import TemplateHTMLRenderer
 
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.status import HTTP_400_BAD_REQUEST
@@ -14,7 +15,7 @@ from chat.utils import logger
 from telegram_bot.tasks import send_photo_to_client, send_document_to_client
 
 
-@api_view(['GET'])
+@api_view(('GET',))
 @permission_classes((IsAuthenticated,))
 def get_chat(request, ucid):
     try:
@@ -34,7 +35,7 @@ def get_chat(request, ucid):
         return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(('GET',))
 @permission_classes((IsAuthenticated,))
 def get_note(request):
     try:
@@ -54,7 +55,7 @@ def get_note(request):
         return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(('GET',))
 @permission_classes((IsAuthenticated,))
 def get_chats(request):
     try:
@@ -69,7 +70,7 @@ def get_chats(request):
         return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(('GET',))
 @permission_classes((IsAuthenticated,))
 def get_messages(request, ucid, offset):
     try:
@@ -82,6 +83,13 @@ def get_messages(request, ucid, offset):
     else:
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
+
+
+@api_view(('GET',))
+@permission_classes((IsAuthenticated,))
+@renderer_classes((TemplateHTMLRenderer,))
+def get_emojis(request):
+    return Response(template_name="./chat/emoji.html")
 
 
 @api_view(['POST'])
