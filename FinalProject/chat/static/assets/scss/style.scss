@@ -140,7 +140,7 @@ ul.messages {
 
 	#aside-chats-menu-spiner {
 		min-height: 100%;
-		
+
 		display: flex;
 		align-items: center;
 
@@ -192,16 +192,96 @@ ul.messages {
 	}
 }
 
+.control-panel {
+	height: 67px;
+	width: 100%;
+	border: 1px solid #dbdbdd;
+	background: #ffffff;
+
+	.telegram-user-image {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My4zMTeDd4YAAAPFSURBVHhe7ZuJbuIwEIb3/d9uSxvISRJukhAgEAgEvJ7IrShMKTgzWVT6V78qocrHh48Z2/3z980Sz+xfANiHz+RfANiHTfi144iO4wvbC4Upf7faNvp33G4EwIt0q+2IsD8U6Xwpit1OHOXPqQ7Ho5ilCwnGRcvgMjuAtuWJOEnF4XBQXb2uzWZbwcLK4jArgP5wfHPHT5XM5tWowcqkNhuASZSo7tyvo5wORVGIRbYS3XCAlk9lFgA9+c1TKmYcEeQA2qanNey/03gao/XVNTmAOJmrJtMKpoVl+2iddUwKAFbvkuHbfxdMBazeOiYFEPRGqqk82sn4gXotIAUA3xC33ogDJVIA63yjmskn0wnQunVNCmC/36tm8snphmjduiYD8GJY1UrNLdfvofXrmgwA7ABNyHlUAC+G3cgIgPQZq1/XpGsARwR4rg5xMEQKAPJ8bhmPvA1m61w1k0cwxR42ELJcX+TMcQCE2V5Amx6TAdhst6qZvIJl1rA8tA06JgHQkuZMgs5lE26FJABgXu52/FHguyzCaJBsCqxWa9U8fhl2F22DjskAREmqmscriDUg6MLaoGMyALA6N6F0kaH165oMACRD+YZ3G4TLE9N94HTYMD2RZTxrwU6m2m6XNhECkwIAd6upQJ8UwWUJVl9dkwOAuz2OpLDXH6H11TU5AHCe00eFbcKt79QsAEaTWDWbRnBhitVDYRYAcHK735eq+fUVMg1/MAsAsN8bXrwB0NEyW7HeFLMBAA/GkeqGnjbbgvwe4NysAMBb2QldjaMELZPS7AAggNFVNEvRMinNDgDCV13BeyKsTEqzAoD5W0eZTLGxcinNCgCev9XRtijQcinNCiAIh6oreoJT4BZh7o+ZFQDFIQn1XeC52QDAyS3FTRH3OsAC4M10xZrwcGQqRxJWD4XJAfjBgOWEOJMhsWnRZ4RkAFwvFEvmk2FYFOM4FW05wrA26LgWAEhSbDeoXnQynIF8KbiEieJZdfhSN1HSAgCVwh6/WGSNdvxcAGIyTaqn91g7b/HdAOBkBkJUjmMvXZVlKUaTSOuV+c0ADDnvYpmcNPEKRFeQePVHk7suTr4FAJEYHHE18fqDSpCCwyvzW9aHqwC8oC+Kgv/VB4+OYrlcfXuVjgJ4ld86nMP/BJXloTpS/2o0XACANzhNvPhsWrBtYhA+AXiVqyj3/d7/1DRKLiB8AvBThv01df0+DsCSgc0D73BkgkuW01HwAaCpBw6PIOfklrkCAETgnxGeRbAgfgLQkWnmMyn/mAaW+Ad/7xXeS7fcQgAAAABJRU5ErkJggg==);
+		background-size: cover;
+	}
+
+	#chat-title {
+		padding: 8px;
+
+		.chat-name {
+			font-size: 14px;
+		}
+
+		.username {
+			font-size: 12px;
+		}
+	}
+
+	.dropdown {
+		position: relative;
+		display: flex;
+	}
+
+	.dropdown-content {
+		display: none;
+		position: absolute;
+		right: 5px;
+		top: 50px;
+		z-index: 1000;
+		min-width: 10rem;
+		padding: 0.5rem 0;
+		margin: 0;
+		font-size: 1rem;
+		color: #212529;
+		text-align: left;
+		list-style: none;
+		background-color: #fff;
+		background-clip: padding-box;
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		border-radius: 0.25rem;
+
+		.danger {
+			i,
+			a {
+				color: red !important;
+			}
+		}
+
+		li {
+			display: block;
+
+			a {
+				color: black;
+				padding: 12px 16px;
+				text-decoration: none;
+			}
+
+			&:hover {
+				color: #1e2125;
+				background-color: #e9ecef;
+			}
+		}
+	}
+
+	.more-actions {
+		font-size: 24px;
+		padding: 14px 15px;
+		text-decoration: none;
+		color: black;
+	}
+}
+
 #chat-and-message {
 	width: 100%;
-	height: calc(100vh - 54px - 50px - 54px);
+	height: calc(100vh - 71px - 50px - 54px);
 	overflow-y: auto;
 	border: 1px solid #dbdbdd;
 	background: #ebebeb;
 
 	#chat-spiner {
 		min-height: 100%;
-		
+
 		display: flex;
 		align-items: center;
 
@@ -216,19 +296,32 @@ ul.messages {
 		border-radius: 5px;
 		padding: 5px;
 
-		.message-client {
-			max-width: 50%;
-			background: #00a6e8;
-			color: white;
-			left: 10px;
-			width: 80%;
-			float: left;
-			border-radius: 0.25rem;
+		.message {
+			width: 50%;
+			border-radius: 5px;
+			margin: 10px 0;
+
+			&::after {
+				content: "";
+				clear: both;
+				display: table;
+			}
 
 			.telegram-reply-message {
-				background-color: #0074a2;
-				margin-top: 8px;
+				border-left: 2px solid #00a6e8; /*background-color: #007b29;*/
+				margin: 8px;
 				padding: 4px 8px;
+
+				.username {
+					font-size: 13px;
+				}
+
+				.content {
+					font-size: 12px;
+					overflow: hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+				}
 			}
 
 			.telegram-text-message {
@@ -248,72 +341,43 @@ ul.messages {
 				user-select: none;
 				i {
 					font-size: 40px;
-					color: white;
+					color: black;
 					padding: 10px;
 					overflow-x: hidden;
 				}
 				a {
 					text-decoration: none;
-					color: white;
+					color: black;
 				}
 			}
 
 			.message-metadata {
-				span {
+				.time {
 					padding: 0 8px;
 					font-size: 10px;
+				}
+
+				.time-right {
+					float: right;
+					color: #aaa;
+				}
+
+				.time-left {
+					float: left;
+					color: #999;
 				}
 			}
 		}
 
+		.message-client {
+			border: 2px solid #dedede;
+			background-color: #f1f1f1;
+		}
+
 		.message-manager {
-			max-width: 50%;
-			background: #00c13f;
-			color: white;
-			right: 10px;
-			width: 80%;
+			border: 2px solid #ccc;
+			background-color: #ddd;
 			float: right;
-			border-radius: 0.25rem;
-
-			.telegram-reply-message {
-				background-color: #007b29;
-				margin-top: 8px;
-				padding: 4px 8px;
-			}
-
-			.telegram-text-message {
-				padding: 8px;
-			}
-
-			.telegram-photo-message {
-				user-select: none;
-				img {
-					padding: 2px;
-					width: 100%;
-					border-radius: 0.25rem;
-				}
-			}
-
-			.telegram-document-message {
-				user-select: none;
-				i {
-					font-size: 40px;
-					color: white;
-					padding: 10px;
-					overflow-x: hidden;
-				}
-				a {
-					text-decoration: none;
-					color: white;
-				}
-			}
-
-			.message-metadata {
-				span {
-					padding: 0 8px;
-					font-size: 10px;
-				}
-			}
 		}
 	}
 
@@ -333,21 +397,7 @@ ul.messages {
 	}
 
 	.selected-message {
-		background-color: rgba(0,166,232, 0.5);
-	}
-}
-
-.control-panel {
-	height: 50px;
-	width: 100%;
-	border: 1px solid #dbdbdd;
-	background: #ffffff;
-
-	.more-actions {
-		font-size: 24px;
-		padding: 5px;
-		text-decoration: none;
-		color: black;
+		background-color: rgba(0, 166, 232, 0.5);
 	}
 }
 
@@ -382,8 +432,8 @@ ul.messages {
 		}
 
 		&:hover {
-			transition: color .25s ease-in-out;
-			color:#00A6E8;
+			transition: color 0.25s ease-in-out;
+			color: #00a6e8;
 		}
 	}
 
@@ -399,8 +449,8 @@ ul.messages {
 		}
 
 		&:hover {
-			transition: color .25s ease-in-out;
-			color:#00A6E8;
+			transition: color 0.25s ease-in-out;
+			color: #00a6e8;
 		}
 	}
 
@@ -416,20 +466,20 @@ ul.messages {
 		}
 
 		&:hover {
-			transition: color .25s ease-in-out;
-			color:#00A6E8;
+			transition: color 0.25s ease-in-out;
+			color: #00a6e8;
 		}
 	}
 
 	.active-emoji {
-		color:#00A6E8;
+		color: #00a6e8;
 	}
 }
 
 #emoji-menu {
 	#emoji-spiner {
 		min-height: 100%;
-		
+
 		display: flex;
 		align-items: center;
 

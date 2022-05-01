@@ -32,7 +32,7 @@ LOGIN_REDIRECT_URL = "chat:index"
 
 # TELEGRAM BOT:
 if DEBUG:
-    os.environ["WEBHOOK_HOST"] = "https://cc58-176-98-9-28.ngrok.io"
+    os.environ["WEBHOOK_HOST"] = "https://b304-176-98-9-28.ngrok.io"
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_API_TOKEN")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")

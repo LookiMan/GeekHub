@@ -92,7 +92,7 @@ def get_emojis(request):
     return Response(template_name="./chat/emoji.html")
 
 
-@api_view(['POST'])
+@api_view(('POST',))
 @permission_classes((IsAuthenticated,))
 def upload_file(request):
     form = UploadFileForm(request.POST, request.FILES)
@@ -114,7 +114,7 @@ def upload_file(request):
             photo = form.cleaned_data.get("photo")
             document = form.cleaned_data.get("document")
             caption = form.cleaned_data.get("caption")
-            reply_to_message_id = form.cleaned_data.get("reply_to_message_id")
+            reply_to_message_id = form.cleaned_data.get("reply_to_message_id") 
 
             if photo:
                 send_photo_to_client(

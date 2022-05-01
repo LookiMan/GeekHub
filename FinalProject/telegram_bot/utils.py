@@ -1,6 +1,8 @@
 import io
 import os
 import random
+from datetime import datetime
+import pytz
 
 import PIL
 
@@ -36,3 +38,7 @@ def set_default_image():
     )
 
     return os.path.join("default", random.choice(choices))
+
+
+def ctime(timestamp):
+    return datetime.fromtimestamp(timestamp, tz=pytz.UTC)

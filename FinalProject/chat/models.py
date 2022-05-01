@@ -198,6 +198,7 @@ class Message(models.Model):
     )
 
     file_name = models.CharField(
+        "filename",
         max_length=255,
         blank=True,
         null=True,
@@ -205,10 +206,32 @@ class Message(models.Model):
     )
 
     caption = models.TextField(
+        "caption",
         blank=True,
         null=True,
         help_text="Описание файла/фото от пользователя",
     )
+
+    edited_text = models.TextField(
+        "edited_text",
+        blank=True,
+        null=True,
+        help_text="Отредактированный текст сообщения",
+    )
+
+    is_edited = models.BooleanField(
+        "is_edited",
+        default=False,
+        help_text="Является ли сообщение отредактированным",
+    )
+
+    is_deleted = models.BooleanField(
+        "is_deleted",
+        default=False,
+        help_text="Является ли сообщение удаленным",
+    )
+
+    date = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

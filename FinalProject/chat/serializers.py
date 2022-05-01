@@ -15,15 +15,19 @@ class MessageSerializer(serializers.ModelSerializer):
     staff = StaffSerializer()
 
     created_at_formatted = serializers.SerializerMethodField()
+    created_at_short = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = (
             "umid", "id", "chat", "user", "staff", "reply_to_message",
             "text", "photo", "document", "file_name", "caption",
-            "created_at_formatted"
+            "created_at_formatted", "created_at_short"
         )
         depth = 2
+
+    def get_created_at_short(self, obj):
+        return obj.created_at.strftime("%H:%M")
 
     def get_created_at_formatted(self, obj):
         return obj.created_at.strftime("%d-%m-%Y %H:%M:%S")

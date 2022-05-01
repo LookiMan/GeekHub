@@ -131,30 +131,20 @@ def send_welcome_message(message):
     )
 
 
-def send_message_to_user_about_blocking(telegram_user):
-    try:
-        chat_id = telegram_user.chats.get(user=telegram_user).id
-    except ObjectDoesNotExist:
-        pass
-    else:
-        bot.send_message(
-            chat_id,
-            "❌ Вы заблокированы ❌",
-            parse_mode="HTML"
-        )
+def send_message_to_user_about_blocking(chat_id):
+    bot.send_message(
+        chat_id,
+        "❌ Вы заблокированы ❌",
+        parse_mode="HTML"
+    )
 
 
-def send_message_to_user_about_unblocking(telegram_user):
-    try:
-        chat_id = telegram_user.chats.get(user=telegram_user).id
-    except ObjectDoesNotExist:
-        pass
-    else:
-        bot.send_message(
-            chat_id,
-            "❌ Вы заблокированы ❌",
-            parse_mode="HTML"
-        )
+def send_message_to_user_about_unblocking(chat_id):
+    bot.send_message(
+        chat_id,
+        "✅ Вы разблокированы ✅",
+        parse_mode="HTML"
+    )
 
 
 def get_or_create_telegram_user(message):
@@ -237,6 +227,8 @@ def process_message(chat, message):
     else:
         reply_to_message = None
 
+    print(message, message.date)
+
     return Message.objects.create(
         id=message.message_id,
         chat=chat,
@@ -248,6 +240,7 @@ def process_message(chat, message):
         document=document,
         file_name=file_name,
         caption=caption,
+        date=utils.ctime(message.date),
     )
 
 
@@ -257,7 +250,7 @@ def process_received_text_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(user)
+        send_message_to_user_about_blocking(chat.id)
     else:
         process_message(chat, message)
 
@@ -273,7 +266,7 @@ def process_received_photo_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(user)
+        send_message_to_user_about_blocking(chat.id)
     else:
         _download_file_from_telegram(message.photo[-1].file_id)
         process_message(chat, message)
@@ -285,7 +278,7 @@ def process_received_document_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(user)
+        send_message_to_user_about_blocking(chat.id)
     else:
         _download_file_from_telegram(message.document.file_id)
         process_message(chat, message)

@@ -7,4 +7,8 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("uuid", "id", "first_name", "last_name", "username", "image")
+        fields = (
+            "uuid", "id",
+            "first_name", "last_name", "username",
+            "image", "is_blocked"
+        )

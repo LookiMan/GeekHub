@@ -171,61 +171,64 @@ function makePreviewText(message) {
 
 function makeReplyText(message) {
     const username = message?.staff ? "Вы" : message.user.first_name;
+    const html = `<div class="username"><strong>${username}</strong></div>`;
 
     if (message.photo) {
-        return `<i><strong>${username}:</strong></i> [фото 🖼]`;
+        return html + `<div class="content">[фото 🖼]</div>`;
     } else if (message.document) {
-        return `<i><strong>${username}:</strong></i> [файл 📁] ${message.file_name}`;
+        return html + `<div class="content">[файл 📁] ${message.file_name}</div>`;
     } else if (message.text) {
-        return `<i><strong>${username}:</strong></i> ${message.text}`;
+        return html + `<div class="content">${message.text}</div>`;
     } else {
-        return'[сообщение удалено]';
+        return html + '<div class="content">[сообщение удалено]</div>';
     }
 }
 
 
 function renderChatMessage(message, userType) {
+    /* userType = "manager" || "client" */
+
     const captionBlock = message.caption ? `<div class="telegram-text-message">${message.caption}</div>` : "";
 
-    var messageBody = `<div class="message-in-chat" data-message-id="${message.id}">
-                        <div class="message-${userType}">`;
+    var messageHtml = `<div class="message-in-chat" data-message-id="${message.id}">
+                        <div class="message message-${userType}">`;
 
     if (message.reply_to_message) {
-        messageBody += `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
+        messageHtml += `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
                             ${makeReplyText(message.reply_to_message)}
                         </div>`;
     }
 
     if (message.photo) {  
-        messageBody += `<div class="telegram-photo-message">
+        messageHtml += `<div class="telegram-photo-message">
                             <img src="${message.photo}"></img>
                             ${captionBlock}
                         </div>`;
         
     } else if (message.document) {
-        messageBody += `<div class="telegram-document-message">
+        messageHtml += `<div class="telegram-document-message">
                             <a href="${message.document}"><i class="bi bi-file-earmark"></i>${message.file_name}</a>
                             ${captionBlock}
                         </div>`;
     } else {
-        messageBody += `<div class="telegram-text-message">
+        messageHtml += `<div class="telegram-text-message">
                             <span>${message.text}</span>
                         </div>`;                   
     }
 
-    messageBody += `<div class="message-metadata">
-                        <span>${message.created_at_formatted}</span>
+    messageHtml += `<div class="message-metadata">
+                        <span class="time time-${userType === "manager" ? "right" : "left"}">${message.created_at_short}</span>
                     </div>
                 </div>
             </div>`;
 
-    messageDiv = $(messageBody).on("dblclick", setReplyMessage);
+    messageDiv = $(messageHtml).on("dblclick", setReplyMessage);
 
     return messageDiv;
 }
 
 
-function appendManagerMessage(message) {
+function renderManagerMessage(message) {
     const chat = document.querySelector("#chat-and-message");
     const messageBlock = renderChatMessage(message, "manager");
 
@@ -234,7 +237,7 @@ function appendManagerMessage(message) {
 }
 
 
-function appendClientMessage(message) {
+function renderClientMessage(message) {
     const chat = document.querySelector("#chat-and-message");
     const messageBlock = renderChatMessage(message, "client");
 
@@ -317,8 +320,6 @@ function renderChatItem(chat) {
 
 
 function renderChatList(chats) {
-    //$('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
-    
     $.each(chats, function (index, chat) {
         renderChatItem(chat);
     });
@@ -371,9 +372,9 @@ function renderNewChatItem(ucid) {
 function renderChatMessages(messages) {
     $.each(messages, function(index, message) { 
         if (message?.staff === null) {
-            appendClientMessage(message);
+            renderClientMessage(message);
         } else {
-            appendManagerMessage(message);
+            renderManagerMessage(message);
         }
     });
 }
@@ -398,32 +399,32 @@ function loadChats() {
             $('#aside-chats-menu-spiner').remove();
             //
             renderNote(note);
-        },
-        error: function(data) {
-            console.error(data);
-        }
-    });
 
-    $.ajax({
-        url: 'http://127.0.0.1:8000/chat/api/v1/chats', // TODO 
-        method: 'get',
-        headers: {
-		    'content-type': 'application/json',
-		    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
-        },
-        success: function (rawChatsList) {
-            //
-            let allChats = storageGet('allChats');
-            //
-            $.each(rawChatsList, function (index, chat) {
-                allChats[chat.ucid] = chat;
+            $.ajax({
+                url: 'http://127.0.0.1:8000/chat/api/v1/chats', // TODO 
+                method: 'get',
+                headers: {
+                    'content-type': 'application/json',
+                    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+                },
+                success: function (rawChatsList) {
+                    //
+                    let allChats = storageGet('allChats');
+                    //
+                    $.each(rawChatsList, function (index, chat) {
+                        allChats[chat.ucid] = chat;
+                    });
+                    //
+                    storageSet('allChats', allChats);
+                    //
+                    $('#aside-chats-menu-spiner').remove();
+                    //
+                    renderChatList(rawChatsList);
+                },
+                error: function(data) {
+                    console.error(data);
+                }
             });
-            //
-            storageSet('allChats', allChats);
-            //
-            $('#aside-chats-menu-spiner').remove();
-            //
-            renderChatList(rawChatsList);
         },
         error: function(data) {
             console.error(data);
@@ -448,7 +449,29 @@ function renderChat(ucid) {
     let chatsMessages = storageGet('chatsMessages');
     let chatMessages = chatsMessages[ucid] || {};
 
-    $('#chat-title').html(`<span><small>${firstName} ${lastName}</span> ${username}</small>`);
+    $('#chat-title').html(`<span class="chat-name">${firstName} ${lastName}</span><div><span class="username">${username}</span></div>`);
+    //
+    let image = $('#chat .control-panel img.telegram-user-image')[0];
+    // TODO:
+    if (chat.user) {
+        image.src = chat.user.image;
+        //
+        if (chat.user.is_blocked === true) {
+            let blockItem = $('#block-user');
+            let unblockItem = $('#unblock-user');
+            unblockItem.attr('data-user-id', chat.user.id);
+            unblockItem.parent().removeClass('d-none');
+            blockItem.parent().addClass('d-none');
+        } else {
+            let blockItem = $('#block-user');
+            let unblockItem = $('#unblock-user');
+            blockItem.attr('data-user-id', chat.user.id);
+            blockItem.parent().removeClass('d-none');
+            unblockItem.parent().addClass('d-none');
+        }
+    } else {
+        image.src = "/static/assets/images/note.png";
+    }
     //
     $('#chat-and-message').html('');
     //
@@ -551,9 +574,9 @@ function processReceivedMessage(message) {
 
     if (activeChatUcid === ucid) {
         if (message?.staff === null) {
-            appendClientMessage(message);
+            renderClientMessage(message);
         } else {
-            appendManagerMessage(message);
+            renderManagerMessage(message);
         }
     
     } else if (message?.staff === null) {
@@ -734,6 +757,53 @@ function preview(image) {
 }
 
 
+function dropdownToggle() {
+    $("#chat-more-actions-menu").toggleClass("d-block");
+}
+
+
+function blockUser(event) {
+    const target = $(event.currentTarget);
+    const user_id = $(target).data('user-id');
+    const url = $(target).data('url').replace('/0/', `/${user_id}/`);
+
+    $.ajax({
+        url: url,
+        method: 'get',
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function(data) {
+            console.error(data);
+        }
+    });
+}
+
+
+function unblockUser(event) {
+    const target = $(event.currentTarget);
+    const user_id = $(target).data('user-id');
+    const url = $(target).data('url').replace('/0/', `/${user_id}/`);
+
+    $.ajax({
+        url: url,
+        method: 'get',
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function(data) {
+            console.error(data);
+        }
+    });
+}
+
+
 function setupData() {
     // 
     storageSet('unreadMessages', {});
@@ -748,15 +818,11 @@ function setupEvents() {
     //
     $('li.aside-chat-tab').first().click();
 
-    $('div#upload-file-modal-form button#send-file').on('click', sendFile);
-    $('div#upload-image-modal-form button#send-image').on('click', sendImage);
-    $('div.input-area .emoji-button').on('click', toggleEmojiMenu);
-
-    $('div#emoji-menu .emoji').click((event) => {
-        const input = $('#chat-message-input');
-        const text = input.val();
-        input.val(text + $(event.currentTarget).text());
-    })
+    $('#upload-file-modal-form button#send-file').on('click', sendFile);
+    $('#upload-image-modal-form button#send-image').on('click', sendImage);
+    $('.input-area .emoji-button').on('click', toggleEmojiMenu);
+    $('#block-user').on('click', blockUser);
+    $('#unblock-user').on('click', unblockUser);
 
     const emojiMenuState = storageGet('emojiMenuState');
 
@@ -775,10 +841,17 @@ function setupEvents() {
         contentType: false,
         type: 'get',
         success: function (html) {
-            console.log(html);
             $('#emoji-spiner').remove();
             $('#emoji-menu').html(html);
-        }
+            $('#emoji-menu .emoji').click((event) => {
+                const input = $('#chat-message-input');
+                input.val(input.val() + $(event.currentTarget).text());
+                input.focus();
+            })    
+        },
+        error: function(data) {
+            console.error(data);
+        },
     });
 }
 

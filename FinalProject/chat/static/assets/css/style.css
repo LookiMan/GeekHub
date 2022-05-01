@@ -166,9 +166,76 @@ ul.messages li {
   background-color: #0097d3;
 }
 
+.control-panel {
+  height: 67px;
+  width: 100%;
+  border: 1px solid #dbdbdd;
+  background: #ffffff;
+}
+.control-panel .telegram-user-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My4zMTeDd4YAAAPFSURBVHhe7ZuJbuIwEIb3/d9uSxvISRJukhAgEAgEvJ7IrShMKTgzWVT6V78qocrHh48Z2/3z980Sz+xfANiHz+RfANiHTfi144iO4wvbC4Upf7faNvp33G4EwIt0q+2IsD8U6Xwpit1OHOXPqQ7Ho5ilCwnGRcvgMjuAtuWJOEnF4XBQXb2uzWZbwcLK4jArgP5wfHPHT5XM5tWowcqkNhuASZSo7tyvo5wORVGIRbYS3XCAlk9lFgA9+c1TKmYcEeQA2qanNey/03gao/XVNTmAOJmrJtMKpoVl+2iddUwKAFbvkuHbfxdMBazeOiYFEPRGqqk82sn4gXotIAUA3xC33ogDJVIA63yjmskn0wnQunVNCmC/36tm8snphmjduiYD8GJY1UrNLdfvofXrmgwA7ABNyHlUAC+G3cgIgPQZq1/XpGsARwR4rg5xMEQKAPJ8bhmPvA1m61w1k0cwxR42ELJcX+TMcQCE2V5Amx6TAdhst6qZvIJl1rA8tA06JgHQkuZMgs5lE26FJABgXu52/FHguyzCaJBsCqxWa9U8fhl2F22DjskAREmqmscriDUg6MLaoGMyALA6N6F0kaH165oMACRD+YZ3G4TLE9N94HTYMD2RZTxrwU6m2m6XNhECkwIAd6upQJ8UwWUJVl9dkwOAuz2OpLDXH6H11TU5AHCe00eFbcKt79QsAEaTWDWbRnBhitVDYRYAcHK735eq+fUVMg1/MAsAsN8bXrwB0NEyW7HeFLMBAA/GkeqGnjbbgvwe4NysAMBb2QldjaMELZPS7AAggNFVNEvRMinNDgDCV13BeyKsTEqzAoD5W0eZTLGxcinNCgCev9XRtijQcinNCiAIh6oreoJT4BZh7o+ZFQDFIQn1XeC52QDAyS3FTRH3OsAC4M10xZrwcGQqRxJWD4XJAfjBgOWEOJMhsWnRZ4RkAFwvFEvmk2FYFOM4FW05wrA26LgWAEhSbDeoXnQynIF8KbiEieJZdfhSN1HSAgCVwh6/WGSNdvxcAGIyTaqn91g7b/HdAOBkBkJUjmMvXZVlKUaTSOuV+c0ADDnvYpmcNPEKRFeQePVHk7suTr4FAJEYHHE18fqDSpCCwyvzW9aHqwC8oC+Kgv/VB4+OYrlcfXuVjgJ4ld86nMP/BJXloTpS/2o0XACANzhNvPhsWrBtYhA+AXiVqyj3/d7/1DRKLiB8AvBThv01df0+DsCSgc0D73BkgkuW01HwAaCpBw6PIOfklrkCAETgnxGeRbAgfgLQkWnmMyn/mAaW+Ad/7xXeS7fcQgAAAABJRU5ErkJggg==);
+  background-size: cover;
+}
+.control-panel #chat-title {
+  padding: 8px;
+}
+.control-panel #chat-title .chat-name {
+  font-size: 14px;
+}
+.control-panel #chat-title .username {
+  font-size: 12px;
+}
+.control-panel .dropdown {
+  position: relative;
+  display: flex;
+}
+.control-panel .dropdown-content {
+  display: none;
+  position: absolute;
+  right: 5px;
+  top: 50px;
+  z-index: 1000;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+}
+.control-panel .dropdown-content .danger i,
+.control-panel .dropdown-content .danger a {
+  color: red !important;
+}
+.control-panel .dropdown-content li {
+  display: block;
+}
+.control-panel .dropdown-content li a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+}
+.control-panel .dropdown-content li:hover {
+  color: #1e2125;
+  background-color: #e9ecef;
+}
+.control-panel .more-actions {
+  font-size: 24px;
+  padding: 14px 15px;
+  text-decoration: none;
+  color: black;
+}
+
 #chat-and-message {
   width: 100%;
-  height: calc(100vh - 54px - 50px - 54px);
+  height: calc(100vh - 71px - 50px - 54px);
   overflow-y: auto;
   border: 1px solid #dbdbdd;
   background: #ebebeb;
@@ -187,89 +254,75 @@ ul.messages li {
   border-radius: 5px;
   padding: 5px;
 }
-#chat-and-message .message-in-chat .message-client {
-  max-width: 50%;
-  background: #00a6e8;
-  color: white;
-  left: 10px;
-  width: 80%;
-  float: left;
-  border-radius: 0.25rem;
+#chat-and-message .message-in-chat .message {
+  width: 50%;
+  border-radius: 5px;
+  margin: 10px 0;
 }
-#chat-and-message .message-in-chat .message-client .telegram-reply-message {
-  background-color: #0074a2;
-  margin-top: 8px;
+#chat-and-message .message-in-chat .message::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+#chat-and-message .message-in-chat .message .telegram-reply-message {
+  border-left: 2px solid #00a6e8;
+  /*background-color: #007b29;*/
+  margin: 8px;
   padding: 4px 8px;
 }
-#chat-and-message .message-in-chat .message-client .telegram-text-message {
+#chat-and-message .message-in-chat .message .telegram-reply-message .username {
+  font-size: 13px;
+}
+#chat-and-message .message-in-chat .message .telegram-reply-message .content {
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#chat-and-message .message-in-chat .message .telegram-text-message {
   padding: 8px;
 }
-#chat-and-message .message-in-chat .message-client .telegram-photo-message {
+#chat-and-message .message-in-chat .message .telegram-photo-message {
   user-select: none;
 }
-#chat-and-message .message-in-chat .message-client .telegram-photo-message img {
+#chat-and-message .message-in-chat .message .telegram-photo-message img {
   padding: 2px;
   width: 100%;
   border-radius: 0.25rem;
 }
-#chat-and-message .message-in-chat .message-client .telegram-document-message {
+#chat-and-message .message-in-chat .message .telegram-document-message {
   user-select: none;
 }
-#chat-and-message .message-in-chat .message-client .telegram-document-message i {
+#chat-and-message .message-in-chat .message .telegram-document-message i {
   font-size: 40px;
-  color: white;
+  color: black;
   padding: 10px;
   overflow-x: hidden;
 }
-#chat-and-message .message-in-chat .message-client .telegram-document-message a {
+#chat-and-message .message-in-chat .message .telegram-document-message a {
   text-decoration: none;
-  color: white;
+  color: black;
 }
-#chat-and-message .message-in-chat .message-client .message-metadata span {
+#chat-and-message .message-in-chat .message .message-metadata .time {
   padding: 0 8px;
   font-size: 10px;
+}
+#chat-and-message .message-in-chat .message .message-metadata .time-right {
+  float: right;
+  color: #aaa;
+}
+#chat-and-message .message-in-chat .message .message-metadata .time-left {
+  float: left;
+  color: #999;
+}
+#chat-and-message .message-in-chat .message-client {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
 }
 #chat-and-message .message-in-chat .message-manager {
-  max-width: 50%;
-  background: #00c13f;
-  color: white;
-  right: 10px;
-  width: 80%;
+  border: 2px solid #ccc;
+  background-color: #ddd;
   float: right;
-  border-radius: 0.25rem;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-reply-message {
-  background-color: #007b29;
-  margin-top: 8px;
-  padding: 4px 8px;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-text-message {
-  padding: 8px;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-photo-message {
-  user-select: none;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-photo-message img {
-  padding: 2px;
-  width: 100%;
-  border-radius: 0.25rem;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-document-message {
-  user-select: none;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-document-message i {
-  font-size: 40px;
-  color: white;
-  padding: 10px;
-  overflow-x: hidden;
-}
-#chat-and-message .message-in-chat .message-manager .telegram-document-message a {
-  text-decoration: none;
-  color: white;
-}
-#chat-and-message .message-in-chat .message-manager .message-metadata span {
-  padding: 0 8px;
-  font-size: 10px;
 }
 #chat-and-message .reply-message {
   position: sticky;
@@ -285,19 +338,6 @@ ul.messages li {
 }
 #chat-and-message .selected-message {
   background-color: rgba(0, 166, 232, 0.5);
-}
-
-.control-panel {
-  height: 50px;
-  width: 100%;
-  border: 1px solid #dbdbdd;
-  background: #ffffff;
-}
-.control-panel .more-actions {
-  font-size: 24px;
-  padding: 5px;
-  text-decoration: none;
-  color: black;
 }
 
 .input-area {
@@ -329,7 +369,7 @@ ul.messages li {
 }
 .input-area .file-select-button:hover {
   transition: color 0.25s ease-in-out;
-  color: #00A6E8;
+  color: #00a6e8;
 }
 .input-area .image-select-button {
   float: left;
@@ -343,7 +383,7 @@ ul.messages li {
 }
 .input-area .image-select-button:hover {
   transition: color 0.25s ease-in-out;
-  color: #00A6E8;
+  color: #00a6e8;
 }
 .input-area .emoji-button {
   width: 50px;
@@ -357,10 +397,10 @@ ul.messages li {
 }
 .input-area .emoji-button:hover {
   transition: color 0.25s ease-in-out;
-  color: #00A6E8;
+  color: #00a6e8;
 }
 .input-area .active-emoji {
-  color: #00A6E8;
+  color: #00a6e8;
 }
 
 #emoji-menu {

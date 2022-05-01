@@ -7,5 +7,8 @@ from telegram_bot import api
 app_name = "telegram_bot"
 
 urlpatterns = [
-    path("telegram_api/<str:token>/", csrf_exempt(api.telegram_webhook), name="telegram_bot_api"),
+    path("webhook/<str:token>/",
+         csrf_exempt(api.telegram_webhook), name="telegram_webhook"),
+    path("block_user/<int:user_id>/", api.block_user, name="block_user"),
+    path("unblock_user/<int:user_id>/", api.unblock_user, name="unblock_user"),
 ]
