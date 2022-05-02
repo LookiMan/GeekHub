@@ -396,7 +396,7 @@ function loadChats() {
             //
             storageSet('allChats', allChats);
             //
-            $('#aside-chats-menu-spiner').remove();
+            $('#aside-chats-menu-spinner').remove();
             //
             renderNote(note);
 
@@ -417,7 +417,7 @@ function loadChats() {
                     //
                     storageSet('allChats', allChats);
                     //
-                    $('#aside-chats-menu-spiner').remove();
+                    $('#aside-chats-menu-spinner').remove();
                     //
                     renderChatList(rawChatsList);
                 },
@@ -841,7 +841,7 @@ function setupEvents() {
         contentType: false,
         type: 'get',
         success: function (html) {
-            $('#emoji-spiner').remove();
+            $('#emoji-spinner').remove();
             $('#emoji-menu').html(html);
             $('#emoji-menu .emoji').click((event) => {
                 const input = $('#chat-message-input');

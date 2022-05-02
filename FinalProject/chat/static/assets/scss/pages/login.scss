@@ -1,0 +1,26 @@
+#login-form {
+	width: 400px;
+	height: 250px;
+	border: 1px solid $light-gray;
+	border-radius: 0.25rem;
+	padding: 15px;
+
+	margin: calc(50% - 300px) auto;
+	max-height: calc(100% - 3.5rem);
+
+	label {
+		margin-top: 25px;
+		display: flex;
+		justify-content: center;
+	}
+
+	input {
+		width: 100%;
+		margin-top: 5px;
+		text-align: center;
+		background-color: transparent;
+		outline: none;
+		border: 0;
+		border-bottom: 2px solid $blue;
+	}
+}
