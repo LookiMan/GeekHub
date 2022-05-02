@@ -20,15 +20,6 @@ from telegram_bot import utils
 
 # https://habr.com/ru/post/502380/
 
-if not TELEGRAM_BOT_TOKEN:
-    raise BaseException(
-        "TELEGRAM_BOT_API_TOKEN not found in OS enviroment paths")
-
-
-if not WEBHOOK_HOST:
-    raise BaseException(
-        "WEBHOOK_HOST not found in OS enviroment paths")
-
 
 WEBHOOK_PATH = f"/{TELEGRAM_BOT_TOKEN}/"
 WEBHOOK_URL = WEBHOOK_HOST + "/telegram/telegram_api" + WEBHOOK_PATH

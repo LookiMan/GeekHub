@@ -9,9 +9,9 @@ Twisted==20.3.0
 asgi-redis==1.4.3
 asgiref==3.5.0
 channels-redis==3.4.0
-pillow==9.0.1
 django-cleanup==6.0.0
 easy-thumbnails==2.8.1
+pillow==9.0.1
 
 # Tasks
 celery==5.2.3
@@ -19,3 +19,6 @@ redis==4.1.4
 
 # Telegram
 pyTelegramBotAPI==4.4.0
+
+# Other
+python-dotenv==0.20.0

@@ -10,198 +10,208 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+from dotenv import load_dotenv
+
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / "subdir".
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
+try:
+    from local_settings import *
+except ImportError:
+    # Build paths inside the project like this: BASE_DIR / "subdir".
+    BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+    # Quick-start development settings - unsuitable for production
+    # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = True
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-ALLOWED_HOSTS = ["*"]
+    # SECURITY WARNING: don"t run with debug turned on in production!
+    DEBUG = True
 
-LOGIN_URL = "chat:login"
-LOGIN_REDIRECT_URL = "chat:index"
+    ALLOWED_HOSTS = ["*"]
 
-# TELEGRAM BOT:
-if DEBUG:
-    os.environ["WEBHOOK_HOST"] = "https://b304-176-98-9-28.ngrok.io"
+    LOGIN_URL = "chat:login"
+    LOGIN_REDIRECT_URL = "chat:index"
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_API_TOKEN")
-WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
+    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# From JWT
-ALGORITHM = "HS256"
+    if not TELEGRAM_BOT_TOKEN:
+        raise BaseException(
+            "TELEGRAM_BOT_TOKEN not found in OS environment paths")
 
-# Application definition
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "channels",
-    "rest_framework",
-    "django_cleanup",
-    "easy_thumbnails",
-    "chat",
-    "telegram_bot",
-]
+    WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.gzip.GZipMiddleware",
-]
+    if not WEBHOOK_HOST:
+        raise BaseException(
+            "WEBHOOK_HOST not found in OS environment paths")
 
-ROOT_URLCONF = "config.urls"
+    REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+    REDIS_PORT = os.getenv("REDIS_PORT", 6379)
 
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
+    # From JWT
+    ALGORITHM = "HS256"
+
+    # Application definition
+    INSTALLED_APPS = [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "channels",
+        "rest_framework",
+        "django_cleanup",
+        "easy_thumbnails",
+        "chat",
+        "telegram_bot",
+    ]
+
+    MIDDLEWARE = [
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django.middleware.gzip.GZipMiddleware",
+    ]
+
+    ROOT_URLCONF = "config.urls"
+
+    TEMPLATES = [
+        {
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [],
+            "APP_DIRS": True,
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
+                ],
+            },
         },
-    },
-]
+    ]
 
-WSGI_APPLICATION = "config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"
+    WSGI_APPLICATION = "config.wsgi.application"
+    ASGI_APPLICATION = "config.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
-}
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
-LANGUAGE_CODE = "ru"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "chat", "static")
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "chat", "media")
-
-PHOTOS_URL = "/photos/"
-PHOTOS_ROOT = os.path.join(BASE_DIR, "chat", "photos")
-
-STATICFILES_DIRS = [
-    PHOTOS_ROOT,
-    MEDIA_ROOT,
-]
-
-
-THUMBNAIL_ALIASES = {
-    "chat.Message.image": {
-        "preview": {
-            "size": (450, 250),
-            "crop": "scale",
-        },
-    },
-    "telegram_bot.User.image":  {
-        "preview": {
-            "size": (50, 50),
-            "crop": "scale",
-        },
-
+    CHANNEL_LAYERS = {
         "default": {
-            "size": (160, 160),
-            "crop": "scale",
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [(REDIS_HOST, REDIS_PORT)],
+            },
         },
-    },
-}
+    }
 
-THUMBNAIL_SUBDIR = "thumbs"
-THUMBNAIL_PREFFIX = "thumb_"
+    # Database
+    # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
+    # Password validation
+    # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+    AUTH_PASSWORD_VALIDATORS = [
+        {
+            "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        },
+        {
+            "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        },
+    ]
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-REST_FRAMEWORK = {}
-DJANGO_CHANNELS_REST_API = {}
+    # Internationalization
+    # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-# MODELS
-AUTH_USER_MODEL = "chat.Staff"
+    LANGUAGE_CODE = "ru"
 
-# CELERY
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379")
-broker_url = REDIS_URL
-CELERY_broker_url = REDIS_URL
-result_backend = REDIS_URL
-accept_content = ["application/json"]
-task_serializer = "json"
-result_serializer = "json"
-timezone = TIME_ZONE
-CELERY_TASK_DEFAULT_QUEUE = "default"
+    TIME_ZONE = "UTC"
+
+    USE_I18N = True
+
+    USE_L10N = True
+
+    USE_TZ = True
+
+    # Static files (CSS, JavaScript, Images)
+    # https://docs.djangoproject.com/en/3.2/howto/static-files/
+
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "chat", "static")
+
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "chat", "media")
+
+    PHOTOS_URL = "/photos/"
+    PHOTOS_ROOT = os.path.join(BASE_DIR, "chat", "photos")
+
+    STATICFILES_DIRS = [
+        PHOTOS_ROOT,
+        MEDIA_ROOT,
+    ]
+
+    THUMBNAIL_ALIASES = {
+        "chat.Message.image": {
+            "preview": {
+                "size": (450, 250),
+                "crop": "scale",
+            },
+        },
+        "telegram_bot.User.image":  {
+            "preview": {
+                "size": (50, 50),
+                "crop": "scale",
+            },
+
+            "default": {
+                "size": (160, 160),
+                "crop": "scale",
+            },
+        },
+    }
+
+    THUMBNAIL_SUBDIR = "thumbs"
+    THUMBNAIL_PREFFIX = "thumb_"
+
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
+
+    # Default primary key field type
+    # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+
+    DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+    REST_FRAMEWORK = {}
+    DJANGO_CHANNELS_REST_API = {}
+
+    # MODELS
+    AUTH_USER_MODEL = "chat.Staff"
+
+    # CELERY
+    REDIS_URL = "redis://{REDIS_HOST}:{REDIS_PORT}"
+    broker_url = REDIS_URL
+    CELERY_broker_url = REDIS_URL
+    result_backend = REDIS_URL
+    accept_content = ["application/json"]
+    task_serializer = "json"
+    result_serializer = "json"
+    timezone = TIME_ZONE
+    CELERY_TASK_DEFAULT_QUEUE = "default"
