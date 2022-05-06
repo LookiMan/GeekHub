@@ -201,6 +201,7 @@ header .navbar {
 #chat-and-message .message-in-chat .message .message-metadata .time {
   padding: 0 8px;
   font-size: 10px;
+  user-select: none;
 }
 #chat-and-message .message-in-chat .message .message-metadata .time-right {
   float: right;
@@ -352,7 +353,8 @@ header .navbar {
   border: 1px solid #dbdbdd;
   border-radius: 0.25rem;
   padding: 15px;
-  margin: auto;
+  margin: calc(50% - 500px) auto;
+  max-height: calc(100% - 3.5rem);
 }
 #registration-form label {
   margin-top: 20px;

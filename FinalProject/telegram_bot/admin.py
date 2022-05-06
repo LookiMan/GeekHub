@@ -29,7 +29,6 @@ class UserAdmin(CustomModelAdmin):
         "last_name",
         "username",
         "preview_user_image",
-        "language_code",
         "created_at",
     )
 
@@ -48,10 +47,10 @@ class UserAdmin(CustomModelAdmin):
         ),
         ("Профиль", {
             "fields":
-                (("image", "language_code", "is_blocked"),)
+                (("image", "is_blocked"),)
         }
         ),
-        ("Персональние данные", {
+        ("Персональные данные", {
             "fields":
             (("uuid", "id", "is_bot"),)
         }
@@ -64,17 +63,17 @@ class UserAdmin(CustomModelAdmin):
 
     def preview_user_image(self, obj):
         if obj.image:
-            return mark_safe(f'<div> <img src="{obj.image.url}" style="width: 50px; height: 50px; background-size: cover; border-radius: 50%;"></div>')
+            return mark_safe(f'<div> <img src="{obj.image}" style="width: 50px; height: 50px; background-size: cover; border-radius: 50%;"></div>')
         else:
             return '[Фото не загружено]'
 
     def make_blocked(self, request, queryset):
         queryset.update(is_blocked=True)
-    make_blocked.short_description = "Отметить выбранных пользователей как заблокированых"
+    make_blocked.short_description = "Отметить выбранных пользователей как заблокированы"
 
     def make_unblocked(self, request, queryset):
         queryset.update(is_blocked=False)
-    make_unblocked.short_description = "Отметить выбранных пользователей как разблокированых"
+    make_unblocked.short_description = "Отметить выбранных пользователей как разблокированы"
 
 
 @admin.register(Chat)

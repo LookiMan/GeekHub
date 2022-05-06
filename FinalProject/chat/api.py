@@ -12,7 +12,7 @@ from chat.models import Chat, Message
 from chat.serializers import ChatSerializer, MessageSerializer
 from chat.utils import logger
 
-from telegram_bot.tasks import send_photo_to_client, send_document_to_client
+from telegram_bot.bot import send_photo_to_client, send_document_to_client
 
 
 @api_view(('GET',))
@@ -114,7 +114,7 @@ def upload_file(request):
             photo = form.cleaned_data.get("photo")
             document = form.cleaned_data.get("document")
             caption = form.cleaned_data.get("caption")
-            reply_to_message_id = form.cleaned_data.get("reply_to_message_id") 
+            reply_to_message_id = form.cleaned_data.get("reply_to_message_id")
 
             if photo:
                 send_photo_to_client(

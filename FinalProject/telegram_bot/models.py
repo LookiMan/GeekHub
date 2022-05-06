@@ -1,7 +1,5 @@
 from django.db import models
 
-from telegram_bot.utils import set_default_image
-
 
 class User(models.Model):
     uuid = models.AutoField(
@@ -50,19 +48,12 @@ class User(models.Model):
         help_text="Псевдоним пользователя (необязательный)",
     )
 
-    image = models.ImageField(
+    image = models.URLField(
+        "user image",
+        max_length=200,
         blank=True,
         null=True,
-        default=set_default_image,
         help_text="Изображение пользователя",
-    )
-
-    language_code = models.CharField(
-        "language_code",
-        blank=True,
-        null=True,
-        max_length=16,
-        help_text="Код языка системы",
     )
 
     created_at = models.DateTimeField(
@@ -71,17 +62,11 @@ class User(models.Model):
         help_text="Дата сохранения пользователя в базу данных",
     )
 
-    def delete(self, *args, **kwargs):
-        if self.image:
-            self.image.delete(save=False)
-
-        super().delete(*args, **kwargs)
-
     def __str__(self):
         first_name = self.first_name or ""
         last_name = self.last_name or ""
-        username = self.username or ""
-        return f"Telegram user: {first_name} {last_name} @{username} ({self.id})"
+        username = "@" + self.username if self.username else ""
+        return f"Telegram user: {first_name} {last_name} {username} ({self.id})"
 
     class Meta:
         verbose_name = "Telegram пользователя"

@@ -77,7 +77,7 @@ def registration_staff(request):
     else:
         context["form"] = RegisterStaffForm()
 
-    return render(request, "./chat/registration_staff.html", context)
+    return render(request, "./chat/registration-staff.html", context)
 
 
 @ user_passes_test(lambda staff: staff.is_superuser, login_url="chat:login")
@@ -107,4 +107,4 @@ def change_staff(request, pk):
         else:
             context["form"] = ChangeStaffInfoForm(instance=staff)
 
-        return render(request, "./chat/edit_staff.html", context)
+        return render(request, "./chat/edit-staff.html", context)

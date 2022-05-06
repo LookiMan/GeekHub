@@ -130,8 +130,8 @@ class Chat(models.Model):
     def __str__(self):
         first_name = self.first_name or ""
         last_name = self.last_name or ""
-        username = self.username or ""
-        return f"Сhat: {first_name} {last_name} @{username} ({self.id})"
+        username = "@" + self.username if self.username else ""
+        return f"Сhat: {first_name} {last_name} {username} ({self.id})"
 
     class Meta:
         verbose_name = "Чат"

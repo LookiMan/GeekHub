@@ -11,7 +11,6 @@
 
 {% block main %}
   <input type="hidden" id="jwt-token" value="{{request.user.token}}"></input>
-    
     <!-- File modal form -->
     <div class="modal fade" id="upload-file-modal-form" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -21,7 +20,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <img id="preview-image" src="">
             <div class="mb-3">
               <label for="form-file" class="form-label">Выберите файл</label>
               <input id="form-file" class="form-control" type="file">
@@ -51,7 +49,7 @@
             <img id="preview-image" src="">
             <div class="mb-3">
               <label for="form-image" class="form-label">Выберите изображение</label>
-              <input id="form-image" class="form-control" type="file" accept=".png, .jpg, .jpeg" onchange="preview(this);">
+              <input id="form-image" class="form-control" type="file" accept=".png, .jpg, .jpeg">
             </div>
             <div class="mb-3">
               <input class="image-caption-input input" placeholder="Коментарий..."></input>
@@ -94,7 +92,7 @@
           </div>
           <span style="margin: auto;"></span>
           <div class="dropdown">
-            <a type="button" id="chat-more-actions" class="more-actions" onclick="dropdownToggle();">
+            <a type="button" id="chat-more-actions" class="more-actions">
               <i class="bi bi-three-dots-vertical"></i>
             </a>
             <ul id="chat-more-actions-menu" class="dropdown-content">

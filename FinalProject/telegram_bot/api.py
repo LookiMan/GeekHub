@@ -1,26 +1,30 @@
 import json
 
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.status import HTTP_200_OK
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
+
+from django.shortcuts import redirect
 
 from django.conf import settings
 from chat.utils import logger
 
 from telegram_bot.models import User
+from telegram_bot.bot import send_message_to_user_about_blocking
+from telegram_bot.bot import send_message_to_user_about_unblocking
 from telegram_bot.tasks import process_telegram_event
-from telegram_bot.tasks import send_message_to_user_about_blocking
-from telegram_bot.tasks import send_message_to_user_about_unblocking
 
 
-@api_view(['POST'])
+@api_view(("POST",))
 def telegram_webhook(request, token):
     update = json.loads(request.body)
 
     if token != settings.TELEGRAM_BOT_TOKEN:
         return Response(
-            'Bad request. Invalid telegram bot token',
+            "Bad request. Invalid telegram bot token",
             status=HTTP_400_BAD_REQUEST,
         )
 
@@ -37,10 +41,17 @@ def telegram_webhook(request, token):
             status=HTTP_500_INTERNAL_SERVER_ERROR
         )
     else:
-        return Response({"code": 200})
+        return Response({"code": HTTP_200_OK})
 
 
-@api_view(['GET'])
+@api_view(("GET",))
+def get_user_photo(request, file_path):
+    # TODO:
+    return redirect("https://api.telegram.org/file/bot{0}/{1}".format(settings.TELEGRAM_BOT_TOKEN, "photos/"+file_path), permanent=True)
+
+
+@api_view(("GET",))
+@permission_classes((IsAuthenticated,))
 def block_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
@@ -66,11 +77,14 @@ def block_user(request, user_id):
     else:
         return Response({
             "success": True,
-            "description": f"User with id '{user_id}' has been blocked"
+            "description": f"User with id '{user_id}' has been blocked",
+            "user_id": user_id,
+            "is_blocked": True,
         })
 
 
-@api_view(['GET'])
+@api_view(("GET",))
+@permission_classes((IsAuthenticated,))
 def unblock_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
@@ -96,5 +110,7 @@ def unblock_user(request, user_id):
     else:
         return Response({
             "success": True,
-            "description": f"User with id '{user_id}' has been unblocked"
+            "description": f"User with id '{user_id}' has been unblocked",
+            "user_id": user_id,
+            "is_blocked": False,
         })

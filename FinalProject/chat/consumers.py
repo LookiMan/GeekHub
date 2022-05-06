@@ -8,7 +8,7 @@ from djangochannelsrestframework.observer import model_observer
 
 from chat.models import Chat, Message
 from chat.serializers import MessageSerializer, ChatSerializer
-from telegram_bot.tasks import async_send_text_message_to_client
+from telegram_bot.bot import async_send_text_message_to_client
 
 
 class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
@@ -30,7 +30,7 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         except:
             data = {
                 "action": "error",
-                "text": f"Chat with ucid \"{ucid}\" not found",
+                "text": f"Chat with ucid '{ucid}' not found",
             }
             await self.send_json(data)
         else:
@@ -97,7 +97,7 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     async def notify_staff(self, event):
         data = {
-            "action": "create_new_chat",
+            "action": "createNewChat",
             "data": event,
         }
         await self.send_json(data)

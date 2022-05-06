@@ -1,3 +1,5 @@
+.vscode
+
 src/
 dev/
 media/
@@ -12,6 +14,15 @@ chat/photos/*
 
 telegram_bot/migrations/*
 !telegram_bot/migrations/__init__.py
+
+# Linux template
+*~
+# KDE directory preferences
+.directory
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

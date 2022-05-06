@@ -4,7 +4,8 @@
 	border-radius: 0.25rem;
 	padding: 15px;
 
-	margin: auto;
+	margin: calc(50% - 500px) auto;
+	max-height: calc(100% - 3.5rem);
 
 	label {
 		margin-top: 20px;

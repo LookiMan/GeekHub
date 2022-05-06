@@ -27,7 +27,7 @@ def save_file(content, filename):
     return filename
 
 
-def set_default_image():
+def get_default_image():
     choices = (
         "default1.png",
         "default2.png",
