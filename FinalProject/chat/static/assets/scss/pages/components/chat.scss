@@ -1,0 +1,249 @@
+#chat {
+	position: relative;
+	#chat-and-message {
+		width: 100%;
+		height: calc(
+			100vh - $nav-panel-height - calc($chat-control-panel-height + 4px) -
+				$chat-input-area-height
+		);
+		overflow-y: auto;
+		border: 1px solid $light-gray;
+		background: #ebebeb;
+
+		#chat-spinner {
+			min-height: 100%;
+
+			display: flex;
+			align-items: center;
+
+			.justify-content-center {
+				width: 100%;
+			}
+		}
+
+		.message-in-chat {
+			overflow: hidden;
+			margin-bottom: 10px;
+			border-radius: 5px;
+			padding: 5px;
+
+			.message {
+				width: 50%;
+				border-radius: 5px;
+				margin: 10px 0;
+
+				&::after {
+					content: "";
+					clear: both;
+					display: table;
+				}
+
+				.telegram-reply-message {
+					border-left: 2px solid $light-blue;
+					margin: 8px;
+					padding: 4px 8px;
+
+					.username {
+						font-size: 13px;
+					}
+
+					.content {
+						font-size: 12px;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
+					}
+				}
+
+				.telegram-text-message {
+					padding: 8px;
+				}
+
+				.telegram-photo-message {
+					user-select: none;
+					img {
+						padding: 2px;
+						width: 100%;
+						border-radius: 0.25rem;
+					}
+				}
+
+				.telegram-document-message {
+					user-select: none;
+					i {
+						font-size: 40px;
+						color: $black;
+						padding: 10px;
+						overflow-x: hidden;
+					}
+					a {
+						text-decoration: none;
+						color: $black;
+					}
+				}
+
+				.message-metadata {
+					.time {
+						padding: 0 8px;
+						font-size: 10px;
+						user-select: none;
+					}
+
+					.time-right {
+						float: right;
+						color: #aaa;
+					}
+
+					.time-left {
+						float: left;
+						color: #999;
+					}
+				}
+			}
+
+			.message-client {
+				border: 2px solid #dedede;
+				background-color: #f1f1f1;
+			}
+
+			.message-manager {
+				border: 2px solid #ccc;
+				background-color: #ddd;
+				float: right;
+			}
+		}
+
+		.reply-message {
+			position: sticky;
+			bottom: 0;
+
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			padding: 10px 15px;
+			background-color: $white;
+
+			i {
+				margin-right: 5px;
+			}
+
+			span {
+				cursor: pointer;
+			}
+		}
+
+		.selected-message {
+			background-color: rgba(0, 166, 232, 0.5);
+		}
+	}
+
+	.input-area {
+		width: 100%;
+		height: 54px;
+		border: 1px solid $light-gray;
+		background: $white;
+
+		.chat-input {
+			float: left;
+			width: calc(100% - 150px);
+			height: 48px;
+			padding: 10px 25px;
+			resize: none;
+			border: 0;
+
+			&:focus-visible {
+				outline: none;
+			}
+		}
+
+		.file-select-button {
+			float: left;
+			width: 50px;
+			height: 50px;
+			font-size: 30px;
+
+			i {
+				position: relative;
+				top: -4px;
+			}
+
+			&:hover {
+				transition: color 0.25s ease-in-out;
+				color: $light-blue;
+			}
+		}
+
+		.image-select-button {
+			float: left;
+			width: 50px;
+			height: 50px;
+			font-size: 30px;
+
+			i {
+				position: relative;
+				top: -4px;
+			}
+
+			&:hover {
+				transition: color 0.25s ease-in-out;
+				color: $light-blue;
+			}
+		}
+
+		.emoji-button {
+			width: 50px;
+			height: 50px;
+			font-size: 30px;
+
+			i {
+				position: relative;
+				left: -6px;
+				top: -4px;
+			}
+
+			&:hover {
+				transition: color 0.25s ease-in-out;
+				color: $light-blue;
+			}
+		}
+
+		.active-emoji {
+			color: $light-blue;
+		}
+	}
+
+	.blocked {
+		user-select: none;
+		position: absolute;
+		top: calc($chat-control-panel-height);
+		left: 0;
+		right: 0;
+		background-color: $black;
+		width: 100%;
+		height: calc(100vh - $nav-panel-height - calc($chat-control-panel-height + 4px));
+		opacity: 0.5;
+		padding:10px;
+
+		.wrapper {
+			background: linear-gradient(
+				to top, transparent, transparent 100%),
+				transparent repeating-linear-gradient(45deg, transparent, transparent 35px, 
+				$gray 35px,
+				$gray 70px
+			);
+			
+			display: flex;
+			height: 100%;
+			justify-content: center;
+			align-items: center;
+
+			span {
+				font-size: 36px;
+				color: $white;
+				background-color: $black;
+				padding: 10px;
+				border: 10px dashed $gray;
+			}
+		}
+	}
+}

@@ -1,3 +1,5 @@
+import { showBlockBanner, hideBlockBanner } from './chat.js'; 
+
 
 export function updateDropdownMenu(user) {
     $('#chat-more-actions').removeClass('d-none');
@@ -12,6 +14,11 @@ export function updateDropdownMenu(user) {
         blockItem.attr('data-user-id', user.id);
         blockItem.parent().removeClass('d-none');
         unblockItem.parent().addClass('d-none');
+    }
+    if (user.is_blocked) {
+        showBlockBanner();
+    } else {
+        hideBlockBanner();
     }
 }
 

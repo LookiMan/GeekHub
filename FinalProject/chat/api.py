@@ -59,7 +59,7 @@ def get_note(request):
 @permission_classes((IsAuthenticated,))
 def get_chats(request):
     try:
-        chats = Chat.objects.all().exclude(is_note=True)
+        chats = Chat.objects.all().filter(is_archived=False).exclude(is_note=True)
     except Chat.DoesNotExist:
         return Response(f'Chats not found', status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
@@ -135,3 +135,34 @@ def upload_file(request):
             return Response({"code": 200}, status=HTTP_201_CREATED)
 
     return Response({"code": 400, "errors": form.errors}, status=HTTP_400_BAD_REQUEST)
+
+
+@api_view(("GET",))
+@permission_classes((IsAuthenticated,))
+def archive_chat(request, ucid):
+    try:
+        user = Chat.objects.get(ucid=ucid)
+        user.is_archived = True
+        user.save(update_fields=["is_archived"])
+    except Chat.DoesNotExist as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": f"Bad request. Chat with ucid '{ucid}' not found",
+        },
+            status=HTTP_400_BAD_REQUEST,
+        )
+    except Exception as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": "Unclassified error",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    else:
+        return Response({
+            "success": True,
+            "description": f"Chat with ucid '{ucid}' has been archived",
+            "ucdi": ucid,
+        })

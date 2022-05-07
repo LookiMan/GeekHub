@@ -33,7 +33,14 @@ export function setReplyMessage(event) {
         const chatsMessages = storageGet('chatsMessages');
         const messages = chatsMessages[ucid] || {};
         const replyToMessage = viewTextMessageWhenReplying(messages[messageId]);
-        replyToMessage.on('click', unsetReplyMessage);
+        replyToMessage.on('click', '.button', unsetReplyMessage);
+        replyToMessage.on('click', 'span', function(event) {
+            event.preventDefault();
+            console.log($(`div[data-message-id="${messageId}"]`));
+            $('#chat-and-message').animate({
+                scrollTop: $(`div[data-message-id="${messageId}"]`).offset().top
+            }, 500);
+        });
 
         storageSet('replyToMessage', {
             ucid,
@@ -82,6 +89,16 @@ function renderChatMessages(messages) {
     });
 }
 
+export function showBlockBanner() {
+    $('#block-banner').removeClass('d-none');
+    $('#chat-message-input').val('').attr('disabled', true);
+}
+
+export function hideBlockBanner() {
+    $('#block-banner').addClass('d-none');
+    $('#chat-message-input').attr('disabled', false);
+}
+
 export function renderChat(ucid) {
     const allChats = storageGet('allChats');
     const chat = allChats[ucid];
@@ -98,6 +115,11 @@ export function renderChat(ucid) {
     updateChatTitle(chat);
 
     if (user) {
+        if (user.is_blocked) {
+            showBlockBanner();
+        } else {
+            hideBlockBanner();
+        }
         updateDropdownMenu(user);
     } else {
         hideDropdownMenu();

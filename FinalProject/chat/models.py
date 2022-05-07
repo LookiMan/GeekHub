@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from distutils import archive_util
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -67,10 +68,17 @@ class Chat(models.Model):
         help_text="Идентификатор чата в telegram",
     )
 
-    is_closed = models.BooleanField(
-        "is_closed",
+    is_archived = models.BooleanField(
+        "is_archived",
         default=False,
-        help_text="Является ли чат закрытым",
+        help_text="Является ли чат заархивированным",
+    )
+
+    archived_at = models.DateTimeField(
+        "archived_at",
+        blank=True,
+        null=True,
+        help_text="Дата архивации чата",
     )
 
     is_note = models.BooleanField(
@@ -127,11 +135,18 @@ class Chat(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def archived_at_formatted(self):
+        if self.archived_at:
+            return self.archived_at.strftime("%d-%m-%Y %H:%M:%S")
+        return "[Дата не установлена]"
+
     def __str__(self):
         first_name = self.first_name or ""
         last_name = self.last_name or ""
         username = "@" + self.username if self.username else ""
-        return f"Сhat: {first_name} {last_name} {username} ({self.id})"
+        state = f"ARCHIVED {self.archived_at_formatted}" if self.is_archived else "ACTIVE"
+        return f"Сhat: {first_name} {last_name} {username} ({self.id}) {state}"
 
     class Meta:
         verbose_name = "Чат"
@@ -231,9 +246,17 @@ class Message(models.Model):
         help_text="Является ли сообщение удаленным",
     )
 
-    date = models.DateTimeField(blank=True, null=True)
+    date = models.DateTimeField(
+        "date",
+        blank=True,
+        null=True,
+        help_text="Время получения сообщения в telegram",
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Время создания сообщения в базе данных",
+    )
 
     def __str__(self):
         preview_text = self.text[:100] if self.text else self.caption

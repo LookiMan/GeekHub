@@ -2,7 +2,7 @@
 	height: $chat-control-panel-height;
 	width: 100%;
 	border: 1px solid $light-gray;
-	background: #fff;
+	background: $white;
 
 	.telegram-user-image {
 		width: 50px;
@@ -42,7 +42,7 @@
 		color: #212529;
 		text-align: left;
 		list-style: none;
-		background-color: #fff;
+		background-color: $white;
 		background-clip: padding-box;
 		border: 1px solid rgba(0, 0, 0, 0.15);
 		border-radius: 0.25rem;
@@ -58,7 +58,7 @@
 			display: block;
 
 			a {
-				color: #000;
+				color: $black;
 				padding: 12px 16px;
 				text-decoration: none;
 			}
@@ -74,6 +74,6 @@
 		font-size: 24px;
 		padding: 14px 15px;
 		text-decoration: none;
-		color: #000;
+		color: $black;
 	}
 }

@@ -1,7 +1,7 @@
 #aside-chats-menu {
 	overflow-y: auto;
 	border: 1px solid $light-gray;
-	background: #fff;
+	background: $white;
 	height: calc(100vh - $nav-panel-height);
 
 	#aside-chats-menu-spinner {

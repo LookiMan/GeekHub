@@ -392,6 +392,37 @@ function unblockUser(event) {
     blockOrUnblockUser(event)
 }
 
+function archiveChat(event) {
+    const target = $(event.currentTarget);
+    const ucid = storageGet('activeChatUcid');
+
+    if (!ucid) {
+        alert('Не удалось получить айди текущего чата для архивации');
+        return;
+    }
+
+    console.log(ucid);
+
+    const url = $(target).data('url').replace('/0/', `/${ucid}/`);
+
+    $.ajax({
+        url,
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        success: function (response) {
+            if (!response.success) {
+                alert(`Упс! Что-то пошло не так...\n${response.description}`);
+            } else {
+                console.log(response);
+            }
+        },
+        error: function(data) {
+            console.error(data);
+        }
+    });
+}
+
 function setupEvents() {
     //
     $('li.aside-chat-tab').first().click();
@@ -401,6 +432,7 @@ function setupEvents() {
     $('.input-area .emoji-button').on('click', toggleEmojiMenu);
     $('#block-user').on('click', blockUser);
     $('#unblock-user').on('click', unblockUser);
+    $('#archive-chat').on('click', archiveChat);
     $('#chat-more-actions').on('click', dropdownToggle);
     $('#form-image').on('change', previewImage);
 
@@ -425,7 +457,9 @@ function setupEvents() {
             $('#emoji-menu').html(html);
             $('#emoji-menu .emoji').click((event) => {
                 const input = $('#chat-message-input');
-                input.val(input.val() + $(event.currentTarget).text()).focus();
+                if (!input.prop('disabled')) {
+                    input.val(input.val() + $(event.currentTarget).text()).focus();
+                }
             })    
         },
         error: function(data) {

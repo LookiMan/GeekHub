@@ -152,6 +152,7 @@ def get_or_create_telegram_chat(telegram_user, message):
         username=message.chat.username,
         type=message.chat.type,
         user=telegram_user,
+        is_archived=False,
     )
 
 
@@ -168,7 +169,7 @@ def get_telegram_user(message):
 
         else:
             telegram_user.image = reverse(
-                "media", args=[get_default_image()]
+                "chat:media", args=[get_default_image()]
             )
 
         telegram_user.save()
@@ -181,7 +182,8 @@ def get_telegram_user(message):
 def get_telegram_chat(user, message):
     chat, is_new = get_or_create_telegram_chat(user, message)
 
-    if is_new:
+    if is_new and not user.is_blocked:
+        send_welcome_message(message)
         notify_staff_about_new_chat(chat)
 
     return chat

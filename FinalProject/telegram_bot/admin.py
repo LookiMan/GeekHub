@@ -1,19 +1,8 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from chat.models import Chat, Message
+from chat.admin import CustomModelAdmin
 from telegram_bot.models import User
-
-
-class CustomModelAdmin(admin.ModelAdmin):
-    def get_readonly_fields(self, request, obj=None):
-        if request.user.is_superuser:
-            return self.readonly_fields
-        else:
-            return list(set(
-                [field.name for field in self.opts.local_fields] +
-                [field.name for field in self.opts.local_many_to_many]
-            ))
 
 
 @admin.register(User)
@@ -74,23 +63,3 @@ class UserAdmin(CustomModelAdmin):
     def make_unblocked(self, request, queryset):
         queryset.update(is_blocked=False)
     make_unblocked.short_description = "Отметить выбранных пользователей как разблокированы"
-
-
-@admin.register(Chat)
-class ChatAdmin(CustomModelAdmin):
-    readonly_fields = ("ucid", "id")
-
-    actions = ("make_closed", "make_opened")
-
-    def make_closed(self, request, queryset):
-        queryset.update(is_blocked=True)
-    make_closed.short_description = "Отметить выбранные чаты как закрытые"
-
-    def make_opened(self, request, queryset):
-        queryset.update(is_blocked=False)
-    make_opened.short_description = "Отметить выбранные чаты как открытые"
-
-
-@admin.register(Message)
-class MessageAdmin(CustomModelAdmin):
-    readonly_fields = ("umid", "id")

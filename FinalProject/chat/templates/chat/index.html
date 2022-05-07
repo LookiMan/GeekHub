@@ -96,14 +96,17 @@
               <i class="bi bi-three-dots-vertical"></i>
             </a>
             <ul id="chat-more-actions-menu" class="dropdown-content">
-              <li class="dropdown-item"><i class="bi bi-archive"></i><a href="#">Закрыть чат</a></li>
+              <li class="dropdown-item">
+                <i class="bi bi-archive"></i>
+                <a id="archive-chat" data-url="{% url 'chat:archive_chat' 0 %}" href="#">Архивировать чат</a>
+              </li>
               <li class="dropdown-item danger">
                 <i class="bi bi-x-octagon"></i>
-                <a id="block-user" data-url="{% url 'telegram_bot:block_user' 0 %}" data-user-id="12345" href="#">Заблокировать</a>
+                <a id="block-user" data-url="{% url 'telegram_bot:block_user' 0 %}" data-user-id="0" href="#">Заблокировать</a>
               </li>
               <li class="dropdown-item d-none">
                 <i class="bi bi-arrow-clockwise"></i>
-                <a id="unblock-user" data-url="{% url 'telegram_bot:unblock_user' 0 %}" data-user-id="" href="#">Разблокировать</a>
+                <a id="unblock-user" data-url="{% url 'telegram_bot:unblock_user' 0 %}" data-user-id="0" href="#">Разблокировать</a>
               </li>
             </ul>
           </div>
@@ -129,6 +132,11 @@
           <button class="button emoji-button">
             <i class="bi bi-emoji-smile"></i>
           </button>
+        </div>
+        <div id="block-banner" class="blocked d-none">
+          <div class="wrapper">
+            <span class="caption">⛔ Пользователь заблокирован</span>
+          </div>
         </div>
       </div>
       <div id="emoji-menu" class="d-none">
