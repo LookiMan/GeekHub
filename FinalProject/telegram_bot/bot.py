@@ -174,8 +174,6 @@ def get_telegram_user(message):
 
         telegram_user.save()
 
-        send_welcome_message(message)
-
     return telegram_user
 
 
