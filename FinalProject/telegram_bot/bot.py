@@ -278,6 +278,22 @@ def process_received_document_message(message):
         process_message(chat, message)
 
 
+@bot.edited_message_handler(content_types=["text", "photo", "document"])
+def process_edited_message(message):
+    try:
+        edited_message = Message.objects.get(id=message.message_id)
+    except Message.DoesNotExist:
+        pass
+    else:
+        if message.content_type == "text":
+            edited_message.edited_text = message.text
+        else:
+            edited_message.edited_text = message.caption
+
+        edited_message.is_edited = True
+        edited_message.save(update_fields=["is_edited", "edited_text"])
+
+
 def get_user_photo_path(user_id):
     response = bot.get_user_profile_photos(user_id)
 
