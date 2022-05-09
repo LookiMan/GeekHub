@@ -8,7 +8,7 @@ import { viewTextMessageWhenReplying } from './view-text-message-when-replying.j
 function updateChatTitle(chat) {
     const firstName = chat.first_name;
     const lastName = chat.last_name || '';
-    const username = chat.username === null ? '' : '@' + chat.username;
+    const username = !chat.username ? '' : '@' + chat.username;
 
     $('#chat-title').html(`<span class="chat-name">${firstName} ${lastName}</span><div><span class="username">${username}</span></div>`);
     //
@@ -18,6 +18,15 @@ function updateChatTitle(chat) {
         image.src = chat.user.image;
     } else {
         image.src = "/static/assets/images/note.png";
+    }
+}
+
+function scroll(messageId) {
+    return function (event) {
+        event.preventDefault();
+        $('#chat-and-message').animate({
+            scrollTop: $(`div[data-message-id="${messageId}"]`).offset().top
+        }, 500);
     }
 }
 
@@ -34,13 +43,7 @@ export function setReplyMessage(event) {
         const messages = chatsMessages[ucid] || {};
         const replyToMessage = viewTextMessageWhenReplying(messages[messageId]);
         replyToMessage.on('click', '.button', unsetReplyMessage);
-        replyToMessage.on('click', 'span', function(event) {
-            event.preventDefault();
-            console.log($(`div[data-message-id="${messageId}"]`));
-            $('#chat-and-message').animate({
-                scrollTop: $(`div[data-message-id="${messageId}"]`).offset().top
-            }, 500);
-        });
+        replyToMessage.on('click', 'span', scroll(messageId));
 
         storageSet('replyToMessage', {
             ucid,
@@ -67,8 +70,19 @@ export function unsetReplyMessage() {
 
 function renderChatMessage(messageHTML) {
     const chat = document.querySelector("#chat-and-message");
-    $(chat).append($(messageHTML).on("dblclick", setReplyMessage));
+    const message = $(messageHTML).on("dblclick", setReplyMessage);
+    $(chat).append(message);
     chat.scrollTop = chat.scrollHeight;
+}
+
+export function updateChatMessage(message) {
+    const editedMessage = $(document.querySelector(`div[data-message-id="${message.id}"]`));
+
+    if (!message.staff) {
+        editedMessage.replaceWith(clientMessage(message));
+    } else {
+        editedMessage.replaceWith(managerMessage(message));
+    }
 }
 
 export function renderClientMessage(message) {
@@ -81,7 +95,7 @@ export function renderManagerMessage(message) {
 
 function renderChatMessages(messages) {
     $.each(messages, function(index, message) { 
-        if (message?.staff === null) {
+        if (!message.staff) {
             renderClientMessage(message);
         } else {
             renderManagerMessage(message);
@@ -103,8 +117,8 @@ export function renderChat(ucid) {
     const allChats = storageGet('allChats');
     const chat = allChats[ucid];
 
-    if (chat === undefined) {
-        console.error(`chat with ucid "${ucid}" not found in local storage!`);
+    if (!chat) {
+        console.error(`Чат с ucid "${ucid}" не найден в локальном хранилище`);
         return;
     }
 
@@ -124,10 +138,9 @@ export function renderChat(ucid) {
     } else {
         hideDropdownMenu();
     }
-    //
+    
     $('#chat-and-message').html('');
-    //
+    
     renderChatMessages(chatMessages);
-    //
     storageSet('activeChatUcid', ucid);
 }

@@ -6,6 +6,11 @@ import { updateSiteTitle } from './site-title.js';
 import { renderChat } from './chat.js';
 
 
+function selectItem(target) {
+    $('li.active-aside-chat-menu-tab').removeClass('active-aside-chat-menu-tab');
+    $(target).addClass('active-aside-chat-menu-tab');
+}
+
 function sideChatMenuClickHandler(event) {
     const target = $(event.currentTarget);
     const chats = storageGet('chatsMessages');
@@ -13,20 +18,18 @@ function sideChatMenuClickHandler(event) {
     const chat = chats[ucid];
     const unreadMessages = storageGet('unreadMessages');
     
-    if (ucid === null) {
-        console.error('Attribute \"data-chat-ucid\" not found in target element');
+    if (!ucid) {
+        console.error('Атрибут \"data-chat-ucid\"не найден в целевом элементе');
         return;
-    } else {
-        renderChat(ucid);
     }
 
-    if (chat === null) {
-        console.error(`Chat with ucid \"${ucid}\" not found in chatsMessages`);
+    if (!chat) {
+        console.error(`Чат с ucid \"${ucid}\" не найден в локальном хранилище`);
         return;      
     }
 
-    $('li.active-aside-chat-menu-tab')?.removeClass('active-aside-chat-menu-tab');
-    $(target).addClass('active-aside-chat-menu-tab');
+    renderChat(ucid);
+    selectItem(target);
 
     delete unreadMessages[ucid];
     storageSet('unreadMessages', unreadMessages);
@@ -37,11 +40,9 @@ function sideChatMenuClickHandler(event) {
 
 export function renderNote(chat) {
     $('#aside-chats-menu-spinner').remove();
-    //
     $('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
-    //
+    
     renderNoteItem(chat);
-    //
     updateAmountMessagesBadge(chat.ucid);
 }
 
@@ -90,10 +91,19 @@ function updateAmountMessagesBadge(ucid) {
 
 export function updateChatListItem(message) {
     const { ucid } = message.chat || {};
-    const previewMessagePrefix = message?.staff === null ? 'Клиент:' : 'Вы:';
+    const previewMessagePrefix = !message.staff ? 'Клиент:' : 'Вы:';
     const preview = $(`li[data-chat-ucid=${ucid}] div.preview`);
 
     preview.html(`<strong>${previewMessagePrefix}</strong> ${previewText(message)}`);
 
     updateAmountMessagesBadge(ucid);
+}
+
+export async function openFirstChat() {
+    const allChats = storageGet('allChats');
+    const ucid = Object.keys(allChats)[0];
+    const target = $(`li[data-chat-ucid="${ucid}"]`);
+
+    await renderChat(ucid);
+    selectItem(target);
 }

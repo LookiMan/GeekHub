@@ -10,7 +10,12 @@
 </noscript>
 
 {% block main %}
-  <input type="hidden" id="jwt-token" value="{{request.user.token}}"></input>
+  <input type="hidden" name="jwt-token" value="{{request.user.token}}"></input>
+  <input type="hidden" name="new-chat-url" value="{% url 'chat:new_chat' 0 %}"></input>
+  <input type="hidden" name="note-url" value="{% url 'chat:note' %}"></input>
+  <input type="hidden" name="chats-url" value="{% url 'chat:chats' %}"></input>
+  <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
+  <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
     <!-- File modal form -->
     <div class="modal fade" id="upload-file-modal-form" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -29,7 +34,6 @@
             </div>
           </div>
           <div class="modal-footer">
-            <input id="upload-url" type="hidden" value="{% url 'chat:upload_file' %}">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
             <button id="send-file" type="button" class="btn btn-primary">Отправить</button>
           </div>
@@ -56,13 +60,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <input id="upload-url" type="hidden" value="{% url 'chat:upload_file' %}">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
             <button id="send-image" type="button" class="btn btn-primary">Отправить</button>
           </div>
-          </div>
         </div>
       </div>
+    </div>
   <div>
     <div class="row">
       {% if message %}
@@ -87,7 +90,7 @@
             <img class="telegram-user-image" src="{% static 'assets/images/default-user.png' %}" alt="telegram user photo">
         </div>
           <div id="chat-title">
-            <div><span class="chat-name">FirstName LastName</span></div>
+            <div><span class="chat-name">Firstname Lastname</span></div>
             <div><span class="username">@username</span></div>
           </div>
           <span style="margin: auto;"></span>

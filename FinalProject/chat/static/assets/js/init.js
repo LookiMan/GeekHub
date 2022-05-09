@@ -18,9 +18,12 @@ function testLocalStorage() {
 
 function setupInitialData() {
     const data = {
-        'unreadMessages': { },
-        'chatsMessages': { },
-        'replyToMessage': { },
+        'allChats': {},
+        'chatsMessages': {},
+        'unreadMessages': {},
+        'chatsMessages': {},
+        'replyToMessage': {},
+        'activeChatUcid': 0,
     }
     $.each(data, function (key, value) {
         storageSet(key, value);

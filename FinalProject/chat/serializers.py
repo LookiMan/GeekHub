@@ -14,23 +14,31 @@ class StaffSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     staff = StaffSerializer()
 
-    created_at_formatted = serializers.SerializerMethodField()
     created_at_short = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = (
-            "umid", "id", "chat", "user", "staff", "reply_to_message",
-            "text", "photo", "document", "file_name", "caption",
-            "created_at_formatted", "created_at_short"
+            "umid",
+            "id",
+            "chat",
+            "user",
+            "staff",
+            "reply_to_message",
+            "text",
+            "photo",
+            "document",
+            "file_name",
+            "caption",
+            "is_edited",
+            "edited_text",
+            "is_deleted",
+            "created_at_short"
         )
         depth = 2
 
     def get_created_at_short(self, obj):
         return obj.created_at.strftime("%H:%M")
-
-    def get_created_at_formatted(self, obj):
-        return obj.created_at.strftime("%d-%m-%Y %H:%M:%S")
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -43,8 +51,14 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = (
-            "ucid", "first_name", "last_name", "username",
-            "user", "staff", "messages", "last_message",
+            "ucid",
+            "first_name",
+            "last_name",
+            "username",
+            "user",
+            "staff",
+            "messages",
+            "last_message",
         )
         depth = 1
         read_only_fields = ("messages", "last_message")
@@ -60,8 +74,14 @@ class ChatSerializerWithoutMessages(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        fields = ("ucid", "first_name", "client", "last_name",
-                  "username", "last_message")
+        fields = (
+            "ucid",
+            "first_name",
+            "client",
+            "last_name",
+            "username",
+            "last_message",
+        )
         depth = 1
         read_only_fields = ("last_message")
 

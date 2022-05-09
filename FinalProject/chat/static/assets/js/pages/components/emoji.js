@@ -21,7 +21,7 @@ export function closeEmojiMenu() {
 export function toggleEmojiMenu() {
     const emojiMenuState = storageGet('emojiMenuState');
 
-    if (emojiMenuState === null || emojiMenuState === emojiMenuToggleStates.close) {
+    if (!emojiMenuState || emojiMenuState === emojiMenuToggleStates.close) {
         openEmojiMenu();
         storageSet('emojiMenuState', emojiMenuToggleStates.open);
 
