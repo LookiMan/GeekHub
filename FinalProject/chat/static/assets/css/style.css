@@ -201,18 +201,34 @@ header .navbar {
   text-decoration: none;
   color: #000;
 }
+#chat #chat-and-message .message-in-chat .message .telegram-deleted-message {
+  user-select: none;
+  padding: 5px;
+}
+#chat #chat-and-message .message-in-chat .message .telegram-deleted-message i.bi-trash {
+  font-size: 24px;
+  color: #000;
+  padding: 10px;
+  overflow-x: hidden;
+}
+#chat #chat-and-message .message-in-chat .message .message-metadata {
+  user-select: none;
+  font-size: 10px;
+}
 #chat #chat-and-message .message-in-chat .message .message-metadata .time {
   padding: 0 8px;
-  font-size: 10px;
-  user-select: none;
 }
-#chat #chat-and-message .message-in-chat .message .message-metadata .time-right {
+#chat #chat-and-message .message-in-chat .message .message-metadata .right {
   float: right;
   color: #aaa;
 }
-#chat #chat-and-message .message-in-chat .message .message-metadata .time-left {
+#chat #chat-and-message .message-in-chat .message .message-metadata .left {
   float: left;
   color: #999;
+}
+#chat #chat-and-message .message-in-chat .message .message-metadata .edited {
+  padding: 0 8px;
+  text-transform: uppercase;
 }
 #chat #chat-and-message .message-in-chat .message-client {
   border: 2px solid #dedede;
@@ -301,6 +317,20 @@ header .navbar {
   color: #00a6e8;
 }
 #chat .input-area .active-emoji {
+  color: #00a6e8;
+}
+#chat .unblock-user {
+  width: 100%;
+  height: 54px;
+  border: 1px solid #dbdbdd;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+#chat .unblock-user a {
+  text-decoration: none;
   color: #00a6e8;
 }
 #chat .blocked {
@@ -412,6 +442,33 @@ header .navbar {
   outline: none;
   border: 0;
   border-bottom: 2px solid #0d6efd;
+}
+
+.archive-empty {
+  user-select: none;
+  position: absolute;
+  top: 67px;
+  left: 0;
+  right: 0;
+  background-color: #000;
+  width: 100%;
+  height: calc(100vh - 54px - 71px);
+  opacity: 0.5;
+  padding: 10px;
+}
+.archive-empty .wrapper {
+  background: linear-gradient(to top, transparent, transparent 100%), transparent repeating-linear-gradient(45deg, transparent, transparent 35px, #6e6e6e 35px, #6e6e6e 70px);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+.archive-empty .wrapper span {
+  font-size: 36px;
+  color: #fff;
+  background-color: #000;
+  padding: 10px;
+  border: 10px dashed #6e6e6e;
 }
 
 #registration-form {

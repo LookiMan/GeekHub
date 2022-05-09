@@ -1,0 +1,58 @@
+{% extends "./base.html" %}
+
+{% load static %}
+
+{% block main %}
+    <input type="hidden" name="archived-chats-url" value="{% url 'chat:archived_chats' %}">
+    <input type="hidden" name="messages-url" value="{% url 'chat:messages' 0 %}">
+    <div class="row">
+      {% if message %}
+        <div class="alert alert-success my-3 text-center shadow-sm" role="alert">
+          {{ message }}
+        </div>
+      {% endif %}
+      <div id="aside-chats-menu" class="col-3 mx-0 px-0">
+        <!-- Здесь функция loadChats с файла main.js получит от сервера список чатов и отрендерит их -->
+        <div id="aside-chats-menu-spinner">
+          <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="chat" class="col-9 mx-0 px-0">
+        <div id="chat-control-panel" class="control-panel d-inline-flex bg-light">
+          <div style="margin: auto 5px;">
+            <img class="telegram-user-image" src="{% static 'assets/images/default-user.png' %}" alt="telegram user photo">
+        </div>
+          <div id="chat-title">
+            <div><span class="chat-name">Firstname Lastname</span></div>
+            <div><span class="username">@username</span></div>
+          </div>
+          <span style="margin: auto;"></span>
+        </div>
+        <div id="chat-and-message" style="background-image: url(&quot;{% static 'assets/images/background.jpg' %}&quot;);">
+          <!--  -->
+          <div id="chat-spinner">
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="unblock-user">
+          <a type="button" id="unblockUser" href="{% url 'chat:unarchive_chat' 0 %}">Вернуть в работу</a>
+        </div>
+        <div id="archive-empty" class="blocked d-none">
+          <div class="wrapper">
+            <span class="caption">🗑 Архив пуст</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

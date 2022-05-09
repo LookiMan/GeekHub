@@ -9,10 +9,32 @@ from chat.forms import LoginStaffForm, RegisterStaffForm, ChangeStaffInfoForm
 from chat.models import Staff, Chat
 
 
+def superuser_required(view_func=None, login_url="chat:login"):
+    actual_decorator = user_passes_test(
+        lambda user: user.is_active and user.is_superuser,
+        login_url=login_url,
+    )
+    if view_func:
+        return actual_decorator(view_func)
+    return actual_decorator
+
+
 @login_required
 def index(request):
-    context = {}
-    return render(request, "./chat/index.html", context)
+    return render(request, "./chat/index.html", {})
+
+
+@superuser_required
+def archive(request):
+    offset_in_seconds = 0 * 86400
+    try:
+        chats = Chat.objects.filter(is_archived=True).exclude(is_note=True)
+    except Chat.DoesNotExist:
+        chats = {}
+    except Exception:
+        chats = {}
+    else:
+        return render(request, "./chat/archive.html", {})
 
 
 def login_staff(request):
@@ -49,7 +71,7 @@ def logout_staff(request):
     return redirect("chat:index")
 
 
-@ user_passes_test(lambda staff: staff.is_superuser, login_url="chat:login")
+@superuser_required
 def registration_staff(request):
     context = {}
 
@@ -80,7 +102,7 @@ def registration_staff(request):
     return render(request, "./chat/registration-staff.html", context)
 
 
-@ user_passes_test(lambda staff: staff.is_superuser, login_url="chat:login")
+@superuser_required
 def change_staff(request, pk):
     context = {}
 

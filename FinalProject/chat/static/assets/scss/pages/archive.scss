@@ -1,0 +1,36 @@
+
+
+
+
+.archive-empty {
+    user-select: none;
+    position: absolute;
+    top: calc($chat-control-panel-height);
+    left: 0;
+    right: 0;
+    background-color: $black;
+    width: 100%;
+    height: calc(100vh - $nav-panel-height - calc($chat-control-panel-height + 4px));
+    opacity: 0.5;
+    padding: 10px;
+
+    .wrapper {
+        background: linear-gradient(to top, transparent, transparent 100%),
+            transparent repeating-linear-gradient(45deg, transparent, transparent 35px,
+                $gray 35px,
+                $gray 70px);
+
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+
+        span {
+            font-size: 36px;
+            color: $white;
+            background-color: $black;
+            padding: 10px;
+            border: 10px dashed $gray;
+        }
+    }
+}

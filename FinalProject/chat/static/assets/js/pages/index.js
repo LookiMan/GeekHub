@@ -1,6 +1,6 @@
 import { updateSiteTitle } from './components/site-title.js';
-import { renderNote, renderChatItem, renderChatList, updateChatListItem } from './components/side-chat-menu.js';
-import { renderClientMessage, renderManagerMessage, unsetReplyMessage } from './components/chat.js';
+import { renderNote, renderChatItem, renderChatList, openFirstChat, updateChatListItem } from './components/side-chat-menu.js';
+import { renderClientMessage, renderManagerMessage, updateChatMessage, unsetReplyMessage } from './components/chat.js';
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
@@ -8,16 +8,39 @@ import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.j
 
 let chatSocket;
 
+class BackendURLS {
+    static csrfmiddlewaretoken() {
+        return $('input[name="csrfmiddlewaretoken"]').val();
+    } 
+    static jwtToken() {
+        $('input[name="jwt-token"]').val();
+    }
+    static newChat(ucid) {
+        return $('input[name="new-chat-url"]').val().replace('/0/', `/${ucid}/`);
+    }
+    static note() {
+        return $('input[name="note-url"]').val();
+    }
+    static chats() {
+        return $('input[name="chats-url"]').val();
+    }
+    static fileUpload() {
+        return $('input[name="file-upload-url"]').val();
+    }
+    static emoji() {
+        return $('input[name="emoji-url"]').val();
+    }
+}
+
 function setupWebSocket() {
     const requestId = new Date().getTime();
-    const token = $('#jwt-token').val();
+    const token = BackendURLS.jwtToken()
     let webSocketIsConnected = false;
 
     chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/?token=${token}`);
 
     (function connect() {
         chatSocket.onopen = event => {
-            console.info('websocket opened!');
             const chats = storageGet('allChats');
 
             chatSocket.send(
@@ -29,7 +52,6 @@ function setupWebSocket() {
 
             $.each(chats, function (index, chat) {
                 const { ucid } = chat; 
-                console.log('subscride', ucid);
 
                 chatSocket.send(
                     JSON.stringify({
@@ -50,28 +72,21 @@ function setupWebSocket() {
 
         chatSocket.onmessage = event => {
             const data = JSON.parse(event.data);
-            console.log(data);
 
             switch (data.action) {
                 case 'createNewChat':
-                    console.log(data);
                     createNewChat(data.data.ucid);
-
                 case 'retrieve':
-                    console.log(data.data)
+                    console.log(data.action, data.data.messages);
                     for (const message of data?.data?.messages || []) {
                         processRetrievedMessage(message);
-                        console.log(data.action, message);
                     }
                     break;
                 case 'create':
-                    processReceivedMessage(data.data);
-                    console.log(data.action, data.data);
+                    processCreatedMessage(data.data);
                     break;
                 case 'update':
-                    console.log(data.action, data.data);
-                    break;
-                default:
+                    processUpdatedMessage(data.data)
                     break;
             }
         };
@@ -110,25 +125,21 @@ function setupWebSocket() {
 
 function createNewChat(ucid) {
     $.ajax({
-        url: `http://127.0.0.1:8000/chat/api/v1/new_chat/${ucid}`, // TODO 
-        method: 'get',
+        url: BackendURLS.newChat(ucid),
         headers: {
 		    'content-type': 'application/json',
-		    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+		    'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
         success: function (chat) {
-            const { ucid } = chat;
-            //
-            const allChats = storageGet('allChats');
-            //
-            allChats[ucid] = chat;
-            //
-            storageSet('allChats', allChats);
-            //
-            renderChatItem(chat);
-            //
             const requestId = new Date().getTime();
-            //
+            const { ucid } = chat;
+            const allChats = storageGet('allChats');
+            
+            allChats[ucid] = chat;
+            
+            storageSet('allChats', allChats);
+            renderChatItem(chat);
+
             chatSocket.send(
                 JSON.stringify({
                     ucid,
@@ -136,7 +147,6 @@ function createNewChat(ucid) {
                     request_id: requestId,
                 })
             );
-            //
             chatSocket.send(
                 JSON.stringify({
                     ucid,
@@ -153,50 +163,44 @@ function createNewChat(ucid) {
 
 async function loadNote() {
     await $.ajax({
-        url: 'http://127.0.0.1:8000/chat/api/v1/note', // TODO 
-        method: 'get',
+        url: BackendURLS.note(),
         headers: {
             'content-type': 'application/json',
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
         success: function (note) {
             const chats = {};
             chats[note.ucid] = note;
-            //
+            
             storageSet('allChats', chats);
-            //
             renderNote(note);
         },
         error: function (error) {
-            console.log(error);
+            console.error(error);
         }
     });
 }
 
 async function loadChats() {
     await $.ajax({
-        url: 'http://127.0.0.1:8000/chat/api/v1/chats', // TODO 
-        method: 'get',
+        url: BackendURLS.chats(),
         headers: {
             'content-type': 'application/json',
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
         success: function (rawChatsList) {
-            //
             const allChats = storageGet('allChats');
-            //
+            
             $.each(rawChatsList, function (index, chat) {
                 allChats[chat.ucid] = chat;
             });
-            //
+            
+            $('#aside-chats-menu-spinner').remove();  
             storageSet('allChats', allChats);
-            //
-            $('#aside-chats-menu-spinner').remove();
-            //
             renderChatList(rawChatsList);
         },
-        error: function(data) {
-            console.error(data);
+        error: function(error) {
+            console.error(error);
         }
     });
 }
@@ -209,57 +213,83 @@ async function loadSideChatsMenu() {
 function processRetrievedMessage(message) {
     const { ucid } = message.chat || {};
     const chatsMessages = storageGet('chatsMessages');
+    const activeChatUcid = storageGet('activeChatUcid');
     
-    if (ucid === null) {
-        console.error('Retrieved message does not have a "ucid" key');
+    if (!ucid) {
+        console.error('Полученное сообщение неимет атрибута "ucid"');
         console.error(message);
         return;
     }
 
     const chatMessages = chatsMessages[ucid] || {};
     chatMessages[message.id] = message;
-    
     chatsMessages[ucid] = chatMessages;
     storageSet('chatsMessages', chatsMessages);
+
+    if (Number(activeChatUcid) === ucid) {
+        if (!message.staff) {
+            renderClientMessage(message);
+        } else {
+            renderManagerMessage(message);
+        }
+    }
 }
 
-function processReceivedMessage(message) {
+function processCreatedMessage(message) {
     const { ucid } = message.chat || {};
     const activeChatUcid = storageGet('activeChatUcid');
-
     const unreadMessages = storageGet('unreadMessages');
     const chatsMessages = storageGet('chatsMessages');
 
-    if (ucid === null) {
-        console.error('Received message does not have a "ucid" key');
+    if (!ucid) {
+        console.error('Полученное сообщение неимет атрибута "ucid"');
         console.error(message);
         return;
     }
-    //
+
     const chatMessages = chatsMessages[ucid] || {};
     chatMessages[message.id] = message;
-    //
     chatsMessages[ucid] = chatMessages;
     storageSet('chatsMessages', chatsMessages);
 
     if (activeChatUcid === ucid) {
-        if (message?.staff === null) {
+        if (!message.staff) {
             renderClientMessage(message);
         } else {
             renderManagerMessage(message);
         }
     
-    } else if (message?.staff === null) {
-        //
+    } else if (!message.staff) {
         const messages = unreadMessages[ucid] || {};
-        messages[message.id] = message;
-        //
+        messages[message.id] = message;  
         unreadMessages[ucid] = messages;
         storageSet('unreadMessages', unreadMessages);
     }
 
     updateChatListItem(message);
     updateSiteTitle();
+}
+
+function processUpdatedMessage(message) {
+    const { ucid } = message.chat || {};
+    const activeChatUcid = storageGet('activeChatUcid');
+    const chatsMessages = storageGet('chatsMessages');
+
+    if (!ucid) {
+        console.error('Полученное сообщение неимет атрибута "ucid"');
+        console.error(message);
+        return;
+    }
+    
+    const chatMessages = chatsMessages[ucid] || {};
+    chatMessages[message.id] = message;
+    chatsMessages[ucid] = chatMessages;
+    storageSet('chatsMessages', chatsMessages);
+
+    if (activeChatUcid === ucid) {
+        updateChatMessage(message);
+    }
+    updateChatListItem(message);
 }
 
 function sendMessage(chatSocket) {
@@ -279,40 +309,42 @@ function sendMessage(chatSocket) {
         return;
     }
 
-    const request = JSON.stringify({
-        ucid,
-        text,
-        reply_to_message_id: replyToMessageId,
-        action: 'send_text_message',
-        request_id: requestId,
-    })
-
-    console.log(request);
-
-    chatSocket.send(request);
-    // Очищаем поле для ввода текста
+    chatSocket.send(
+        JSON.stringify({
+            ucid,
+            text,
+            reply_to_message_id: replyToMessageId,
+            action: 'send_text_message',
+            request_id: requestId,
+        })
+    );
     $('#chat-message-input').val('');
 }
 
 function sendFormData(formData) {
     $.ajax({
         headers: {
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
-        url: $('#upload-url').val(),
+        url: BackendURLS.fileUpload(),
         cache: false,
         contentType: false,
         enctype: 'multipart/form-data',
         processData: false,
         data: formData,
         type: 'post',
+        success: function (response) {
+            // TODO:
+        },
+        error: function (error) {
+            console.error(error);
+        }
     });
 }
 
 function sendFile() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
-
     const formData = new FormData();
     const fileData = $('#upload-file-modal-form input[type=file]').prop('files')[0];
 
@@ -331,7 +363,6 @@ function sendFile() {
 function sendImage() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
-
     const formData = new FormData();
     const fileData = $('#upload-image-modal-form input[type=file]').prop('files')[0];
 
@@ -347,7 +378,7 @@ function sendImage() {
     sendFormData(formData);
 }
 
-function blockOrUnblockUser(event) {
+function changeBlockStateUser(event) {
     const target = $(event.currentTarget);
     const userId = $(target).data('user-id');
     const url = $(target).data('url').replace('/0/', `/${userId}/`);
@@ -355,7 +386,7 @@ function blockOrUnblockUser(event) {
     $.ajax({
         url,
         headers: {
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
         success: function (response) {
             if (!response.success) {
@@ -378,18 +409,18 @@ function blockOrUnblockUser(event) {
                 });
             }
         },
-        error: function(data) {
-            console.error(data);
+        error: function(error) {
+            console.error(error);
         }
     });
 }
 
 function blockUser(event) {
-    blockOrUnblockUser(event);
+    changeBlockStateUser(event);
 }
 
 function unblockUser(event) {
-    blockOrUnblockUser(event)
+    changeBlockStateUser(event)
 }
 
 function archiveChat(event) {
@@ -397,36 +428,52 @@ function archiveChat(event) {
     const ucid = storageGet('activeChatUcid');
 
     if (!ucid) {
-        alert('Не удалось получить айди текущего чата для архивации');
+        alert('Не удалось получить "ucid" текущего чата для архивации');
         return;
     }
-
-    console.log(ucid);
 
     const url = $(target).data('url').replace('/0/', `/${ucid}/`);
 
     $.ajax({
         url,
         headers: {
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
         success: function (response) {
             if (!response.success) {
                 alert(`Упс! Что-то пошло не так...\n${response.description}`);
             } else {
-                console.log(response);
+                const allChats = storageGet('allChats');
+                const chatsMessages = storageGet('chatsMessages');
+                const { ucid } = response;
+
+                if (!ucid) {
+                    console.error('Ответ не имеет атрибута "ucid"');
+                    console.error(response);
+                    return;
+                }
+                
+                try {
+                    delete allChats[ucid];
+                    delete chatsMessages[ucid];
+                } catch (error) {
+                    console.error(error);
+                }
+
+                $(`li[data-chat-ucid="${ucid}"]`).remove();
+                
+                storageSet('allChats', allChats);
+                storageSet('chatsMessages', chatsMessages);
+                openFirstChat();
             }
         },
-        error: function(data) {
-            console.error(data);
+        error: function(error) {
+            console.error(error);
         }
     });
 }
 
 function setupEvents() {
-    //
-    $('li.aside-chat-tab').first().click();
-
     $('#upload-file-modal-form button#send-file').on('click', sendFile);
     $('#upload-image-modal-form button#send-image').on('click', sendImage);
     $('.input-area .emoji-button').on('click', toggleEmojiMenu);
@@ -438,7 +485,7 @@ function setupEvents() {
 
     const emojiMenuState = storageGet('emojiMenuState');
 
-    if (emojiMenuState === null || emojiMenuState === emojiMenuToggleStates.close) {
+    if (!emojiMenuState || emojiMenuState === emojiMenuToggleStates.close) {
         closeEmojiMenu();
     } else {
         openEmojiMenu();
@@ -446,9 +493,9 @@ function setupEvents() {
 
     $.ajax({
         headers: {
-            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
-        url: 'http://127.0.0.1:8000/chat/api/v1/emoji',
+        url: BackendURLS.emoji(),
         cache: true,
         contentType: false,
         type: 'get',
@@ -462,14 +509,16 @@ function setupEvents() {
                 }
             })    
         },
-        error: function(data) {
-            console.error(data);
+        error: function(error) {
+            console.error(error);
         },
-    });
+    });   
 }
 
 $(document).ready(async function () {
     await loadSideChatsMenu();
     await setupWebSocket();
     await setupEvents();
+
+    openFirstChat();
 });

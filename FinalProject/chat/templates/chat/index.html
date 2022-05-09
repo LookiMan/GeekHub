@@ -1,13 +1,6 @@
 {% extends "./base.html" %}
 
-
 {% load static %}
-
-<noscript>
-  <div class="alert alert-warning my-3 text-center shadow-sm" role="alert">
-    Для корректной работы сайта включите javascript
-  </div>
-</noscript>
 
 {% block main %}
   <input type="hidden" name="jwt-token" value="{{request.user.token}}"></input>
