@@ -1,0 +1,58 @@
+{% extends "./base.html" %}
+
+{% load static %}
+
+{% block main %}
+  <div>
+    <div class="container">
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li {% if message.tags %} class="alert alert-{{message.tags}} my-3 text-center shadow-sm" {% endif %}>
+          {{ message }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <div>
+        <table id="staff-list" class="table table-striped table-hover text-center">
+          <thead>
+            <tr>
+              <th scope="col">USERNAME</th>
+              <th scope="col">ИМЯ</th>
+              <th scope="col">ФАМИЛИЯ</th>
+              <th scope="col">СТАТУС ПЕРСОНАЛА</th>
+              <th scope="col">АКТИВЕН</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for staff in formset %}
+              <tr>
+                <td>
+                  <a href="{% url 'chat:change_staff' staff.pk %}">{{staff.username}}</a>
+                </td>
+                <td>{{staff.first_name}}</td>
+                <td>{{staff.last_name}}</td>
+                <td>
+                  {% if staff.is_staff %}
+                    <span class="badge rounded-pill bg-success"><i class="bi bi-check2"></i></span>
+                  {% else %}
+                    <span class="badge rounded-pill bg-danger"><i class="bi bi-x-lg"></i></span>
+                  {% endif %}
+                  </td>
+                <td>
+                  {% if staff.is_active %}
+                    <span class="badge rounded-pill bg-success"><i class="bi bi-check2"></i></span>
+                  {% else %}
+                    <span class="badge rounded-pill bg-danger"><i class="bi bi-x-lg"></i></span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

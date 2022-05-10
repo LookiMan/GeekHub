@@ -498,6 +498,24 @@ header .navbar {
   border: 0;
   border-bottom: 2px solid #0d6efd;
 }
+#registration-form .errorlist {
+  font-size: 12px;
+  color: #6e6e6e;
+}
+
+#staff-list {
+  margin-top: 25px;
+  border: 1px solid #dbdbdd;
+}
+#staff-list th[scope=row] {
+  font-size: 20px;
+}
+#staff-list th[scope=col] {
+  font-size: 14px;
+}
+#staff-list a {
+  text-decoration: none;
+}
 
 html,
 body {

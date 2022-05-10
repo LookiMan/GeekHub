@@ -404,6 +404,7 @@ function changeBlockStateUser(event) {
                         chats[key] = value;
 
                         storageSet('allChats', chats);
+                        $('#chat-more-actions-menu').removeClass('d-block');
                         return;
                     }
                 });
@@ -461,6 +462,7 @@ function archiveChat(event) {
                 }
 
                 $(`li[data-chat-ucid="${ucid}"]`).remove();
+                $('#chat-more-actions-menu').removeClass('d-block');
                 
                 storageSet('allChats', allChats);
                 storageSet('chatsMessages', chatsMessages);
@@ -482,6 +484,14 @@ function setupEvents() {
     $('#archive-chat').on('click', archiveChat);
     $('#chat-more-actions').on('click', dropdownToggle);
     $('#form-image').on('change', previewImage);
+    /*     
+    $('body').on('click', function () {
+        console.log($('#chat-more-actions-menu').hasClass('d-block'), this);
+        if ($('#chat-more-actions-menu').hasClass('d-block')) {
+            $('#chat-more-actions-menu').removeClass('d-block');
+        }
+    }); 
+    */
 
     const emojiMenuState = storageGet('emojiMenuState');
 

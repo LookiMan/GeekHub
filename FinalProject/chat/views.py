@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.http import Http404, HttpResponseNotFound
+from django.http import HttpResponseForbidden, Http404, HttpResponseNotFound
 from django.urls import reverse_lazy
 
 from chat.forms import LoginStaffForm, RegisterStaffForm, ChangeStaffInfoForm
@@ -90,10 +90,10 @@ def registration_staff(request):
                 staff=staff,
             )
 
-            return redirect(reverse_lazy("chat:edit", kwargs={"pk": staff.pk}))
+            return redirect(reverse_lazy("chat:change_staff", kwargs={"pk": staff.pk}))
 
         else:
-            context["form"] = RegisterStaffForm()
+            context["form"] = RegisterStaffForm(request.POST or None)
             for error in form.errors.values():
                 messages.warning(request, error)
     else:
@@ -118,7 +118,7 @@ def change_staff(request, pk):
             if form.is_valid():
                 form.save()
 
-                return redirect("chat:index")
+                return redirect("chat:staff_list")
 
             else:
                 context["form"] = ChangeStaffInfoForm(
@@ -130,3 +130,19 @@ def change_staff(request, pk):
             context["form"] = ChangeStaffInfoForm(instance=staff)
 
         return render(request, "./chat/edit-staff.html", context)
+
+
+@superuser_required
+def staff_list(request):
+    if request.method == "GET":
+        context = {}
+        try:
+            formset = Staff.objects.all()
+        except Exception as exc:
+            messages.warning(request, f"Возникла непредвиденная ошибка: {exc}")
+        else:
+            context["formset"] = formset
+
+        return render(request, "./chat/staff-list.html", context)
+    else:
+        return HttpResponseForbidden()

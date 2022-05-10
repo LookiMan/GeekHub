@@ -87,8 +87,12 @@ class RegisterStaffForm(forms.ModelForm):
     class Meta:
         model = Staff
         fields = (
-            "login", "password1", "password2",
-            "first_name", "last_name", "username",
+            "login",
+            "password1",
+            "password2",
+            "username",
+            "first_name",
+            "last_name"
         )
 
 
@@ -96,7 +100,14 @@ class ChangeStaffInfoForm(forms.ModelForm):
 
     class Meta(UserCreationForm):
         model = Staff
-        fields = ("login", "first_name", "last_name", "username")
+        fields = (
+            "login",
+            "username",
+            "first_name",
+            "last_name",
+            "is_staff",
+            "is_active",
+        )
 
 
 class CustomStaffCreationForm(UserCreationForm):
