@@ -77,7 +77,6 @@ function setupWebSocket() {
                 case 'createNewChat':
                     createNewChat(data.data.ucid);
                 case 'retrieve':
-                    console.log(data.action, data.data.messages);
                     for (const message of data?.data?.messages || []) {
                         processRetrievedMessage(message);
                     }
@@ -345,6 +344,7 @@ function sendFormData(formData) {
 function sendFile() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
+    const date = (new Date().getTime() / 1000).toFixed();
     const formData = new FormData();
     const fileData = $('#upload-file-modal-form input[type=file]').prop('files')[0];
 
@@ -356,6 +356,9 @@ function sendFile() {
     formData.append('caption', $('#upload-file-modal-form .file-caption-input').val());
     formData.append('ucid', storageGet("activeChatUcid"));
     formData.append('document', fileData);
+    formData.append('file_name', fileData.name);
+    formData.append('message_id', new Date().getTime());
+    formData.append('date', date);
 
     sendFormData(formData);
 }
@@ -363,6 +366,7 @@ function sendFile() {
 function sendImage() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
+    const date = (new Date().getTime() / 1000).toFixed();
     const formData = new FormData();
     const fileData = $('#upload-image-modal-form input[type=file]').prop('files')[0];
 
@@ -374,6 +378,9 @@ function sendImage() {
     formData.append('caption', $('#upload-image-modal-form .image-caption-input').val());
     formData.append('ucid', storageGet("activeChatUcid"));
     formData.append('photo', fileData);
+    formData.append('file_name', fileData.name);
+    formData.append('message_id', new Date().getTime());
+    formData.append('date', date);
 
     sendFormData(formData);
 }

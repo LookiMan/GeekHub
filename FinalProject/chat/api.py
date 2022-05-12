@@ -3,7 +3,6 @@ from rest_framework.decorators import api_view, permission_classes, renderer_cla
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer
 
-from rest_framework.status import HTTP_200_OK
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
@@ -11,7 +10,8 @@ from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 from chat.forms import UploadFileForm
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer, MessageSerializer
-from chat.utils import logger
+from chat.tasks import upload_to_google_drive
+from chat.utils import logger, ctime
 
 from telegram_bot.bot import send_photo_to_client, send_document_to_client
 
@@ -137,23 +137,54 @@ def upload_file(request):
             caption = form.cleaned_data.get("caption")
             reply_to_message_id = form.cleaned_data.get("reply_to_message_id")
 
-            if photo:
-                send_photo_to_client(
-                    chat,
-                    photo,
+            if chat.is_note:
+                message_id = form.cleaned_data.get("message_id")
+                file_name = form.cleaned_data.get("file_name")
+                date = form.cleaned_data.get("date")
+
+                if reply_to_message_id:
+                    try:
+                        reply_to_message = Message.objects.get(
+                            id=reply_to_message_id,
+                            chat=chat,
+                        )
+                    except Message.DoesNotExist:
+                        reply_to_message = None
+                else:
+                    reply_to_message = None
+
+                Message.objects.create(
+                    id=message_id,
+                    chat=chat,
+                    user=None,
+                    staff=chat.staff,
+                    reply_to_message=reply_to_message,
+                    text=None,
+                    photo=upload_to_google_drive(file_name, photo.read()) if photo else None,
+                    document=upload_to_google_drive(file_name, document.read()) if document else None,
+                    file_name=file_name,
                     caption=caption,
-                    reply_to_message_id=reply_to_message_id
+                    date=ctime(date),
                 )
 
-            elif document:
-                send_document_to_client(
-                    chat,
-                    document,
-                    caption=caption,
-                    reply_to_message_id=reply_to_message_id
-                )
+            else:
+                if photo:
+                    send_photo_to_client(
+                        chat,
+                        photo,
+                        caption=caption,
+                        reply_to_message_id=reply_to_message_id
+                    )
 
-            return Response({"code": HTTP_200_OK}, status=HTTP_201_CREATED)
+                elif document:
+                    send_document_to_client(
+                        chat,
+                        document,
+                        caption=caption,
+                        reply_to_message_id=reply_to_message_id
+                    )
+
+            return Response({"code": HTTP_201_CREATED}, status=HTTP_201_CREATED)
 
     return Response({"code": HTTP_400_BAD_REQUEST, "errors": form.errors}, status=HTTP_400_BAD_REQUEST)
 

@@ -33,7 +33,7 @@ export function chatMessage(message, userType) {
             
         } else if (message.document) {
             messageHTML += `<div class="telegram-document-message">
-                                <a href="${message.document}"><i class="bi bi-file-earmark"></i>${message.file_name}</a>
+                                <a href="${message.document}" download="${message.file_name}"><i class="bi bi-file-earmark"></i>${message.file_name}</a>
                                 ${captionBlock}
                             </div>`;
         } else {

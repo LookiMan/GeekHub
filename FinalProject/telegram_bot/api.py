@@ -7,9 +7,8 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 
-from django.shortcuts import redirect
-
 from django.conf import settings
+from chat.tasks import google_drive_serve
 from chat.utils import logger
 
 from telegram_bot.models import User
@@ -45,9 +44,8 @@ def telegram_webhook(request, token):
 
 
 @api_view(("GET",))
-def get_user_photo(request, file_path):
-    # TODO:
-    return redirect("https://api.telegram.org/file/bot{0}/{1}".format(settings.TELEGRAM_BOT_TOKEN, "photos/"+file_path), permanent=True)
+def user_photo(request, file_id):
+    return google_drive_serve(request, file_id)
 
 
 @api_view(("GET",))

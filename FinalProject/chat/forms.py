@@ -129,9 +129,8 @@ class UploadFileForm(forms.Form):
 
     photo = forms.FileField(required=False)
     document = forms.FileField(required=False)
+    file_name = forms.CharField(required=False)
     reply_to_message_id = forms.IntegerField(required=False)
-
-    caption = forms.CharField(
-        max_length=255,
-        required=False,
-    )
+    caption = forms.CharField(required=False)
+    message_id = forms.IntegerField(required=False)
+    date = forms.IntegerField(required=False)

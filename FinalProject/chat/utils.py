@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import logging
+import pytz
 
 
 logger = logging.getLogger()
@@ -12,3 +15,7 @@ handler.setFormatter(
 )
 
 logger.addHandler(handler)
+
+
+def ctime(timestamp):
+    return datetime.fromtimestamp(timestamp, tz=pytz.UTC)

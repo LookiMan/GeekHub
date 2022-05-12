@@ -1,14 +1,12 @@
 from datetime import datetime, timedelta
-from distutils import archive_util
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils.safestring import mark_safe
 from django.db import models
 import jwt
 
 from telegram_bot.models import User
-
-# https://habr.com/ru/post/538040/
 
 
 class Staff(AbstractUser):
@@ -259,8 +257,16 @@ class Message(models.Model):
     )
 
     def __str__(self):
-        preview_text = self.text[:100] if self.text else self.caption
-        return f"Telegram message ({self.id}): {preview_text}"
+        if self.text:
+            preview_text = self.text[:100] if self.text else self.caption
+        elif self.photo:
+            preview_text = f'<i>Фото</i>'
+        elif self.document:
+            preview_text = f'<i>Документ:</i> {self.file_name}'
+        else:
+            preview_text = '<i>Отсутствует</i>'
+            
+        return mark_safe(f"Telegram message ({self.id}): {preview_text}")
 
     class Meta:
         verbose_name = "Сообщение"

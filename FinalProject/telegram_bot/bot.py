@@ -14,7 +14,9 @@ from config.settings import TELEGRAM_BOT_TOKEN, WEBHOOK_HOST
 from chat.models import Chat, Message
 
 from telegram_bot.models import User
-from telegram_bot.utils import ctime, save_file, get_default_image
+from telegram_bot.utils import ctime, get_default_image
+
+from google_drive_API.api import GoogleDrive
 
 
 WEBHOOK_PATH = f"/{TELEGRAM_BOT_TOKEN}/"
@@ -33,6 +35,7 @@ IGNORED_CONTENT_TYPES = [
 
 
 bot = TeleBot(token=TELEGRAM_BOT_TOKEN)
+g_drive = GoogleDrive()
 
 
 if "--not-set-telegram-webhook" not in sys.argv:
@@ -42,11 +45,20 @@ if "--not-set-telegram-webhook" not in sys.argv:
     sys.argv.append("--not-set-telegram-webhook")
 
 
-def _download_file_from_telegram(file_id):
+def download_file_from_telegram(file_id):
     metadata = bot.get_file(file_id)
     content = bot.download_file(metadata.file_path)
 
-    save_file(content, file_id)
+    return g_drive.put_file(file_id, content)
+
+
+def download_user_photo(user_id):
+    response = bot.get_user_profile_photos(user_id)
+
+    if response.total_count > 0:
+        return download_file_from_telegram(response.photos[0][0].file_id)
+
+    return None
 
 
 @async_to_sync
@@ -88,7 +100,6 @@ def send_photo_to_client(chat, file, *, caption=None, reply_to_message_id=None):
         reply_to_message_id=reply_to_message_id,
     )
 
-    _download_file_from_telegram(message.photo[-1].file_id)
     process_message(chat, message)
 
 
@@ -100,7 +111,6 @@ def send_document_to_client(chat, file, *, caption=None, reply_to_message_id=Non
         reply_to_message_id=reply_to_message_id,
     )
 
-    _download_file_from_telegram(message.document.file_id)
     process_message(chat, message)
 
 
@@ -160,16 +170,16 @@ def get_telegram_user(message):
     telegram_user, is_new = get_or_create_telegram_user(message)
 
     if is_new:
-        path = get_user_photo_path(message.from_user.id)
+        file_id = download_user_photo(message.from_user.id)
 
-        if path:
+        if file_id:
             telegram_user.image = reverse(
-                "telegram_bot:user_photo", args=[path.replace("photos/", "")]
+                "telegram_bot:user_photo", args=[file_id]
             )
 
         else:
             telegram_user.image = reverse(
-                "chat:media", args=[get_default_image()]
+                "photos", args=[get_default_image()]
             )
 
         telegram_user.save()
@@ -202,9 +212,9 @@ def process_ignored_content_types(message):
 
 
 def process_message(chat, message):
-    document = message.document.file_id if message.document else None
+    photo = download_file_from_telegram(message.photo[-1].file_id) if message.photo else None
+    document = download_file_from_telegram(message.document.file_id) if message.document else None
     file_name = message.document.file_name if message.document else None
-    photo = message.photo[-1].file_id if message.photo else None
     caption = message.caption if message.caption else None
 
     staff = chat.staff if message.from_user.is_bot else None
@@ -260,7 +270,6 @@ def process_received_photo_message(message):
     if user.is_blocked:
         send_message_to_user_about_blocking(chat.id)
     else:
-        _download_file_from_telegram(message.photo[-1].file_id)
         process_message(chat, message)
 
 
@@ -272,7 +281,6 @@ def process_received_document_message(message):
     if user.is_blocked:
         send_message_to_user_about_blocking(chat.id)
     else:
-        _download_file_from_telegram(message.document.file_id)
         process_message(chat, message)
 
 
@@ -290,18 +298,6 @@ def process_edited_message(message):
 
         edited_message.is_edited = True
         edited_message.save(update_fields=["is_edited", "edited_text"])
-
-
-def get_user_photo_path(user_id):
-    response = bot.get_user_profile_photos(user_id)
-
-    if response.total_count > 0:
-        file_id = response.photos[0][0].file_id
-        metadata = bot.get_file(file_id)
-
-        return metadata.file_path
-
-    return None
 
 
 def debug_telegram_bot():

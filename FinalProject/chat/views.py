@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -25,10 +26,12 @@ def index(request):
 
 
 @superuser_required
-def archive(request):
-    offset_in_seconds = 0 * 86400
+def archive(request, offset):
+    gt = datetime.now() - timedelta(days=offset)
+
     try:
-        chats = Chat.objects.filter(is_archived=True).exclude(is_note=True)
+        chats = Chat.objects.filter(
+            is_archived=True, archived_at__gt=gt).exclude(is_note=True)
     except Chat.DoesNotExist:
         chats = {}
     except Exception:

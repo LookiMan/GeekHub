@@ -22,3 +22,8 @@ pyTelegramBotAPI==4.4.0
 
 # Other
 python-dotenv==0.20.0
+
+#Google
+google-api-python-client 
+google-auth-httplib2 
+google-auth-oauthlib

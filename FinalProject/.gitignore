@@ -15,6 +15,8 @@ chat/photos/*
 telegram_bot/migrations/*
 !telegram_bot/migrations/__init__.py
 
+google_drive_API/json/
+
 # Linux template
 *~
 # KDE directory preferences

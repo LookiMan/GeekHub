@@ -9,56 +9,55 @@
   <input type="hidden" name="chats-url" value="{% url 'chat:chats' %}"></input>
   <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
   <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
-    <!-- File modal form -->
-    <div class="modal fade" id="upload-file-modal-form" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Выберите файл для загрузки</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <!-- File modal form -->
+  <div class="modal fade" id="upload-file-modal-form" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Выберите файл для загрузки</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="form-file" class="form-label">Выберите файл</label>
+            <input id="form-file" class="form-control" type="file">
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="form-file" class="form-label">Выберите файл</label>
-              <input id="form-file" class="form-control" type="file">
-            </div>
-            <div class="mb-3">
-              <input class="file-caption-input input" placeholder="Коментарий..."></input>
-            </div>
+          <div class="mb-3">
+            <input class="file-caption-input input" placeholder="Коментарий..."></input>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button id="send-file" type="button" class="btn btn-primary">Отправить</button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button id="send-file" type="button" class="btn btn-primary">Отправить</button>
         </div>
       </div>
     </div>
-
-    <!-- Image modal form -->
-    <div class="modal fade" id="upload-image-modal-form" tabindex="-1" aria-labelledby="upload-image-modal-form-label" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Выберите изображение для загрузки</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <!-- Image modal form -->
+  <div class="modal fade" id="upload-image-modal-form" tabindex="-1" aria-labelledby="upload-image-modal-form-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Выберите изображение для загрузки</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img id="preview-image" src="">
+          <div class="mb-3">
+            <label for="form-image" class="form-label">Выберите изображение</label>
+            <input id="form-image" class="form-control" type="file" accept=".png, .jpg, .jpeg">
           </div>
-          <div class="modal-body">
-            <img id="preview-image" src="">
-            <div class="mb-3">
-              <label for="form-image" class="form-label">Выберите изображение</label>
-              <input id="form-image" class="form-control" type="file" accept=".png, .jpg, .jpeg">
-            </div>
-            <div class="mb-3">
-              <input class="image-caption-input input" placeholder="Коментарий..."></input>
-            </div>
+          <div class="mb-3">
+            <input class="image-caption-input input" placeholder="Коментарий..."></input>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button id="send-image" type="button" class="btn btn-primary">Отправить</button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button id="send-image" type="button" class="btn btn-primary">Отправить</button>
         </div>
       </div>
     </div>
+  </div>
   <div>
     <div class="row">
       {% if message %}
@@ -76,7 +75,6 @@
           </div>
         </div>
       </div>
-
       <div id="chat" class="col-9 mx-0 px-0">
         <div class="control-panel d-inline-flex bg-light">
           <div style="margin: auto 5px;">
@@ -136,7 +134,6 @@
         </div>
       </div>
       <div id="emoji-menu" class="d-none">
-        <!-- -->
         <div id="emoji-spinner">
           <div class="d-flex justify-content-center">
             <div class="spinner-border text-primary" role="status">

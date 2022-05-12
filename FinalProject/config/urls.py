@@ -13,11 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path("blog/", include("blog.urls"))
 """
+
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.staticfiles.views import serve
 from django.views.decorators.cache import never_cache
 from django.conf import settings
+
+from chat.tasks import google_drive_serve
 
 
 urlpatterns = [
@@ -31,5 +34,5 @@ if settings.DEBUG:
     urlpatterns += (
         path(r"static/<path:path>", never_cache(serve), name="static"),
         path(r"photos/<path:path>", never_cache(serve), name="photos"),
-        path(r"media/<path:path>", never_cache(serve), name="media"),
+        path(r"media/<str:file_id>", google_drive_serve, name="media"),
     )
