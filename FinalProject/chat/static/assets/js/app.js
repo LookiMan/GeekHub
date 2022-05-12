@@ -2,11 +2,13 @@ import('./init.js');
 
 
 try {
-    switch (location.pathname) { 
-        case '/chat/index/':
+    const url = location.pathname;
+
+    switch (true) { 
+        case url.indexOf('/index/') !== -1:
             import('./pages/index.js');
             break;
-        case '/chat/archive/':
+        case url.indexOf('/archive/') !== -1:
             import('./pages/archive.js');
             break; 
     }
