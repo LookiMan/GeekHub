@@ -10,7 +10,7 @@
   <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
   <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
   <!-- File modal form -->
-  <div class="modal fade" id="upload-file-modal-form" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
+  <div class="modal fade" id="upload-file-modal-form" data-bs-backdrop="static" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -34,7 +34,7 @@
     </div>
   </div>
   <!-- Image modal form -->
-  <div class="modal fade" id="upload-image-modal-form" tabindex="-1" aria-labelledby="upload-image-modal-form-label" aria-hidden="true">
+  <div class="modal fade" id="upload-image-modal-form" data-bs-backdrop="static" tabindex="-1" aria-labelledby="upload-image-modal-form-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">

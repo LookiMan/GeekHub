@@ -16,6 +16,17 @@ export function dropdownToggle() {
 }
 
 export function previewImage(event) { 
-    var previewImage = $("#preview-image")[0];
+    let previewImage = $("#preview-image")[0];
     previewImage.src = URL.createObjectURL(event.currentTarget.files[0]);
+}
+
+export function clearFileModalForm() {
+    $('#form-file').val('');
+    $('#upload-file-modal-form .file-caption-input').val('');
+}
+
+export function clearImageModalForm() {
+    $('#preview-image')[0].src = '';
+    $('#form-image').val('');
+    $('#upload-image-modal-form .image-caption-input').val('');
 }

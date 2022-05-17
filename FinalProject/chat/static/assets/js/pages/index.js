@@ -4,6 +4,7 @@ import { renderClientMessage, renderManagerMessage, updateChatMessage, unsetRepl
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
+import { clearFileModalForm, clearImageModalForm } from '../utils.js'
 
 
 let chatSocket;
@@ -321,6 +322,9 @@ function sendMessage(chatSocket) {
 }
 
 function sendFormData(formData) {
+    formData.append('message_id', new Date().getTime());
+    formData.append('date', (new Date().getTime() / 1000).toFixed());
+
     $.ajax({
         headers: {
             'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
@@ -344,7 +348,6 @@ function sendFormData(formData) {
 function sendFile() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
-    const date = (new Date().getTime() / 1000).toFixed();
     const formData = new FormData();
     const fileData = $('#upload-file-modal-form input[type=file]').prop('files')[0];
 
@@ -357,8 +360,6 @@ function sendFile() {
     formData.append('ucid', storageGet("activeChatUcid"));
     formData.append('document', fileData);
     formData.append('file_name', fileData.name);
-    formData.append('message_id', new Date().getTime());
-    formData.append('date', date);
 
     sendFormData(formData);
 }
@@ -366,7 +367,6 @@ function sendFile() {
 function sendImage() {
     const ucid = storageGet('activeChatUcid');
     const replyToMessage = storageGet('replyToMessage');
-    const date = (new Date().getTime() / 1000).toFixed();
     const formData = new FormData();
     const fileData = $('#upload-image-modal-form input[type=file]').prop('files')[0];
 
@@ -379,8 +379,6 @@ function sendImage() {
     formData.append('ucid', storageGet("activeChatUcid"));
     formData.append('photo', fileData);
     formData.append('file_name', fileData.name);
-    formData.append('message_id', new Date().getTime());
-    formData.append('date', date);
 
     sendFormData(formData);
 }
@@ -499,6 +497,17 @@ function setupEvents() {
         }
     }); 
     */
+
+    $(".modal").on('hide.bs.modal', function (event) {
+        switch (event.currentTarget.id) { 
+            case "upload-image-modal-form":
+                clearImageModalForm();
+                break;
+            case "upload-file-modal-form":
+                clearFileModalForm();
+                break; 
+        }
+     });
 
     const emojiMenuState = storageGet('emojiMenuState');
 
