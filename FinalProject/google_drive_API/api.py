@@ -59,3 +59,11 @@ class GoogleDrive(GoogleServices):
         ).execute()
 
         return file.get('id')
+
+
+def main():
+    g_drive = GoogleDrive()
+
+
+if __name__ == "__main__":
+    main()
