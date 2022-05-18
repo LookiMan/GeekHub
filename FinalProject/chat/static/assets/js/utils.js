@@ -30,3 +30,19 @@ export function clearImageModalForm() {
     $('#form-image').val('');
     $('#upload-image-modal-form .image-caption-input').val('');
 }
+
+export function copyToClipboard(messageId) {
+    const messages = storageGet('chatsMessages');
+
+    $.each(messages, function (key, values) {
+        const message = values[messageId];
+        if (message) {
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val(message.text).select();
+            document.execCommand("copy");
+            $temp.remove();
+            return;
+        }
+    });
+}
