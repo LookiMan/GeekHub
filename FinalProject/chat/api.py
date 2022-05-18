@@ -13,7 +13,7 @@ from chat.serializers import ChatSerializer, MessageSerializer
 from chat.tasks import upload_to_google_drive
 from chat.utils import logger, ctime
 
-from telegram_bot.bot import send_photo_to_client, send_document_to_client
+from telegram_bot.bot import send_photo_to_client, send_document_to_client, delete_bot_message
 
 
 class IsSuperuser(BasePermission):
@@ -249,3 +249,43 @@ def unarchive_chat(request, ucid):
             "description": f"Chat with ucid '{ucid}' has been archived",
             "ucid": ucid,
         })
+
+
+@api_view(("GET",))
+@permission_classes((IsAuthenticated,))
+def delete_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id)
+        message.is_deleted = True
+        message.save(update_fields=["is_deleted"])
+    except Chat.DoesNotExist as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": f"Некорректный запрос. Сообщение с id '{message_id}' не найдено в базе данных",
+        },
+            status=HTTP_400_BAD_REQUEST,
+        )
+    except Exception as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    else:
+        try:
+            delete_bot_message(message.chat.id, message_id)
+        except Exception as exc:
+            return Response({
+                "success": False,
+                "description": f"Сообщение с id '{message_id}' помечено как удаленное, но не удалено в telegram-чате",
+                "id": message_id,
+            })
+        else:
+            return Response({
+                "success": True,
+                "description": f"Сообщение с id '{message_id}' успешно помечено как удаленное",
+                "id": message_id,
+            })

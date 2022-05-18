@@ -86,4 +86,9 @@ urlpatterns = [
         api.upload_file,
         name="upload_file"
     ),
+    path(
+        "api/v1/delete_message/<int:message_id>/",
+        api.delete_message,
+        name="delete_message"
+    ),
 ]

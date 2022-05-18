@@ -300,6 +300,10 @@ def process_edited_message(message):
         edited_message.save(update_fields=["is_edited", "edited_text"])
 
 
+def delete_bot_message(chat_id, message_id):
+    bot.delete_message(chat_id, message_id)
+
+
 def debug_telegram_bot():
     bot.remove_webhook()
     bot.polling()
