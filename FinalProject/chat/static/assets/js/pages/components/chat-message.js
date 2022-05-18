@@ -26,8 +26,8 @@ export function chatMessage(message, userType) {
         }
 
         if (message.photo) {
-            messageHTML += `<div class="telegram-photo-message">
-                                <img onload="$(this).css('background-image', 'none')" src="${message.photo}"></img>
+            messageHTML += `<div class="telegram-photo-message default-image">
+                                <img onload="$(this).parent().removeClass('default-image');" src="${message.photo}"></img>
                                 ${captionBlock}
                             </div>`;
             
