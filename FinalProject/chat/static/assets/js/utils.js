@@ -39,7 +39,8 @@ export function copyToClipboard(messageId) {
         if (message) {
             var $temp = $("<input>");
             $("body").append($temp);
-            $temp.val(message.text).select();
+            const text = message.text || message.caption || message.file_name;
+            $temp.val(text).select();
             document.execCommand("copy");
             $temp.remove();
             return;
