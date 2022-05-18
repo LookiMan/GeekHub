@@ -1,10 +1,10 @@
 import { updateSiteTitle } from './components/site-title.js';
 import { renderNote, renderChatItem, renderChatList, openFirstChat, updateChatListItem } from './components/side-chat-menu.js';
-import { renderClientMessage, renderManagerMessage, updateChatMessage, unsetReplyMessage } from './components/chat.js';
+import { renderClientMessage, renderManagerMessage, updateChatMessage, setReplyMessage, unsetReplyMessage } from './components/chat.js';
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
-import { clearFileModalForm, clearImageModalForm } from '../utils.js'
+import { clearFileModalForm, clearImageModalForm, copyToClipboard } from '../utils.js'
 
 
 let chatSocket;
@@ -27,6 +27,9 @@ class BackendURLS {
     }
     static fileUpload() {
         return $('input[name="file-upload-url"]').val();
+    }
+    static deleteMessage(messageId) {
+        return $('input[name="delete-message-url"]').val().replace('/0/', `/${messageId}/`);
     }
     static emoji() {
         return $('input[name="emoji-url"]').val();
@@ -155,8 +158,8 @@ function createNewChat(ucid) {
                 })
             );
         },
-        error: function(data) {
-            console.error(data);
+        error: function(error) {
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
@@ -176,7 +179,7 @@ async function loadNote() {
             renderNote(note);
         },
         error: function (error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
@@ -200,7 +203,7 @@ async function loadChats() {
             renderChatList(rawChatsList);
         },
         error: function(error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
@@ -216,8 +219,7 @@ function processRetrievedMessage(message) {
     const activeChatUcid = storageGet('activeChatUcid');
     
     if (!ucid) {
-        console.error('Полученное сообщение неимет атрибута "ucid"');
-        console.error(message);
+        alert('Полученное сообщение не имеет атрибута "ucid"');
         return;
     }
 
@@ -242,8 +244,7 @@ function processCreatedMessage(message) {
     const chatsMessages = storageGet('chatsMessages');
 
     if (!ucid) {
-        console.error('Полученное сообщение неимет атрибута "ucid"');
-        console.error(message);
+        alert('Полученное сообщение неимет атрибута "ucid"');
         return;
     }
 
@@ -276,8 +277,7 @@ function processUpdatedMessage(message) {
     const chatsMessages = storageGet('chatsMessages');
 
     if (!ucid) {
-        console.error('Полученное сообщение неимет атрибута "ucid"');
-        console.error(message);
+        alert('Полученное сообщение неимет атрибута "ucid"');
         return;
     }
     
@@ -337,10 +337,11 @@ function sendFormData(formData) {
         data: formData,
         type: 'post',
         success: function (response) {
-            // TODO:
+            $('.modal.fade.show').modal('hide');
+            $('.modal-upload-spinner.active').addClass('d-none');
         },
         error: function (error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
@@ -416,7 +417,7 @@ function changeBlockStateUser(event) {
             }
         },
         error: function(error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
@@ -427,6 +428,23 @@ function blockUser(event) {
 
 function unblockUser(event) {
     changeBlockStateUser(event)
+}
+
+function deleteMessage(messageId) {
+    $.ajax({
+        url: BackendURLS.deleteMessage(messageId),
+        headers: {
+            'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
+        },
+        success: function (response) {
+            if (!response.success) {
+                alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
+            }
+        },
+        error: function(error) {
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+        }
+    }); 
 }
 
 function archiveChat(event) {
@@ -447,15 +465,14 @@ function archiveChat(event) {
         },
         success: function (response) {
             if (!response.success) {
-                alert(`Упс! Что-то пошло не так...\n${response.description}`);
+                alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
             } else {
                 const allChats = storageGet('allChats');
                 const chatsMessages = storageGet('chatsMessages');
                 const { ucid } = response;
 
                 if (!ucid) {
-                    console.error('Ответ не имеет атрибута "ucid"');
-                    console.error(response);
+                    alert('Ответ не имеет атрибута "ucid"');
                     return;
                 }
                 
@@ -463,7 +480,7 @@ function archiveChat(event) {
                     delete allChats[ucid];
                     delete chatsMessages[ucid];
                 } catch (error) {
-                    console.error(error);
+                    alert(`Упс! Что-то пошло не так...\n\n${error}`);
                 }
 
                 $(`li[data-chat-ucid="${ucid}"]`).remove();
@@ -475,39 +492,60 @@ function archiveChat(event) {
             }
         },
         error: function(error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         }
     });
 }
 
 function setupEvents() {
-    $('#upload-file-modal-form button#send-file').on('click', sendFile);
-    $('#upload-image-modal-form button#send-image').on('click', sendImage);
+    $('#upload-file-modal-form button#send-file').on('click', function (event) {
+        $('#upload-file-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
+        sendFile();
+    });
+    $('#upload-image-modal-form button#send-image').on('click', function (event) {
+        $('#upload-image-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
+        sendImage();
+    });
     $('.input-area .emoji-button').on('click', toggleEmojiMenu);
     $('#block-user').on('click', blockUser);
     $('#unblock-user').on('click', unblockUser);
     $('#archive-chat').on('click', archiveChat);
     $('#chat-more-actions').on('click', dropdownToggle);
     $('#form-image').on('change', previewImage);
-    /*     
-    $('body').on('click', function () {
-        console.log($('#chat-more-actions-menu').hasClass('d-block'), this);
-        if ($('#chat-more-actions-menu').hasClass('d-block')) {
-            $('#chat-more-actions-menu').removeClass('d-block');
-        }
-    }); 
-    */
+        
+    $('#chat-more-actions-menu').on('mouseleave', function () {
+        $(this).removeClass('d-block');
+    });
 
-    $(".modal").on('hide.bs.modal', function (event) {
+    $(".modal").on('hidden.bs.modal', function (event) {
         switch (event.currentTarget.id) { 
-            case "upload-image-modal-form":
+            case 'upload-image-modal-form':
                 clearImageModalForm();
                 break;
-            case "upload-file-modal-form":
+            case 'upload-file-modal-form':
                 clearFileModalForm();
                 break; 
         }
-     });
+    });
+
+    $(document).on('mousedown', '#jqcontext-menu li', function () {
+        const messageId = $(this).data('id');
+
+        switch ($(this).data('key')) { 
+            case 'reply':
+                setReplyMessage(messageId);
+                break;
+            case 'copy':
+                copyToClipboard(messageId);
+                break;
+            case 'edit':
+                console.log('edit', messageId);
+                break;
+            case 'delete':
+                deleteMessage(messageId);
+                break;
+        }
+    });
 
     const emojiMenuState = storageGet('emojiMenuState');
 
@@ -528,7 +566,7 @@ function setupEvents() {
         success: function (html) {
             $('#emoji-spinner').remove();
             $('#emoji-menu').html(html);
-            $('#emoji-menu .emoji').click((event) => {
+            $('#emoji-menu .emoji').on('click', (event) => {
                 const input = $('#chat-message-input');
                 if (!input.prop('disabled')) {
                     input.val(input.val() + $(event.currentTarget).text()).focus();
@@ -536,7 +574,7 @@ function setupEvents() {
             })    
         },
         error: function(error) {
-            console.error(error);
+            alert(`Упс! Что-то пошло не так...\n\n${error}`);
         },
     });   
 }

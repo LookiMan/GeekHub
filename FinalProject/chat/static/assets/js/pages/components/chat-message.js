@@ -6,7 +6,7 @@ export function chatMessage(message, userType) {
 
     if (message.is_deleted) {
         return `<div class="message-in-chat" data-message-id="${message.id}">
-                    <div class="message message-${userType}">
+                    <div id="${message.id}" class="message message-${userType}">
                         <div class="telegram-deleted-message">
                             <i class="bi bi-trash"></i><span><i>Сообщение удалено</i></span>
                         </div>
@@ -14,10 +14,10 @@ export function chatMessage(message, userType) {
                 </div>`;
     } else {
         const caption = message.is_edited ? message.edited_text : message.caption;
-        const captionBlock = caption ? `<div class="telegram-text-message"> ${caption}</div>` : "";
+        const captionBlock = caption ? `<div class="telegram-text-message"> ${caption}</div>` : '';
 
         let messageHTML = `<div class="message-in-chat" data-message-id="${message.id}">
-                            <div class="message message-${userType}">`;
+                            <div id="${message.id}" class="message message-${userType}">`;
 
         if (message.reply_to_message) {
             messageHTML += `<div class="telegram-reply-message" data-target-message-id="${message.reply_to_message.id}">
@@ -27,7 +27,7 @@ export function chatMessage(message, userType) {
 
         if (message.photo) {
             messageHTML += `<div class="telegram-photo-message">
-                                <img src="${message.photo}"></img>
+                                <img onload="$(this).css('background-image', 'none')" src="${message.photo}"></img>
                                 ${captionBlock}
                             </div>`;
             
