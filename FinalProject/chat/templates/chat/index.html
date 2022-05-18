@@ -10,6 +10,13 @@
   <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
   <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
   <input type="hidden" name="delete-message-url" value="{% url 'chat:delete_message' 0 %}"></input>
+  <!-- Image viewer -->
+  <div class="image-viewer">
+    <div id="image-viewer">
+      <span class="close">&times;</span>
+      <img class="modal-content" id="full-image">
+    </div>
+  </div>
   <!-- File modal form -->
   <div class="modal fade" id="upload-file-modal-form" data-bs-backdrop="static" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

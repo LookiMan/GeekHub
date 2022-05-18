@@ -77,7 +77,7 @@ function renderChatMessage(messageHTML, messageData) {
         },
     ];
 
-    if (messageData.text) {
+    if (messageData.text || messageData.caption || messageData.document) {
         clientMessageContextMenu = clientMessageContextMenu.concat([
             {
                 icon: 'bi bi-clipboard-check',
@@ -110,6 +110,17 @@ function renderChatMessage(messageHTML, messageData) {
         defaultStyle: 'jqcontext-menu-dark',
         contextMenu: messageData?.staff ? managerMessageContextMenu : clientMessageContextMenu,
     });
+
+    if (messageData.photo) { 
+        $(message).find('.message img').click(function() {
+            $("#full-image").attr("src", $(this).attr("src"));
+            $('#image-viewer').show();
+        });
+        
+        $("#image-viewer .close").click(function(){
+            $('#image-viewer').hide();
+        });
+    }
 
     $(chat).append(message);
 
