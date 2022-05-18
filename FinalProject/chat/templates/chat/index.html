@@ -9,6 +9,7 @@
   <input type="hidden" name="chats-url" value="{% url 'chat:chats' %}"></input>
   <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
   <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
+  <input type="hidden" name="delete-message-url" value="{% url 'chat:delete_message' 0 %}"></input>
   <!-- File modal form -->
   <div class="modal fade" id="upload-file-modal-form" data-bs-backdrop="static" tabindex="-1" aria-labelledby="upload-file-modal-form-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -29,6 +30,13 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
           <button id="send-file" type="button" class="btn btn-primary">Отправить</button>
+        </div>
+        <div class="modal-upload-spinner d-none">
+          <div class="d-flex justify-content-center text-primary" style="margin: 27%;">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -54,6 +62,13 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
           <button id="send-image" type="button" class="btn btn-primary">Отправить</button>
+        </div>
+        <div class="modal-upload-spinner d-none">
+          <div class="d-flex justify-content-center text-primary" style="margin: 27%;">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
