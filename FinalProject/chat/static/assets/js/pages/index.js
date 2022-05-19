@@ -394,6 +394,7 @@ function changeBlockStateUser(event) {
         headers: {
             'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
+        method: "PUT",
         success: function (response) {
             if (!response.success) {
                 alert(`Упс! Что-то пошло не так...\n${response.description}`);
@@ -436,6 +437,7 @@ function deleteMessage(messageId) {
         headers: {
             'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
+        method: "DELETE",
         success: function (response) {
             if (!response.success) {
                 alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
@@ -463,6 +465,7 @@ function archiveChat(event) {
         headers: {
             'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),
         },
+        method: "PUT",
         success: function (response) {
             if (!response.success) {
                 alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
