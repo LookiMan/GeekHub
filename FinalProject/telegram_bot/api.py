@@ -48,7 +48,7 @@ def user_photo(request, file_id):
     return google_drive_serve(request, file_id)
 
 
-@api_view(("GET",))
+@api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def block_user(request, user_id):
     try:
@@ -81,7 +81,7 @@ def block_user(request, user_id):
         })
 
 
-@api_view(("GET",))
+@api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def unblock_user(request, user_id):
     try:
