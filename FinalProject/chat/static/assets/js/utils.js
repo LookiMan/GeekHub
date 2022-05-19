@@ -47,3 +47,13 @@ export function copyToClipboard(messageId) {
         }
     });
 }
+
+export function showError(error) {
+    const modal = new bootstrap.Modal($('#display-errors-modal-form'), {
+        background: true,
+        keyboard: true,
+    });
+
+    $('#display-errors-modal-form-content').html(`<p>${JSON.stringify(error)}</p>`);
+    modal.show();
+} 
