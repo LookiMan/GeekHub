@@ -97,10 +97,21 @@ def get_messages(request, ucid):
     try:
         messages = Message.objects.filter(chat=ucid)
     except Message.DoesNotExist:
-        return Response(f"Messages not found", status=HTTP_400_BAD_REQUEST)
+        return Response({
+            "success": False,
+            "description": f"Сообщение с ucid '{ucid}' не найдено",
+            "ucid": ucid,
+        },
+            status=HTTP_400_BAD_REQUEST
+        )
     except Exception as exc:
         logger.exception(f"{exc}. Payload: ucid: {ucid};")
-        return Response("Unclassified error", status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
     else:
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
@@ -160,8 +171,10 @@ def upload_file(request):
                     staff=chat.staff,
                     reply_to_message=reply_to_message,
                     text=None,
-                    photo=upload_to_google_drive(file_name, photo.read()) if photo else None,
-                    document=upload_to_google_drive(file_name, document.read()) if document else None,
+                    photo=upload_to_google_drive(
+                        file_name, photo.read()) if photo else None,
+                    document=upload_to_google_drive(
+                        file_name, document.read()) if document else None,
                     file_name=file_name,
                     caption=caption,
                     date=ctime(date),
@@ -189,76 +202,66 @@ def upload_file(request):
     return Response({"code": HTTP_400_BAD_REQUEST, "errors": form.errors}, status=HTTP_400_BAD_REQUEST)
 
 
-@api_view(("GET",))
+def change_chat_archive_state(request, ucid, *, is_archived):
+    try:
+        chat = Chat.objects.get(ucid=ucid)
+        chat.is_archived = is_archived
+        chat.save(update_fields=["is_archived"])
+    except Chat.DoesNotExist as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": f"Некорректный запрос. Чат с ucid '{ucid}' не найден",
+        },
+            status=HTTP_400_BAD_REQUEST,
+        )
+    except Exception as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    else:
+        state = "заархивирован" if chat.is_archived else "разархивирован"
+
+        return Response({
+            "success": True,
+            "description": f"Чат с ucid '{ucid}' {state}",
+            "ucid": ucid,
+        })
+
+
+@api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def archive_chat(request, ucid):
-    try:
-        chat = Chat.objects.get(ucid=ucid)
-        chat.is_archived = True
-        chat.save(update_fields=["is_archived"])
-    except Chat.DoesNotExist as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": f"Bad request. Chat with ucid '{ucid}' not found",
-        },
-            status=HTTP_400_BAD_REQUEST,
-        )
-    except Exception as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": "Unclassified error",
-        },
-            status=HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    else:
-        return Response({
-            "success": True,
-            "description": f"Chat with ucid '{ucid}' has been archived",
-            "ucid": ucid,
-        })
+    return change_chat_archive_state(request, ucid, is_archived=True)
 
 
-@api_view(("GET",))
+@api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def unarchive_chat(request, ucid):
-    try:
-        chat = Chat.objects.get(ucid=ucid)
-        chat.is_archived = False
-        chat.save(update_fields=["is_archived"])
-    except Chat.DoesNotExist as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": f"Bad request. Chat with ucid '{ucid}' not found",
-        },
-            status=HTTP_400_BAD_REQUEST,
-        )
-    except Exception as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": "Unclassified error",
-        },
-            status=HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    else:
-        return Response({
-            "success": True,
-            "description": f"Chat with ucid '{ucid}' has been archived",
-            "ucid": ucid,
-        })
+    return change_chat_archive_state(request, ucid, is_archived=False)
 
 
-@api_view(("GET",))
+@api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
-def delete_message(request, message_id):
+def edit_message(request, message_id, text):
+    update_fields = []
+
     try:
         message = Message.objects.get(id=message_id)
-        message.is_deleted = True
-        message.save(update_fields=["is_deleted"])
-    except Chat.DoesNotExist as exc:
+
+        if message.text:
+            message.text = text
+            update_fields.append("text")
+        elif message.caption:
+            message.text = caption
+            update_fields.append("text")
+
+        message.save(update_fields=update_fields)
+    except Message.DoesNotExist as exc:
         logger.exception(exc)
         return Response({
             "success": False,
@@ -278,6 +281,48 @@ def delete_message(request, message_id):
         try:
             delete_bot_message(message.chat.id, message_id)
         except Exception as exc:
+            logger.exception(exc)
+            return Response({
+                "success": False,
+                "description": f"Сообщение с id '{message_id}' помечено как удаленное, но не удалено в telegram-чате",
+                "id": message_id,
+            })
+        else:
+            return Response({
+                "success": True,
+                "description": f"Сообщение с id '{message_id}' успешно помечено как удаленное",
+                "id": message_id,
+            })
+
+
+@api_view(("DELETE",))
+@permission_classes((IsAuthenticated,))
+def delete_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id)
+        message.is_deleted = True
+        message.save(update_fields=["is_deleted"])
+    except Message.DoesNotExist as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": f"Некорректный запрос. Сообщение с id '{message_id}' не найдено в базе данных",
+        },
+            status=HTTP_400_BAD_REQUEST,
+        )
+    except Exception as exc:
+        logger.exception(exc)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    else:
+        try:
+            delete_bot_message(message.chat.id, message_id)
+        except Exception as exc:
+            logger.exception(exc)
             return Response({
                 "success": False,
                 "description": f"Сообщение с id '{message_id}' помечено как удаленное, но не удалено в telegram-чате",

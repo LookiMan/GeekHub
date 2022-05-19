@@ -12,8 +12,7 @@ from chat.tasks import google_drive_serve
 from chat.utils import logger
 
 from telegram_bot.models import User
-from telegram_bot.bot import send_message_to_user_about_blocking
-from telegram_bot.bot import send_message_to_user_about_unblocking
+from telegram_bot.bot import send_message, BOT_PHRASES
 from telegram_bot.tasks import process_telegram_event
 
 
@@ -48,19 +47,16 @@ def user_photo(request, file_id):
     return google_drive_serve(request, file_id)
 
 
-@api_view(("PUT",))
-@permission_classes((IsAuthenticated,))
-def block_user(request, user_id):
+def change_user_blocked_state(request, user_id, *, is_blocked):
     try:
         user = User.objects.get(id=user_id)
-        user.is_blocked = True
+        user.is_blocked = is_blocked
         user.save(update_fields=["is_blocked"])
-        send_message_to_user_about_blocking(user_id)
     except User.DoesNotExist as exc:
         logger.exception(exc)
         return Response({
             "success": False,
-            "description": f"Bad request. User with id '{user_id}' not found",
+            "description": f"Некорректный запрос. Пользователь с id '{user_id}' не найден",
         },
             status=HTTP_400_BAD_REQUEST,
         )
@@ -68,47 +64,39 @@ def block_user(request, user_id):
         logger.exception(exc)
         return Response({
             "success": False,
-            "description": "Unclassified error",
+            "description": "Непредвиденная ошибка сервера",
         },
             status=HTTP_500_INTERNAL_SERVER_ERROR
         )
     else:
-        return Response({
-            "success": True,
-            "description": f"User with id '{user_id}' has been blocked",
-            "user_id": user_id,
-            "is_blocked": True,
-        })
+        state = "заблокирован" if is_blocked else "разблокирован"
+        text = BOT_PHRASES["user_blocked"] if user.is_blocked else BOT_PHRASES["user_unblocked"]
+
+        try:
+            send_message(user.id, text)
+        except:
+            return Response({
+                "success": False,
+                "description": f"Пользователь с id '{user.id}' {state}. Но не получил сообщение в телеграмме",
+                "user_id": user.id,
+                "is_blocked": user.is_blocked,
+            })
+        else:
+            return Response({
+                "success": True,
+                "description": f"Пользователь с id '{user.id}' {state}",
+                "user_id": user.id,
+                "is_blocked": user.is_blocked,
+            })
+
+
+@api_view(("PUT",))
+@permission_classes((IsAuthenticated,))
+def block_user(request, user_id):
+    return change_user_blocked_state(request, user_id, is_blocked=True)
 
 
 @api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def unblock_user(request, user_id):
-    try:
-        user = User.objects.get(id=user_id)
-        user.is_blocked = False
-        user.save(update_fields=["is_blocked"])
-        send_message_to_user_about_unblocking(user_id)
-    except User.DoesNotExist as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": f"Bad request. User with id '{user_id}' not found",
-        },
-            status=HTTP_400_BAD_REQUEST,
-        )
-    except Exception as exc:
-        logger.exception(exc)
-        return Response({
-            "success": False,
-            "description": "Unclassified error",
-        },
-            status=HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    else:
-        return Response({
-            "success": True,
-            "description": f"User with id '{user_id}' has been unblocked",
-            "user_id": user_id,
-            "is_blocked": False,
-        })
+    return change_user_blocked_state(request, user_id, is_blocked=False)

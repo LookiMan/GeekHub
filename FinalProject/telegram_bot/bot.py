@@ -9,7 +9,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 
-from config.settings import TELEGRAM_BOT_TOKEN, WEBHOOK_HOST
+from config.settings import (
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_BOT_WEBHOOK_HOST,
+    TELEGRAM_BOT_FILE_SIZE_LIMIT
+)
 
 from chat.models import Chat, Message
 
@@ -20,7 +24,7 @@ from google_drive_API.api import GoogleDrive
 
 
 WEBHOOK_PATH = f"/{TELEGRAM_BOT_TOKEN}/"
-WEBHOOK_URL = WEBHOOK_HOST + "/telegram/webhook" + WEBHOOK_PATH
+WEBHOOK_URL = TELEGRAM_BOT_WEBHOOK_HOST + "/telegram/webhook" + WEBHOOK_PATH
 
 
 IGNORED_CONTENT_TYPES = [
@@ -32,6 +36,14 @@ IGNORED_CONTENT_TYPES = [
     "location",
     "contact"
 ]
+
+
+BOT_PHRASES = {
+    "user_blocked": "❌ Вы заблокированы ❌",
+    "user_unblocked": "✅ Вы разблокированы ✅",
+    "file_size_exceeded": "⚠️ Превышен допустимый размер файла.\nМаксимальный размер файла 2.5 MB",
+    "available_content_types": "ℹ️ Бот поддерживает следующие типы сообщений:\n\n📝 Текст\n\n🖼 Фото\n\n📁 Файлы (до 2.5 MB)",
+}
 
 
 bot = TeleBot(token=TELEGRAM_BOT_TOKEN)
@@ -75,24 +87,31 @@ async def notify_staff_about_new_chat(chat):
     )
 
 
-def send_text_message_to_client(chat, text, reply_to_message_id=None):
-    message = bot.send_message(
-        chat.id,
+def send_message(chat_id, text, *, reply_to_message_id=None):
+    bot.send_chat_action(chat_id, action='typing')
+    return bot.send_message(
+        chat_id,
         text=mark_safe(text),
-        reply_markup=None,
-        parse_mode="HTML",
-        reply_to_message_id=reply_to_message_id
+        reply_to_message_id=reply_to_message_id,
+        parse_mode="HTML"
     )
+
+
+def send_text_message_to_client(chat, text, *, reply_to_message_id=None):
+    message = send_message(
+        chat.id, text, reply_to_message_id=reply_to_message_id)
 
     process_message(chat, message)
 
 
 @sync_to_async
-def async_send_text_message_to_client(chat, text, reply_to_message_id=None):
-    send_text_message_to_client(chat, text, reply_to_message_id)
+def async_send_text_message_to_client(chat, text, *, reply_to_message_id=None):
+    send_text_message_to_client(
+        chat, text, reply_to_message_id=reply_to_message_id)
 
 
 def send_photo_to_client(chat, file, *, caption=None, reply_to_message_id=None):
+    bot.send_chat_action(chat.id, action='upload_photo')
     message = bot.send_photo(
         chat.id,
         file,
@@ -104,6 +123,7 @@ def send_photo_to_client(chat, file, *, caption=None, reply_to_message_id=None):
 
 
 def send_document_to_client(chat, file, *, caption=None, reply_to_message_id=None):
+    bot.send_chat_action(chat.id, action='upload_document')
     message = bot.send_document(
         chat.id,
         file,
@@ -121,27 +141,7 @@ def send_welcome_message(message):
 
     username = message.chat.username or first_name + " " + last_name
 
-    bot.send_message(
-        message.chat.id,
-        text=f"<i>Привет, {mark_safe(username)}👋\n</i>",
-        parse_mode='HTML',
-    )
-
-
-def send_message_to_user_about_blocking(chat_id):
-    bot.send_message(
-        chat_id,
-        "❌ Вы заблокированы ❌",
-        parse_mode="HTML"
-    )
-
-
-def send_message_to_user_about_unblocking(chat_id):
-    bot.send_message(
-        chat_id,
-        "✅ Вы разблокированы ✅",
-        parse_mode="HTML"
-    )
+    send_message(message.chat.id, f"<i>Привет, {mark_safe(username)}👋\n</i>")
 
 
 def get_or_create_telegram_user(message):
@@ -199,21 +199,15 @@ def get_telegram_chat(user, message):
 
 @ bot.message_handler(content_types=IGNORED_CONTENT_TYPES)
 def process_ignored_content_types(message):
-    text = "⚠️ На данный момент \nбот поддерживает "
-    "следующие типы сообщений:"
-    "\n\n📝 Текст"
-    "\n\n🖼 Фото"
-    "\n\n📁 Файлы"
-
-    bot.send_message(
-        message.chat.id,
-        text=text
-    )
+    send_message(message.chat.id, BOT_PHRASES["available_content_types"])
 
 
 def process_message(chat, message):
-    photo = download_file_from_telegram(message.photo[-1].file_id) if message.photo else None
-    document = download_file_from_telegram(message.document.file_id) if message.document else None
+    photo = download_file_from_telegram(
+        message.photo[-1].file_id) if message.photo else None
+    document = download_file_from_telegram(
+        message.document.file_id) if message.document else None
+
     file_name = message.document.file_name if message.document else None
     caption = message.caption if message.caption else None
 
@@ -252,13 +246,13 @@ def process_received_text_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(chat.id)
+        send_message(chat.id, BOT_PHRASES["user_blocked"])
     else:
         process_message(chat, message)
 
 
 @ bot.message_handler(commands=["start"])
-def process_received_start_commant(message):
+def process_received_start_command(message):
     process_received_text_message(message)
 
 
@@ -268,7 +262,7 @@ def process_received_photo_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(chat.id)
+        send_message(chat.id, BOT_PHRASES["user_blocked"])
     else:
         process_message(chat, message)
 
@@ -279,9 +273,12 @@ def process_received_document_message(message):
     chat = get_telegram_chat(user, message)
 
     if user.is_blocked:
-        send_message_to_user_about_blocking(chat.id)
+        send_message(chat.id, BOT_PHRASES["user_blocked"])
     else:
-        process_message(chat, message)
+        if message.document.file_size <= TELEGRAM_BOT_FILE_SIZE_LIMIT:
+            process_message(chat, message)
+        else:
+            send_message(chat.id, BOT_PHRASES["file_size_exceeded"])
 
 
 @bot.edited_message_handler(content_types=["text", "photo", "document"])

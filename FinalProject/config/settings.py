@@ -38,14 +38,15 @@ except ImportError:
     LOGIN_REDIRECT_URL = "chat:index"
 
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_FILE_SIZE_LIMIT = 2.5 * 1024 * 1024 # 2.5 MB
 
     if not TELEGRAM_BOT_TOKEN:
         raise BaseException(
             "TELEGRAM_BOT_TOKEN not found in OS environment paths")
 
-    WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
+    TELEGRAM_BOT_WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 
-    if not WEBHOOK_HOST:
+    if not TELEGRAM_BOT_WEBHOOK_HOST:
         raise BaseException(
             "WEBHOOK_HOST not found in OS environment paths")
 

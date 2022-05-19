@@ -37,7 +37,7 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
             if chat.is_note:
                 await self.create_text_note(chat, text, reply_to_message_id)
             else:
-                await async_send_text_message_to_client(chat, text, reply_to_message_id)
+                await async_send_text_message_to_client(chat, text, reply_to_message_id=reply_to_message_id)
 
     @action()
     async def subscribe_to_messages_in_chat(self, ucid, **kwargs):

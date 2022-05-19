@@ -28,6 +28,7 @@
 			padding: 5px;
 
 			.message {
+				overflow: hidden;
 				width: 50%;
 				border-radius: 5px;
 				margin: 10px 0;
@@ -84,6 +85,9 @@
 					}
 					a {
 						text-decoration: none;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
 						color: $black;
 					}
 				}

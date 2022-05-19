@@ -154,6 +154,7 @@ header .navbar {
   padding: 5px;
 }
 #chat #chat-and-message .message-in-chat .message {
+  overflow: hidden;
   width: 50%;
   border-radius: 5px;
   margin: 10px 0;
@@ -204,6 +205,9 @@ header .navbar {
 }
 #chat #chat-and-message .message-in-chat .message .telegram-document-message a {
   text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: #000;
 }
 #chat #chat-and-message .message-in-chat .message .telegram-deleted-message {
