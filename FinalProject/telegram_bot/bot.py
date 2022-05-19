@@ -300,6 +300,10 @@ def process_edited_message(message):
         edited_message.save(update_fields=["is_edited", "edited_text"])
 
 
+def edit_bot_message_text(chat_id, message_id, text):
+    bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
+
+
 def delete_bot_message(chat_id, message_id):
     bot.delete_message(chat_id, message_id)
 
