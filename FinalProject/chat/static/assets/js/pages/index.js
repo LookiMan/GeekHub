@@ -4,7 +4,7 @@ import { renderClientMessage, renderManagerMessage, updateChatMessage, setReplyM
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
-import { clearFileModalForm, clearImageModalForm, copyToClipboard } from '../utils.js'
+import { clearFileModalForm, clearImageModalForm, copyToClipboard, showError } from '../utils.js'
 
 
 let chatSocket;
@@ -159,7 +159,7 @@ function createNewChat(ucid) {
             );
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -179,7 +179,7 @@ async function loadNote() {
             renderNote(note);
         },
         error: function (error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -203,7 +203,7 @@ async function loadChats() {
             renderChatList(rawChatsList);
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -219,7 +219,7 @@ function processRetrievedMessage(message) {
     const activeChatUcid = storageGet('activeChatUcid');
     
     if (!ucid) {
-        alert('Полученное сообщение не имеет атрибута "ucid"');
+        showError('Полученное сообщение не имеет атрибута "ucid"');
         return;
     }
 
@@ -244,7 +244,7 @@ function processCreatedMessage(message) {
     const chatsMessages = storageGet('chatsMessages');
 
     if (!ucid) {
-        alert('Полученное сообщение неимет атрибута "ucid"');
+        showError('Полученное сообщение неимет атрибута "ucid"');
         return;
     }
 
@@ -277,7 +277,7 @@ function processUpdatedMessage(message) {
     const chatsMessages = storageGet('chatsMessages');
 
     if (!ucid) {
-        alert('Полученное сообщение неимет атрибута "ucid"');
+        showError('Полученное сообщение неимет атрибута "ucid"');
         return;
     }
     
@@ -341,7 +341,7 @@ function sendFormData(formData) {
             $('.modal-upload-spinner.active').addClass('d-none');
         },
         error: function (error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -397,7 +397,7 @@ function changeBlockStateUser(event) {
         method: "PUT",
         success: function (response) {
             if (!response.success) {
-                alert(`Упс! Что-то пошло не так...\n${response.description}`);
+                showError(`Упс! Что-то пошло не так...\n${response.description}`);
             } else {
                 const chats = storageGet('allChats');
 
@@ -418,7 +418,7 @@ function changeBlockStateUser(event) {
             }
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -440,11 +440,11 @@ function deleteMessage(messageId) {
         method: "DELETE",
         success: function (response) {
             if (!response.success) {
-                alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
+                showError(`Упс! Что-то пошло не так...\n\n${response.description}`);
             }
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     }); 
 }
@@ -454,7 +454,7 @@ function archiveChat(event) {
     const ucid = storageGet('activeChatUcid');
 
     if (!ucid) {
-        alert('Не удалось получить "ucid" текущего чата для архивации');
+        showError('Не удалось получить "ucid" текущего чата для архивации');
         return;
     }
 
@@ -468,14 +468,14 @@ function archiveChat(event) {
         method: "PUT",
         success: function (response) {
             if (!response.success) {
-                alert(`Упс! Что-то пошло не так...\n\n${response.description}`);
+                showError(`Упс! Что-то пошло не так...\n\n${response.description}`);
             } else {
                 const allChats = storageGet('allChats');
                 const chatsMessages = storageGet('chatsMessages');
                 const { ucid } = response;
 
                 if (!ucid) {
-                    alert('Ответ не имеет атрибута "ucid"');
+                    showError('Ответ не имеет атрибута "ucid"');
                     return;
                 }
                 
@@ -483,7 +483,7 @@ function archiveChat(event) {
                     delete allChats[ucid];
                     delete chatsMessages[ucid];
                 } catch (error) {
-                    alert(`Упс! Что-то пошло не так...\n\n${error}`);
+                    showError(error);
                 }
 
                 $(`li[data-chat-ucid="${ucid}"]`).remove();
@@ -495,7 +495,7 @@ function archiveChat(event) {
             }
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         }
     });
 }
@@ -577,7 +577,7 @@ function setupEvents() {
             })    
         },
         error: function(error) {
-            alert(`Упс! Что-то пошло не так...\n\n${error}`);
+            showError(error);
         },
     });   
 }
