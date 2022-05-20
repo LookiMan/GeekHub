@@ -1,3 +1,4 @@
+from email import message
 import time
 
 from channels.db import database_sync_to_async
@@ -9,6 +10,7 @@ from djangochannelsrestframework.observer import model_observer
 from chat.models import Chat, Message
 from chat.serializers import MessageSerializer, ChatSerializer
 from telegram_bot.bot import async_send_text_message_to_client
+from telegram_bot.bot import async_edit_bot_message_text, async_edit_bot_message_caption
 
 
 class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
@@ -21,6 +23,32 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         await self.add_group("chat")
 
     @action()
+    async def edit_text_message(self, text, **kwargs):
+        ucid = kwargs.get("ucid")
+        message_id = kwargs.get("message_id")
+
+        try:
+            chat = await self.get_chat(ucid)
+            message = await self.get_message(ucid, message_id)
+
+            message.is_edited = True
+            message.edited_text = text
+
+            await self.save_message(message)
+
+        except Exception as exc:
+            await self.send_json({
+                "action": "error",
+                "data": f"Message with id '{message_id}' not found. {exc}",
+            })
+        else:
+            if not chat.is_note:
+                if message.text:
+                    await async_edit_bot_message_text(chat.id, message_id, text)
+                elif message.caption:
+                    await async_edit_bot_message_caption(chat.id, message_id, text)
+
+    @action()
     async def send_text_message(self, text, **kwargs):
         ucid = kwargs.get("ucid")
         reply_to_message_id = kwargs.get("reply_to_message_id")
@@ -28,11 +56,10 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         try:
             chat = await self.get_chat(ucid=ucid)
         except:
-            data = {
+            await self.send_json({
                 "action": "error",
-                "text": f"Chat with ucid '{ucid}' not found",
-            }
-            await self.send_json(data)
+                "data": f"Чат с ucid '{ucid}' не найден",
+            })
         else:
             if chat.is_note:
                 await self.create_text_note(chat, text, reply_to_message_id)
@@ -68,6 +95,14 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
     @ database_sync_to_async
     def get_chat(self, ucid):
         return Chat.objects.get(ucid=ucid)
+
+    @ database_sync_to_async
+    def get_message(self, ucid, message_id):
+        return Message.objects.filter(id=message_id, chat__ucid=ucid)[0]
+
+    @ database_sync_to_async
+    def save_message(self, message):
+        message.save(update_fields=["is_edited", "edited_text"])
 
     @ database_sync_to_async
     def create_text_note(self, chat, text, reply_to_message_id):

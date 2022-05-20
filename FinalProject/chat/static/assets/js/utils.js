@@ -31,21 +31,30 @@ export function clearImageModalForm() {
     $('#upload-image-modal-form .image-caption-input').val('');
 }
 
-export function copyToClipboard(messageId) {
+export function getMessageById(messageId) {
     const messages = storageGet('chatsMessages');
+    let targetMessage;
 
     $.each(messages, function (key, values) {
         const message = values[messageId];
         if (message) {
-            var $temp = $("<input>");
-            $("body").append($temp);
-            const text = message.text || message.caption || message.file_name;
-            $temp.val(text).select();
-            document.execCommand("copy");
-            $temp.remove();
+            targetMessage = message;
             return;
         }
     });
+
+    return targetMessage;
+}
+
+export function copyToClipboard(messageId) {
+    const message = getMessageById(messageId);
+    const text = message.edited_text || message.text || message.caption || message.file_name;
+    const $temp = $("<input>");
+
+    $("body").append($temp);
+    $temp.val(text).select();
+    document.execCommand("copy");
+    $temp.remove();
 }
 
 export function showError(error) {

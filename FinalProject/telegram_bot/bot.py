@@ -110,6 +110,17 @@ def async_send_text_message_to_client(chat, text, *, reply_to_message_id=None):
         chat, text, reply_to_message_id=reply_to_message_id)
 
 
+@sync_to_async
+def async_edit_bot_message_text(chat_id, message_id, text):
+    bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
+
+
+@sync_to_async
+def async_edit_bot_message_caption(chat_id, message_id, caption):
+    bot.edit_message_caption(
+        chat_id=chat_id, message_id=message_id, caption=caption)
+
+
 def send_photo_to_client(chat, file, *, caption=None, reply_to_message_id=None):
     bot.send_chat_action(chat.id, action='upload_photo')
     message = bot.send_photo(
@@ -264,7 +275,10 @@ def process_received_photo_message(message):
     if user.is_blocked:
         send_message(chat.id, BOT_PHRASES["user_blocked"])
     else:
-        process_message(chat, message)
+        if message.photo[-1].file_size <= TELEGRAM_BOT_FILE_SIZE_LIMIT:
+            process_message(chat, message)
+        else:
+            send_message(chat.id, BOT_PHRASES["file_size_exceeded"])
 
 
 @ bot.message_handler(content_types=["document"])
@@ -295,10 +309,6 @@ def process_edited_message(message):
 
         edited_message.is_edited = True
         edited_message.save(update_fields=["is_edited", "edited_text"])
-
-
-def edit_bot_message_text(chat_id, message_id, text):
-    bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
 
 
 def delete_bot_message(chat_id, message_id):

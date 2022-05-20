@@ -23,6 +23,7 @@ function setupInitialData() {
         'unreadMessages': {},
         'chatsMessages': {},
         'replyToMessage': {},
+        'editMessage': {},
         'activeChatUcid': 0,
     }
     $.each(data, function (key, value) {

@@ -320,7 +320,8 @@ def delete_message(request, message_id):
         )
     else:
         try:
-            delete_bot_message(message.chat.id, message_id)
+            if not message.chat.is_note:
+                delete_bot_message(message.chat.id, message_id)
         except Exception as exc:
             logger.exception(exc)
             return Response({

@@ -1,4 +1,4 @@
-import { storageSet, storageGet } from '../../utils.js';
+import { storageSet, storageGet, getMessageById, showError } from '../../utils.js';
 import { clientMessage } from './client-chat-message.js';
 import { managerMessage } from './manager-chat-message.js';
 import { updateDropdownMenu, hideDropdownMenu } from './chat-dropdown-menu.js';
@@ -56,18 +56,50 @@ export function setReplyMessage(messageId) {
 
 export function unsetReplyMessage() {
     try {
-        storageSet('replyToMessage', {
-            chatId: 0,
-            messageId: 0,
-        });
+        storageSet('replyToMessage', {});
         $('div#chat-and-message div.selected-message').removeClass('selected-message');
         $('div#chat-and-message div.reply-message').remove();
     } catch (exc) {
-        alert(`Ууупс! Что-то пошло не так!\nОшибка: ${exc}`);
+        showError(`Ууупс! Что-то пошло не так!\nОшибка: ${exc}`);
     } 
 }
 
-function renderChatMessage(messageHTML, messageData) {
+export function setEditMessage(messageId) {
+    const ucid = storageGet('activeChatUcid');
+    const lastRecord = storageGet('editMessage'); 
+
+    if (lastRecord && lastRecord.messageId === messageId) {
+        unsetEditMessage();
+    } else {
+        unsetEditMessage();
+        const message = getMessageById(messageId);
+        const editMessage = viewTextMessageWhenReplying(message);
+        editMessage.on('click', '.button', unsetEditMessage);
+        editMessage.on('click', 'span', scroll(messageId));
+
+        storageSet('editMessage', {
+            ucid,
+            messageId,
+        });
+
+        $(`#chat-and-message div[data-message-id="${messageId}"]`).addClass('selected-message');
+        $('#chat-and-message').append(editMessage);
+
+        $('#chat-message-input').val(message.edited_text || message.text || message.caption);
+    }
+}
+
+export function unsetEditMessage() {
+    try {
+        storageSet('editMessage', {});
+        $('div#chat-and-message div.selected-message').removeClass('selected-message');
+        $('div#chat-and-message div.reply-message').remove();
+    } catch (exc) {
+        showError(`Ууупс! Что-то пошло не так!\nОшибка: ${exc}`);
+    } 
+}
+
+function bindActionsForMessage(message, messageData) {
     let clientMessageContextMenu = [
         {
             icon: 'bi bi-reply',
@@ -103,13 +135,12 @@ function renderChatMessage(messageHTML, messageData) {
         }
     ]);
 
-    const chat = document.querySelector('#chat-and-message');
-    const message = $(messageHTML);
-
-    $(message).find('.message').jqContextMenu({
-        defaultStyle: 'jqcontext-menu-dark',
-        contextMenu: messageData?.staff ? managerMessageContextMenu : clientMessageContextMenu,
-    });
+    if (!messageData.is_deleted) {
+        $(message).find('.message').jqContextMenu({
+            defaultStyle: 'jqcontext-menu-dark',
+            contextMenu: messageData?.staff ? managerMessageContextMenu : clientMessageContextMenu,
+        });
+    }
 
     if (messageData.photo) { 
         $(message).find('.message img').click(function() {
@@ -121,19 +152,23 @@ function renderChatMessage(messageHTML, messageData) {
             $('#image-viewer').hide();
         });
     }
+    return message;
+}
 
-    $(chat).append(message);
+function renderChatMessage(messageHTML, messageData) {
+    const chat = document.querySelector('#chat-and-message');
+    const message = bindActionsForMessage($(messageHTML), messageData);
 
-    chat.scrollTop = chat.scrollHeight;
+    $(chat).append(message).scrollTop(chat.scrollHeight);
 }
 
 export function updateChatMessage(message) {
     const editedMessage = $(document.querySelector(`div[data-message-id="${message.id}"]`));
 
     if (!message.staff) {
-        editedMessage.replaceWith(clientMessage(message));
+        editedMessage.replaceWith(bindActionsForMessage($(clientMessage(message)), message));
     } else {
-        editedMessage.replaceWith(managerMessage(message));
+        editedMessage.replaceWith(bindActionsForMessage($(managerMessage(message)), message));
     }
 }
 

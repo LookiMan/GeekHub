@@ -1,6 +1,7 @@
 import { updateSiteTitle } from './components/site-title.js';
 import { renderNote, renderChatItem, renderChatList, openFirstChat, updateChatListItem } from './components/side-chat-menu.js';
-import { renderClientMessage, renderManagerMessage, updateChatMessage, setReplyMessage, unsetReplyMessage } from './components/chat.js';
+import { renderClientMessage, renderManagerMessage, updateChatMessage } from './components/chat.js';
+import { setEditMessage, unsetEditMessage, setReplyMessage, unsetReplyMessage } from './components/chat.js';
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
@@ -91,6 +92,9 @@ function setupWebSocket() {
                 case 'update':
                     processUpdatedMessage(data.data)
                     break;
+                case 'error':
+                    showError(data.data);
+                    break;
             }
         };
 
@@ -120,7 +124,11 @@ function setupWebSocket() {
 
             if (message.length > 0) {
                 event.preventDefault();
-                sendMessage(chatSocket);
+                if (Object.keys(storageGet('editMessage')).length === 0) {
+                    sendMessage(chatSocket);
+                } else {
+                    editMessage(chatSocket);
+                }
             }
         }
     });
@@ -300,13 +308,13 @@ function sendMessage(chatSocket) {
 
     let replyToMessageId;
 
+    if (text.length === 0) {
+        return;
+    }
+
     if (replyToMessage && replyToMessage.ucid === ucid) {
         replyToMessageId = replyToMessage.messageId;
         unsetReplyMessage();
-    }
-
-    if (text.length === 0) {
-        return;
     }
 
     chatSocket.send(
@@ -319,6 +327,35 @@ function sendMessage(chatSocket) {
         })
     );
     $('#chat-message-input').val('');
+}
+
+function editMessage(chatSocket) {
+    const ucid = storageGet('activeChatUcid');
+    const requestId = new Date().getTime();
+    const text = $('#chat-message-input').val().trim();
+    const editMessage = storageGet('editMessage');
+
+    let editMessageId;
+
+    if (text.length === 0) {
+        return;
+    }
+
+    if (editMessage && editMessage.ucid === ucid) {
+        editMessageId = editMessage.messageId;
+        unsetEditMessage();
+    }
+
+    chatSocket.send(
+        JSON.stringify({
+            ucid,
+            text,
+            message_id: editMessageId,
+            action: 'edit_text_message',
+            request_id: requestId,
+        })
+    );
+    $('#chat-message-input').val('');   
 }
 
 function sendFormData(formData) {
@@ -429,6 +466,14 @@ function blockUser(event) {
 
 function unblockUser(event) {
     changeBlockStateUser(event)
+}
+
+function startEditMessage(messageId) {
+    const ucid = storageGet('ucid');
+    storageSet('editMessage', {
+        messageId,
+        ucid,
+    });
 }
 
 function deleteMessage(messageId) {
@@ -542,7 +587,7 @@ function setupEvents() {
                 copyToClipboard(messageId);
                 break;
             case 'edit':
-                console.log('edit', messageId);
+                setEditMessage(messageId);
                 break;
             case 'delete':
                 deleteMessage(messageId);
