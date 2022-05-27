@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    from local_settings import *
+    from config.local_settings import *
 except ImportError:
     # Build paths inside the project like this: BASE_DIR / "subdir".
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,15 +30,16 @@ except ImportError:
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
     # SECURITY WARNING: don"t run with debug turned on in production!
-    DEBUG = True
+    DEBUG = False
 
     ALLOWED_HOSTS = ["*"]
 
     LOGIN_URL = "chat:login"
     LOGIN_REDIRECT_URL = "chat:index"
 
+    TELEGRAM_BOT_FILE_SIZE_LIMIT = 2.5 * 1024 * 1024  # 2.5 MB
+
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    TELEGRAM_BOT_FILE_SIZE_LIMIT = 2.5 * 1024 * 1024 # 2.5 MB
 
     if not TELEGRAM_BOT_TOKEN:
         raise BaseException(
@@ -50,8 +51,11 @@ except ImportError:
         raise BaseException(
             "WEBHOOK_HOST not found in OS environment paths")
 
-    REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
-    REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+    REDIS_URI = os.getenv("REDIS_URI")
+
+    if not REDIS_URI:
+        raise BaseException(
+            "REDIS_URI not found in OS environment paths")
 
     # From JWT
     ALGORITHM = "HS256"
@@ -67,13 +71,13 @@ except ImportError:
         "channels",
         "rest_framework",
         "django_cleanup",
-        "easy_thumbnails",
         "chat",
         "telegram_bot",
     ]
 
     MIDDLEWARE = [
         "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
@@ -108,7 +112,7 @@ except ImportError:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [(REDIS_HOST, REDIS_PORT)],
+                "hosts": [REDIS_URI],
             },
         },
     }
@@ -158,41 +162,8 @@ except ImportError:
     # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
     STATIC_URL = "/static/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "chat", "static")
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = os.path.join(BASE_DIR, "chat", "media")
-
-    PHOTOS_URL = "/photos/"
-    PHOTOS_ROOT = os.path.join(BASE_DIR, "chat", "photos")
-
-    STATICFILES_DIRS = [
-        PHOTOS_ROOT,
-        MEDIA_ROOT,
-    ]
-
-    THUMBNAIL_ALIASES = {
-        "chat.Message.image": {
-            "preview": {
-                "size": (450, 250),
-                "crop": "scale",
-            },
-        },
-        "telegram_bot.User.image":  {
-            "preview": {
-                "size": (50, 50),
-                "crop": "scale",
-            },
-
-            "default": {
-                "size": (160, 160),
-                "crop": "scale",
-            },
-        },
-    }
-
-    THUMBNAIL_SUBDIR = "thumbs"
-    THUMBNAIL_PREFFIX = "thumb_"
 
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
@@ -207,10 +178,9 @@ except ImportError:
     AUTH_USER_MODEL = "chat.Staff"
 
     # CELERY
-    REDIS_URL = "redis://{REDIS_HOST}:{REDIS_PORT}"
-    broker_url = REDIS_URL
-    CELERY_broker_url = REDIS_URL
-    result_backend = REDIS_URL
+    broker_url = REDIS_URI
+    CELERY_broker_url = REDIS_URI
+    result_backend = REDIS_URI
     accept_content = ["application/json"]
     task_serializer = "json"
     result_serializer = "json"
