@@ -48,7 +48,7 @@ class CustomStaffAdmin(UserAdmin):
                 (("is_staff", "is_active"),)
         }
         ),
-        ("Персональние данные", {
+        ("Персональные данные", {
             "fields":
                 (("first_name", "last_name"),)
         }
