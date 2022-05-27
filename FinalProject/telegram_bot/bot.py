@@ -315,6 +315,10 @@ def delete_bot_message(chat_id, message_id):
     bot.delete_message(chat_id, message_id)
 
 
+def edit_bot_message(chat_id, message_id):
+    bot.edit_message(chat_id, message_id)
+
+
 def debug_telegram_bot():
     bot.remove_webhook()
     bot.polling()
