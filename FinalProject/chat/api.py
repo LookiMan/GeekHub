@@ -13,7 +13,8 @@ from chat.serializers import ChatSerializer, MessageSerializer
 from chat.tasks import upload_to_google_drive
 from chat.utils import logger, ctime
 
-from telegram_bot.bot import send_photo_to_client, send_document_to_client, delete_bot_message
+from telegram_bot.bot import send_photo_to_client, send_document_to_client
+from telegram_bot.bot import delete_bot_message, edit_bot_message
 
 
 class IsSuperuser(BasePermission):
@@ -32,13 +33,11 @@ def get_chat(request, ucid):
         logger.exception(f"{exc}. Payload: ucid: {ucid}")
         return Response("Unclassified error", status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-
         if not chat.staff:
             chat.staff = request.user
-            chat.save()
+            chat.save(update_fields=["staff"])
 
-        serializer = ChatSerializer(chat)
-        return Response(serializer.data)
+        return Response(ChatSerializer(chat).data)
 
 
 @api_view(("GET",))
@@ -57,8 +56,7 @@ def get_note(request):
         logger.exception(exc)
         return Response("Unclassified error", status=HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        serializer = ChatSerializer(chat)
-        return Response(serializer.data)
+        return Response(ChatSerializer(chat).data)
 
 
 @api_view(("GET",))
@@ -70,7 +68,12 @@ def get_chats(request):
         return Response(f"Chats not found", status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
         logger.exception(exc)
-        return Response("Unclassified error", status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
     else:
         serializer = ChatSerializer(chats, many=True)
         return Response(serializer.data)
@@ -85,10 +88,14 @@ def get_archived_chats(request):
         return Response(f"Chats not found", status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
         logger.exception(exc)
-        return Response("Unclassified error", status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            "success": False,
+            "description": "Непредвиденная ошибка сервера",
+        },
+            status=HTTP_500_INTERNAL_SERVER_ERROR
+        )
     else:
-        serializer = ChatSerializer(chats, many=True)
-        return Response(serializer.data)
+        return Response(ChatSerializer(chats, many=True).data)
 
 
 @api_view(("GET",))
@@ -113,8 +120,7 @@ def get_messages(request, ucid):
             status=HTTP_500_INTERNAL_SERVER_ERROR
         )
     else:
-        serializer = MessageSerializer(messages, many=True)
-        return Response(serializer.data)
+        return Response(MessageSerializer(messages, many=True).data)
 
 
 @api_view(("GET",))
@@ -136,9 +142,9 @@ def upload_file(request):
             chat = Chat.objects.get(ucid=ucid)
         except Chat.DoesNotExist:
             Response({
-                "code": HTTP_400_BAD_REQUEST, "errors":  {
-                    "chat": f"Чат с ucid '{ucid}' не найден"
-                }
+                "success": False,
+                "code": HTTP_400_BAD_REQUEST,
+                "description": f"Чат с ucid '{ucid}' не найден",
             },
                 status=HTTP_400_BAD_REQUEST
             )
@@ -199,7 +205,12 @@ def upload_file(request):
 
             return Response({"code": HTTP_201_CREATED}, status=HTTP_201_CREATED)
 
-    return Response({"code": HTTP_400_BAD_REQUEST, "errors": form.errors}, status=HTTP_400_BAD_REQUEST)
+    return Response({
+        "code": HTTP_400_BAD_REQUEST,
+        "errors": form.errors
+    },
+        status=HTTP_400_BAD_REQUEST
+    )
 
 
 def change_chat_archive_state(request, ucid, *, is_archived):
@@ -248,19 +259,11 @@ def unarchive_chat(request, ucid):
 @api_view(("PUT",))
 @permission_classes((IsAuthenticated,))
 def edit_message(request, message_id, text):
-    update_fields = []
-
     try:
         message = Message.objects.get(id=message_id)
-
-        if message.text:
-            message.text = text
-            update_fields.append("text")
-        elif message.caption:
-            message.text = caption
-            update_fields.append("text")
-
-        message.save(update_fields=update_fields)
+        message.is_edited = True
+        message.edited_text = text
+        message.save(update_fields=["is_edited", "edited_text"])
     except Message.DoesNotExist as exc:
         logger.exception(exc)
         return Response({
@@ -279,18 +282,18 @@ def edit_message(request, message_id, text):
         )
     else:
         try:
-            delete_bot_message(message.chat.id, message_id)
+            edit_bot_message(message.chat.id, message_id)
         except Exception as exc:
             logger.exception(exc)
             return Response({
                 "success": False,
-                "description": f"Сообщение с id '{message_id}' помечено как удаленное, но не удалено в telegram-чате",
+                "description": f"Сообщение с id '{message_id}' помечено как отредактировано, но не изменено в telegram-чате",
                 "id": message_id,
             })
         else:
             return Response({
                 "success": True,
-                "description": f"Сообщение с id '{message_id}' успешно помечено как удаленное",
+                "description": f"Сообщение с id '{message_id}' успешно изменено",
                 "id": message_id,
             })
 

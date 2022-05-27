@@ -2,16 +2,8 @@ from django.http import StreamingHttpResponse
 
 from config.celery import app
 
+from chat.utils import generator
 from telegram_bot.bot import g_drive
-
-
-def generator(content):
-    content.seek(0)
-    while True:
-        chunk = content.read(1024)
-        if not chunk:
-            return None
-        yield chunk
 
 
 @app.task()

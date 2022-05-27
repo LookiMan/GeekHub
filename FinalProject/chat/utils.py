@@ -19,3 +19,14 @@ logger.addHandler(handler)
 
 def ctime(timestamp):
     return datetime.fromtimestamp(timestamp, tz=pytz.UTC)
+
+
+def generator(content):
+    chunk_size = 4096
+
+    content.seek(0)
+    while True:
+        chunk = content.read(chunk_size)
+        if not chunk:
+            return None
+        yield chunk

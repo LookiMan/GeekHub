@@ -8,7 +8,12 @@ class StaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = ("id", "username", "first_name", "last_name")
+        fields = (
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+        )
 
 
 class MessageSerializer(serializers.ModelSerializer):

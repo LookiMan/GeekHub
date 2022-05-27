@@ -9,6 +9,9 @@ class ClientSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "uuid", "id",
-            "first_name", "last_name", "username",
-            "image", "is_blocked"
+            "first_name",
+            "last_name",
+            "username",
+            "image",
+            "is_blocked",
         )
