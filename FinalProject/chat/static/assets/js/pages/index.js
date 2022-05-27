@@ -15,7 +15,7 @@ class BackendURLS {
         return $('input[name="csrfmiddlewaretoken"]').val();
     } 
     static jwtToken() {
-        $('input[name="jwt-token"]').val();
+        return $('input[name="jwt-token"]').val();
     }
     static newChat(ucid) {
         return $('input[name="new-chat-url"]').val().replace('/0/', `/${ucid}/`);
@@ -39,10 +39,11 @@ class BackendURLS {
 
 function setupWebSocket() {
     const requestId = new Date().getTime();
-    const token = BackendURLS.jwtToken()
+    const token = BackendURLS.jwtToken();
+    const ws_scheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     let webSocketIsConnected = false;
 
-    chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/?token=${token}`);
+    chatSocket = new WebSocket(`${ws_scheme}${window.location.host}/ws/chat/?token=${token}`);
 
     (function connect() {
         chatSocket.onopen = event => {
@@ -55,7 +56,7 @@ function setupWebSocket() {
                 })
             );
 
-            $.each(chats, function (index, chat) {
+            $.each(chats, (index, chat) => {
                 const { ucid } = chat; 
 
                 chatSocket.send(
@@ -466,14 +467,6 @@ function blockUser(event) {
 
 function unblockUser(event) {
     changeBlockStateUser(event)
-}
-
-function startEditMessage(messageId) {
-    const ucid = storageGet('ucid');
-    storageSet('editMessage', {
-        messageId,
-        ucid,
-    });
 }
 
 function deleteMessage(messageId) {
