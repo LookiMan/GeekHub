@@ -27,12 +27,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("chat/", include("chat.urls")),
     path("telegram/", include("telegram_bot.urls")),
+    path(r"media/<str:file_id>", google_drive_serve, name="media"),
 ]
 
 
 if settings.DEBUG:
     urlpatterns += (
-        path(r"static/<path:path>", never_cache(serve), name="static"),
-        path(r"photos/<path:path>", never_cache(serve), name="photos"),
-        path(r"media/<str:file_id>", google_drive_serve, name="media"),
+        path(r"static/<path:path>", never_cache(serve), name="static"),  
     )
