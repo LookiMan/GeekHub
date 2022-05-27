@@ -10,7 +10,6 @@ asgi-redis==1.4.3
 asgiref==3.5.0
 channels-redis==3.4.0
 django-cleanup==6.0.0
-easy-thumbnails==2.8.1
 pillow==9.0.1
 
 # Tasks
@@ -23,8 +22,9 @@ pyTelegramBotAPI==4.4.0
 # Other
 python-dotenv==0.20.0
 django-heroku==0.3.1
+whitenoise==6.1.0
 
 #Google
-google-api-python-client 
-google-auth-httplib2 
-google-auth-oauthlib
+google-api-python-client==2.48.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.5.1
