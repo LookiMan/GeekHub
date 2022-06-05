@@ -540,12 +540,16 @@ function archiveChat(event) {
 
 function setupEvents() {
     $('#upload-file-modal-form button#send-file').on('click', function (event) {
-        $('#upload-file-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
-        sendFile();
+        if ($('#upload-file-modal-form input[type=file]').prop('files').length > 0) {
+            $('#upload-file-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
+            sendFile();
+        }
     });
     $('#upload-image-modal-form button#send-image').on('click', function (event) {
-        $('#upload-image-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
-        sendImage();
+        if ($('#upload-image-modal-form input[type=file]').prop('files').length > 0) {
+            $('#upload-image-modal-form .modal-upload-spinner').addClass('active').removeClass('d-none');
+            sendImage();
+        }
     });
     $('.input-area .emoji-button').on('click', toggleEmojiMenu);
     $('#block-user').on('click', blockUser);
