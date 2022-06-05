@@ -100,7 +100,7 @@ export function unsetEditMessage() {
 }
 
 function bindActionsForMessage(message, messageData) {
-    let clientMessageContextMenu = [
+    let contextMenu = [
         {
             icon: 'bi bi-reply',
             text: 'Ответить',
@@ -110,7 +110,7 @@ function bindActionsForMessage(message, messageData) {
     ];
 
     if (messageData.text || messageData.caption || messageData.document) {
-        clientMessageContextMenu = clientMessageContextMenu.concat([
+        contextMenu = contextMenu.concat([
             {
                 icon: 'bi bi-clipboard-check',
                 text: 'Копировать',
@@ -120,25 +120,32 @@ function bindActionsForMessage(message, messageData) {
         ]);      
     }
 
-    const managerMessageContextMenu = clientMessageContextMenu.concat([
-        {
-            icon: 'bi bi-pen',
-            text: 'Редактировать',
-            dataKey: 'edit',
-            dataId: messageData.id,
-        },
-        {
-            icon: 'bi bi-x-lg',
-            text: 'Удалить',
-            dataKey: 'delete',
-            dataId: messageData.id, 
+    if (messageData?.staff) {
+        if (messageData.text || messageData.caption) {
+            contextMenu = contextMenu.concat([
+                {
+                    icon: 'bi bi-pen',
+                    text: 'Редактировать',
+                    dataKey: 'edit',
+                    dataId: messageData.id,
+                },
+            ]);
         }
-    ]);
+
+        contextMenu = contextMenu.concat([
+            {
+                icon: 'bi bi-x-lg',
+                text: 'Удалить',
+                dataKey: 'delete',
+                dataId: messageData.id, 
+            }
+        ]);
+    }
 
     if (!messageData.is_deleted) {
         $(message).find('.message').jqContextMenu({
             defaultStyle: 'jqcontext-menu-dark',
-            contextMenu: messageData?.staff ? managerMessageContextMenu : clientMessageContextMenu,
+            contextMenu,
         });
     }
 
