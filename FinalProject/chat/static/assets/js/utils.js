@@ -66,3 +66,33 @@ export function showError(error) {
     $('#display-errors-modal-form-content').html(`<p>${JSON.stringify(error)}</p>`);
     modal.show();
 } 
+
+export class BackendURLS {
+    static csrfmiddlewaretoken() {
+        return $('input[name="csrfmiddlewaretoken"]').val();
+    } 
+    static jwtToken() {
+        return $('input[name="jwt-token"]').val();
+    }
+    static newChat(ucid) {
+        return $('input[name="new-chat-url"]').val().replace('/0/', `/${ucid}/`);
+    }
+    static note() {
+        return $('input[name="note-url"]').val();
+    }
+    static chats() {
+        return $('input[name="chats-url"]').val();
+    }
+    static messages(ucid) {
+        return $('input[name="chat-messages-url"]').val().replace('/0/', `/${ucid}/`);
+    }
+    static fileUpload() {
+        return $('input[name="file-upload-url"]').val();
+    }
+    static deleteMessage(messageId) {
+        return $('input[name="delete-message-url"]').val().replace('/0/', `/${messageId}/`);
+    }
+    static emoji() {
+        return $('input[name="emoji-url"]').val();
+    }
+}

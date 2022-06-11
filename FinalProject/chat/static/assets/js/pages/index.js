@@ -5,37 +5,10 @@ import { setEditMessage, unsetEditMessage, setReplyMessage, unsetReplyMessage } 
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
 import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
 import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
-import { clearFileModalForm, clearImageModalForm, copyToClipboard, showError } from '../utils.js'
+import { clearFileModalForm, clearImageModalForm, copyToClipboard, showError, BackendURLS } from '../utils.js'
 
 
 let chatSocket;
-
-class BackendURLS {
-    static csrfmiddlewaretoken() {
-        return $('input[name="csrfmiddlewaretoken"]').val();
-    } 
-    static jwtToken() {
-        return $('input[name="jwt-token"]').val();
-    }
-    static newChat(ucid) {
-        return $('input[name="new-chat-url"]').val().replace('/0/', `/${ucid}/`);
-    }
-    static note() {
-        return $('input[name="note-url"]').val();
-    }
-    static chats() {
-        return $('input[name="chats-url"]').val();
-    }
-    static fileUpload() {
-        return $('input[name="file-upload-url"]').val();
-    }
-    static deleteMessage(messageId) {
-        return $('input[name="delete-message-url"]').val().replace('/0/', `/${messageId}/`);
-    }
-    static emoji() {
-        return $('input[name="emoji-url"]').val();
-    }
-}
 
 function setupWebSocket() {
     const requestId = new Date().getTime();
