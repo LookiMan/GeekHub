@@ -7,7 +7,11 @@ from telegram_bot.models import User
 
 @admin.register(User)
 class UserAdmin(CustomModelAdmin):
-    readonly_fields = ("uuid", "id", "is_bot")
+    readonly_fields = (
+        "uuid",
+        "id",
+        "is_bot",
+    )
 
     list_display = (
         "uuid",
