@@ -7,6 +7,7 @@
   <input type="hidden" name="new-chat-url" value="{% url 'chat:new_chat' 0 %}"></input>
   <input type="hidden" name="note-url" value="{% url 'chat:note' %}"></input>
   <input type="hidden" name="chats-url" value="{% url 'chat:chats' %}"></input>
+  <input type="hidden" name="chat-messages-url" value="{% url 'chat:messages' 0 %}"></input>
   <input type="hidden" name="file-upload-url" value="{% url 'chat:upload_file' %}">
   <input type="hidden" name="emoji-url" value="{% url 'chat:emoji' %}"></input>
   <input type="hidden" name="delete-message-url" value="{% url 'chat:delete_message' 0 %}"></input>
