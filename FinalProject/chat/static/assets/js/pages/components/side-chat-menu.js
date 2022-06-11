@@ -99,7 +99,6 @@ function updateAmountMessagesBadge(ucid) {
         messages = chatsMessages[ucid] || {};
 
         if (Object.keys(messages).length === 0) {
-            console.log("empty")
             return;
         }
 
