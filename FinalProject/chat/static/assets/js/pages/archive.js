@@ -1,19 +1,7 @@
 import { renderChatList } from './components/side-chat-menu.js';
-import { storageSet, storageGet } from '../utils.js';
 import { openFirstChat } from './components/side-chat-menu.js';
+import { storageSet, storageGet, BackendURLS } from '../utils.js';
 
-
-class BackendURLS {
-    static csrfmiddlewaretoken() {
-        return $('input[name="csrfmiddlewaretoken"]').val();
-    } 
-    static archivedChatsUrl() {
-        return $('input[name="archived-chats-url"]').val();
-    }
-    static messagesUrl(ucid) {
-        return $('input[name="messages-url"]').val().replace("/0/", `/${ucid}/`);
-    }
-}
 
 async function loadChats() {
     await $.ajax({
