@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -81,9 +83,13 @@ def get_chats(request):
 
 @api_view(("GET",))
 @permission_classes((IsAuthenticated, IsSuperuser))
-def get_archived_chats(request):
+def get_archived_chats(request, offset):
     try:
-        chats = Chat.objects.all().filter(is_archived=True).exclude(is_note=True)
+        gt = datetime.now() - timedelta(days=offset)
+
+        chats = Chat.objects.all().filter(
+            is_archived=True, archived_at__gte=gt).exclude(is_note=True)
+
     except Chat.DoesNotExist:
         return Response(f"Chats not found", status=HTTP_400_BAD_REQUEST)
     except Exception as exc:
@@ -217,7 +223,8 @@ def change_chat_archive_state(request, ucid, *, is_archived):
     try:
         chat = Chat.objects.get(ucid=ucid)
         chat.is_archived = is_archived
-        chat.save(update_fields=["is_archived"])
+        chat.archived_at = datetime.now()
+        chat.save(update_fields=["is_archived", "archived_at"])
     except Chat.DoesNotExist as exc:
         logger.exception(exc)
         return Response({

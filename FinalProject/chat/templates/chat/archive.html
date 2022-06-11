@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block main %}
-    <input type="hidden" name="archived-chats-url" value="{% url 'chat:archived_chats' %}">
+    <input type="hidden" name="archived-chats-url" value="{% url 'chat:archived_chats' 0 %}">
     <input type="hidden" name="messages-url" value="{% url 'chat:messages' 0 %}">
     <div class="row">
       {% if message %}

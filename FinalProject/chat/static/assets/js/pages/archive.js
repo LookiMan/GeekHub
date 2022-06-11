@@ -4,8 +4,17 @@ import { storageSet, storageGet, BackendURLS } from '../utils.js';
 
 
 async function loadChats() {
+    const match = location.pathname.match(/\d+/);
+
+    if (!match) {
+        showError('Не удалось найти совпадений');
+        return;
+    }
+
+    const offset = match[0];
+
     await $.ajax({
-        url: BackendURLS.archivedChatsUrl(),
+        url: BackendURLS.archivedChatsUrl(offset),
         headers: {
             'content-type': 'application/json',
             'X-CSRFToken': BackendURLS.csrfmiddlewaretoken(),

@@ -67,7 +67,7 @@ urlpatterns = [
         name="chats"
     ),
     path(
-        "api/v1/archived_chats/",
+        "api/v1/archived_chats/<int:offset>/",
         api.get_archived_chats,
         name="archived_chats"
     ),

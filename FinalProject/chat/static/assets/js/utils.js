@@ -92,8 +92,8 @@ export class BackendURLS {
     static emoji() {
         return $('input[name="emoji-url"]').val();
     }
-    static archivedChatsUrl() {
-        return $('input[name="archived-chats-url"]').val();
+    static archivedChatsUrl(offset) {
+        return $('input[name="archived-chats-url"]').val().replace("/0/", `/${offset}/`);
     }
     static messagesUrl(ucid) {
         return $('input[name="messages-url"]').val().replace("/0/", `/${ucid}/`);
