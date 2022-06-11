@@ -14,7 +14,7 @@ export function noteItem(chat) {
                     <div class="fw-bold">${firstName}</div>
                     <div class="preview"><strong>${lastMessagePrefix}</strong> ${lastMessageText}</div>
                 </div>
-                <span class="badge bg-primary rounded-pill">0</span>
+                <span class="badge bg-primary rounded-pill">${$(chat.messages).length}</span>
             </li>`);
     
     return item;
