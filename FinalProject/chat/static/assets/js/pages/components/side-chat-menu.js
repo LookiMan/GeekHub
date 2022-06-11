@@ -1,14 +1,38 @@
-import { storageSet, storageGet } from '../../utils.js';
 import { noteItem } from './note-item.js';
 import { chatItem } from './chat-item.js';
 import { previewText } from './chat-item-preview-text.js';
 import { updateSiteTitle } from './site-title.js';
 import { renderChat } from './chat.js';
+import { storageSet, storageGet, BackendURLS } from '../../utils.js';
 
 
 function selectItem(target) {
     $('li.active-aside-chat-menu-tab').removeClass('active-aside-chat-menu-tab');
     $(target).addClass('active-aside-chat-menu-tab');
+}
+
+async function uploadMessages(ucid) {
+    await $.ajax({
+        url: BackendURLS.messages(ucid),
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
+        },
+        success: function (messages) {
+            const chatsMessages = storageGet('chatsMessages') || {};
+            const chat = chatsMessages[ucid] || {};
+            //
+            $.each(messages, function (index, message) {
+                chat[message.id] = message;
+            });
+            //
+            chatsMessages[ucid] = chat;
+
+            storageSet('chatsMessages', chatsMessages);
+        },
+        error: function (data) {
+            console.error(data);
+        }
+    });
 }
 
 function sideChatMenuClickHandler(event) {
@@ -24,8 +48,7 @@ function sideChatMenuClickHandler(event) {
     }
 
     if (!chat) {
-        console.error(`Чат с ucid \"${ucid}\" не найден в локальном хранилище`);
-        return;      
+        uploadMessages(ucid);
     }
 
     renderChat(ucid);
@@ -41,9 +64,7 @@ function sideChatMenuClickHandler(event) {
 export function renderNote(chat) {
     $('#aside-chats-menu-spinner').remove();
     $('#aside-chats-menu').append($('<ol class="mx-0 px-0"></ol>'));
-    
     renderNoteItem(chat);
-    updateAmountMessagesBadge(chat.ucid);
 }
 
 function renderNoteItem(chat) {
@@ -71,22 +92,26 @@ export function renderChatList(chats) {
 function updateAmountMessagesBadge(ucid) {
     const activeChatUcid = storageGet('activeChatUcid'); 
     const badge = $(`li[data-chat-ucid=${ucid}] span.badge`);
+    let messages;
 
     if (activeChatUcid === ucid) {
         const chatsMessages = storageGet('chatsMessages');
-        const messages = chatsMessages[ucid] || {};
+        messages = chatsMessages[ucid] || {};
 
-        badge.removeClass('bg-danger');
-        badge.addClass('bg-primary');
-        badge.text(Object.keys(messages).length);
+        if (Object.keys(messages).length === 0) {
+            console.log("empty")
+            return;
+        }
+
+        badge.removeClass('bg-danger').addClass('bg-primary');
     } else {
         const unreadMessages = storageGet('unreadMessages');
-        const messages = unreadMessages[ucid] || {};
+        messages = unreadMessages[ucid] || {};
 
-        badge.removeClass('bg-primary');
-        badge.addClass('bg-danger');
-        badge.text(Object.keys(messages).length);
+        badge.removeClass('bg-primary').addClass('bg-danger');
     }
+
+    badge.text(Object.keys(messages).length);
 }
 
 export function updateChatListItem(message) {
