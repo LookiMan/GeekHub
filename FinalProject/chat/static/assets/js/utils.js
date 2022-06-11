@@ -83,9 +83,6 @@ export class BackendURLS {
     static chats() {
         return $('input[name="chats-url"]').val();
     }
-    static messages(ucid) {
-        return $('input[name="chat-messages-url"]').val().replace('/0/', `/${ucid}/`);
-    }
     static fileUpload() {
         return $('input[name="file-upload-url"]').val();
     }
@@ -94,5 +91,11 @@ export class BackendURLS {
     }
     static emoji() {
         return $('input[name="emoji-url"]').val();
+    }
+    static archivedChatsUrl() {
+        return $('input[name="archived-chats-url"]').val();
+    }
+    static messagesUrl(ucid) {
+        return $('input[name="messages-url"]').val().replace("/0/", `/${ucid}/`);
     }
 }
