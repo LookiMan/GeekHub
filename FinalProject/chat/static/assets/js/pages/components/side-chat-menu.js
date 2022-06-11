@@ -13,7 +13,7 @@ function selectItem(target) {
 
 async function uploadMessages(ucid) {
     await $.ajax({
-        url: BackendURLS.messages(ucid),
+        url: BackendURLS.messagesUrl(ucid),
         headers: {
             'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]')[0].value,
         },
