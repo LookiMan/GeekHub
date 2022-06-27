@@ -17,27 +17,27 @@ urlpatterns = [
         name="archive"
     ),
     path(
-        "accouts/login/",
+        "accounts/login/",
         views.login_staff,
         name="login"
     ),
     path(
-        "accouts/logout/",
+        "accounts/logout/",
         views.logout_staff,
         name="logout"
     ),
     path(
-        "accouts/registration/",
+        "accounts/registration/",
         views.registration_staff,
         name="registration"
     ),
     path(
-        "accouts/change/<int:pk>/",
+        "accounts/change/<int:pk>/",
         views.change_staff,
         name="change_staff"
     ),
     path(
-        "accouts/staff_list/",
+        "accounts/staff_list/",
         views.staff_list,
         name="staff_list"
     ),
