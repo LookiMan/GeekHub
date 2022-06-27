@@ -252,6 +252,7 @@ class Message(models.Model):
     )
 
     created_at = models.DateTimeField(
+        "created_at",
         auto_now_add=True,
         help_text="Время создания сообщения в базе данных",
     )
@@ -265,7 +266,7 @@ class Message(models.Model):
             preview_text = f'<i>Документ:</i> {self.file_name}'
         else:
             preview_text = '<i>Отсутствует</i>'
-            
+
         return mark_safe(f"Telegram message ({self.id}): {preview_text}")
 
     class Meta:
