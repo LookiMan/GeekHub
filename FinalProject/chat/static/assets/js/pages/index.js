@@ -93,7 +93,9 @@ function setupWebSocket() {
     $('#chat-message-input').focus();
     $('#chat-message-input').on('keydown', function (event) {
         // enter, return
-        if (event.keyCode === 13) {
+        const keyId = event.keyCode || event.which || event.key || 0;
+
+        if (keyId === 13) {
             const message = $(event.currentTarget).val().trim();
 
             if (message.length > 0) {
