@@ -97,6 +97,17 @@ class RegisterStaffForm(forms.ModelForm):
 
 
 class ChangeStaffInfoForm(forms.ModelForm):
+    first_name = forms.CharField(
+        label="Имя",
+        help_text="Имя сотрудника",
+        required=True,
+    )
+
+    last_name = forms.CharField(
+        label="Фамилия",
+        help_text="Фамилия сотрудника",
+        required=True,
+    )
 
     class Meta(UserCreationForm):
         model = Staff
