@@ -10,6 +10,9 @@ try {
             break;
         case url.indexOf('/archive/') !== -1:
             import('./pages/archive.js');
+            break;
+        case url.indexOf('/login/') !== -1:
+            import('./pages/login.js');
             break; 
     }
 } catch (error) {
