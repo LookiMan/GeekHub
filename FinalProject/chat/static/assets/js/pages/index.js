@@ -14,11 +14,10 @@ function setupWebSocket() {
     const requestId = new Date().getTime();
     const token = BackendURLS.jwtToken();
     const ws_scheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    let webSocketIsConnected = false;
-
-    chatSocket = new WebSocket(`${ws_scheme}${window.location.host}/ws/chat/?token=${token}`);
 
     (function connect() {
+        chatSocket = new WebSocket(`${ws_scheme}${window.location.host}/ws/chat/?token=${token}`);
+
         chatSocket.onopen = event => {
             const chats = storageGet('allChats');
 
@@ -30,7 +29,7 @@ function setupWebSocket() {
             );
 
             $.each(chats, (index, chat) => {
-                const { ucid } = chat; 
+                const { ucid } = chat;
 
                 chatSocket.send(
                     JSON.stringify({
@@ -75,14 +74,12 @@ function setupWebSocket() {
         chatSocket.onerror = error => {
             console.error(error);
             chatSocket.onclose = null;
-            webSocketIsConnected = false;
             chatSocket.close();
             connect();
         };
 
         chatSocket.onclose = event => {
             console.info(`WebSocket closed with code ${event.code}! ${event.reason}`);
-            webSocketIsConnected = false;
             if (event.wasClean) {
                 return;
             }

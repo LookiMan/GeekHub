@@ -30,13 +30,10 @@ def archive(request, offset):
 
 
 def login_staff(request):
-    context = {"page": "login"}
-
     if request.method == "POST":
         form = LoginStaffForm(request.POST)
 
         if form.is_valid():
-            context["form"] = form
             login_data = form.cleaned_data
 
             user = authenticate(
@@ -50,17 +47,14 @@ def login_staff(request):
             else:
                 messages.warning(request, "Неверный логин или пароль")
         else:
-            context["form"] = LoginStaffForm()
             messages.warning(request, "Форма заполнена некорректно")
 
-        return render(request, "./chat/login.html", context)
-    else:
-        if request.user.is_authenticated:
-            return redirect("chat:index")
+        return render(request, "./chat/login.html", {"form": LoginStaffForm(), "page": "login"})
 
-        context["form"] = LoginStaffForm()
+    if request.user.is_authenticated:
+        return redirect("chat:index")
 
-    return render(request, "./chat/login.html", context)
+    return render(request, "./chat/login.html", {"form": LoginStaffForm(), "page": "login"})
 
 
 def logout_staff(request):
@@ -71,8 +65,6 @@ def logout_staff(request):
 
 @superuser_required
 def registration_staff(request):
-    context = {}
-
     if request.method == "POST":
         form = RegisterStaffForm(request.POST)
 
@@ -80,7 +72,7 @@ def registration_staff(request):
             staff = form.save()
 
             Chat.objects.create(
-                id=0,
+                id=staff.id,
                 first_name="Мои заметки",
                 last_name=None,
                 username=None,
@@ -91,13 +83,14 @@ def registration_staff(request):
             return redirect(reverse_lazy("chat:change_staff", kwargs={"pk": staff.pk}))
 
         else:
-            context["form"] = RegisterStaffForm(request.POST or None)
+            context = {"form": RegisterStaffForm(request.POST or None)}
+
             for error in form.errors.values():
                 messages.warning(request, error)
-    else:
-        context["form"] = RegisterStaffForm()
 
-    return render(request, "./chat/registration-staff.html", context)
+            return render(request, "./chat/registration-staff.html", context)
+
+    return render(request, "./chat/registration-staff.html", {"form": RegisterStaffForm()})
 
 
 @superuser_required
