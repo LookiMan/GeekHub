@@ -1,5 +1,8 @@
+import pytz
+
 from rest_framework import serializers
 
+from config.settings import TIME_ZONE
 from chat.models import Staff, Chat, Message
 from telegram_bot.serializers import ClientSerializer
 
@@ -43,7 +46,7 @@ class MessageSerializer(serializers.ModelSerializer):
         depth = 2
 
     def get_created_at_short(self, obj):
-        return obj.created_at.strftime("%H:%M")
+        return pytz.timezone(TIME_ZONE).normalize(obj.created_at).strftime("%H:%M")
 
 
 class ChatSerializer(serializers.ModelSerializer):
