@@ -117,7 +117,9 @@
                   <div class="mx-4" style="margin: auto;"><span class="badge rounded-pill bg-success">{{user.username}}</span></div>
                   <a class="btn btn-outline-danger" type="button" href="{% url 'chat:logout' %}">Выйти</a>
                 {% else %}
-                  <a class="btn btn-outline-primary" type="button" href="{% url 'chat:login' %}">Войти</a>
+                  {% if page and page != 'login' %}
+                    <a class="btn btn-outline-primary" type="button" href="{% url 'chat:login' %}">Войти</a>
+                  {% endif %}
                 {% endif %}
               </div>
             </div>
