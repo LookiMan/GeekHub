@@ -150,7 +150,7 @@ except ImportError:
 
     LANGUAGE_CODE = "ru"
 
-    TIME_ZONE = "UTC"
+    TIME_ZONE = "Europe/Istanbul"
 
     USE_I18N = True
 
@@ -163,7 +163,6 @@ except ImportError:
 
     STATIC_URL = "/static/"
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 
