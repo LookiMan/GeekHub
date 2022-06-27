@@ -30,7 +30,7 @@ def archive(request, offset):
 
 
 def login_staff(request):
-    context = {}
+    context = {"page": "login"}
 
     if request.method == "POST":
         form = LoginStaffForm(request.POST)
@@ -50,8 +50,14 @@ def login_staff(request):
             else:
                 messages.warning(request, "Неверный логин или пароль")
         else:
+            context["form"] = LoginStaffForm()
             messages.warning(request, "Форма заполнена некорректно")
+
+        return render(request, "./chat/login.html", context)
     else:
+        if request.user.is_authenticated:
+            return redirect("chat:index")
+
         context["form"] = LoginStaffForm()
 
     return render(request, "./chat/login.html", context)
