@@ -12,8 +12,8 @@ from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 from chat.forms import UploadFileForm
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer, MessageSerializer
-from chat.tasks import upload_to_google_drive
 from chat.utils import logger, ctime
+from google_drive_API.api import upload_to_google_drive
 
 from telegram_bot.bot import send_photo_to_client, send_document_to_client
 from telegram_bot.bot import delete_bot_message, edit_bot_message

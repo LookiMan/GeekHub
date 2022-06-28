@@ -1,13 +1,13 @@
 import sys
 
-from telebot import TeleBot
+from telebot import TeleBot, types
 
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.safestring import mark_safe
-from django.urls import reverse
+from django.urls import reverse_lazy
 
 from config.settings import (
     TELEGRAM_BOT_TOKEN,
@@ -20,7 +20,7 @@ from chat.models import Chat, Message
 from telegram_bot.models import User
 from telegram_bot.utils import ctime, get_default_image
 
-from google_drive_API.api import GoogleDrive
+from google_drive_API.api import upload_to_google_drive
 
 
 WEBHOOK_PATH = f"/{TELEGRAM_BOT_TOKEN}/"
@@ -47,7 +47,6 @@ BOT_PHRASES = {
 
 
 bot = TeleBot(token=TELEGRAM_BOT_TOKEN)
-g_drive = GoogleDrive()
 
 
 if "--not-set-telegram-webhook" not in sys.argv:
@@ -61,7 +60,7 @@ def download_file_from_telegram(file_id):
     metadata = bot.get_file(file_id)
     content = bot.download_file(metadata.file_path)
 
-    return g_drive.put_file(file_id, content)
+    return upload_to_google_drive(file_id, content)
 
 
 def download_user_photo(user_id):
@@ -189,9 +188,10 @@ def get_telegram_user(message):
             )
 
         else:
-            telegram_user.image = reverse(
-                "static", args=[get_default_image()]
-            )
+            # telegram_user.image = reverse(
+            #    "static", args=[get_default_image()]
+            # )
+            telegram_user.image = f"/static/{get_default_image()}"
 
         telegram_user.save()
 
@@ -322,3 +322,8 @@ def edit_bot_message(chat_id, message_id):
 def debug_telegram_bot():
     bot.remove_webhook()
     bot.polling()
+
+
+def process_telegram_event(update):
+    update = types.Update.de_json(update)
+    bot.process_new_updates([update])

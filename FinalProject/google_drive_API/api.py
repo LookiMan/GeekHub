@@ -8,7 +8,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaInMemoryUpload, MediaIoBaseDownload
 
+from django.http import StreamingHttpResponse
+
 from google_drive_API.config import SCOPES
+from chat.utils import generator
 
 
 class GoogleServices(object):
@@ -61,9 +64,14 @@ class GoogleDrive(GoogleServices):
         return file.get('id')
 
 
-def main():
-    g_drive = GoogleDrive()
+def google_drive_serve(request, file_id, *args, **kwargs):
+    content = g_drive.get_file(file_id)
+
+    return StreamingHttpResponse(generator(content))
 
 
-if __name__ == "__main__":
-    main()
+def upload_to_google_drive(filename, content):
+    return g_drive.put_file(filename, content)
+
+
+g_drive = GoogleDrive()

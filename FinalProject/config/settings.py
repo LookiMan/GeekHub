@@ -62,6 +62,7 @@ except ImportError:
 
     # Application definition
     INSTALLED_APPS = [
+        "whitenoise.runserver_nostatic",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -162,7 +163,19 @@ except ImportError:
     # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
     STATIC_URL = "/static/"
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(BASE_DIR, "chat", "static")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "chat", "media")
+
+    PHOTOS_URL = "/photos/"
+    PHOTOS_ROOT = os.path.join(BASE_DIR, "chat", "photos")
+
+    STATICFILES_DIRS = [
+        PHOTOS_ROOT,
+        MEDIA_ROOT,
+    ]
 
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 

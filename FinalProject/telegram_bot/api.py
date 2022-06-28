@@ -8,12 +8,11 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 
 from django.conf import settings
-from chat.tasks import google_drive_serve
 from chat.utils import logger
+from google_drive_API.api import google_drive_serve
 
 from telegram_bot.models import User
-from telegram_bot.bot import send_message, BOT_PHRASES
-from telegram_bot.tasks import process_telegram_event
+from telegram_bot.bot import send_message, process_telegram_event, BOT_PHRASES
 
 
 @api_view(("POST",))
@@ -25,12 +24,8 @@ def telegram_webhook(request, token):
             "Bad request. Invalid telegram bot token",
             status=HTTP_400_BAD_REQUEST,
         )
-
     try:
-        if settings.DEBUG:
-            process_telegram_event(update)
-        else:
-            process_telegram_event.delay(update)
+        process_telegram_event(update)
 
     except Exception as exc:
         logger.exception(exc)
