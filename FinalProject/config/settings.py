@@ -71,7 +71,6 @@ except ImportError:
         "django.contrib.staticfiles",
         "channels",
         "rest_framework",
-        "django_cleanup",
         "chat",
         "telegram_bot",
     ]
