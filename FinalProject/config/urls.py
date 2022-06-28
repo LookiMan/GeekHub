@@ -16,11 +16,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
-from django.contrib.staticfiles.views import serve
-from django.views.decorators.cache import never_cache
-from django.conf import settings
 
-from chat.tasks import google_drive_serve
+from google_drive_API.api import google_drive_serve
 
 
 urlpatterns = [
@@ -29,9 +26,3 @@ urlpatterns = [
     path("telegram/", include("telegram_bot.urls")),
     path(r"media/<str:file_id>", google_drive_serve, name="media"),
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += (
-        path(r"static/<path:path>", never_cache(serve), name="static"),  
-    )
