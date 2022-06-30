@@ -1,11 +1,48 @@
-import { updateSiteTitle } from './components/site-title.js';
-import { renderNote, renderChatItem, renderChatList, openFirstChat, updateChatListItem } from './components/side-chat-menu.js';
-import { renderClientMessage, renderManagerMessage, updateChatMessage } from './components/chat.js';
-import { setEditMessage, unsetEditMessage, setReplyMessage, unsetReplyMessage } from './components/chat.js';
+import { 
+    renderNote,
+    renderChatItem,
+    renderChatList,
+    openFirstChat,
+    updateChatListItem 
+} from './components/side-chat-menu.js';
+
+import {
+    renderClientMessage,
+    renderManagerMessage,
+    updateChatMessage
+} from './components/chat.js';
+
+import { 
+    setEditMessage,
+    unsetEditMessage,
+    setReplyMessage,
+    unsetReplyMessage
+} from './components/chat.js';
+
+import { 
+    openEmojiMenu,
+    closeEmojiMenu,
+    toggleEmojiMenu,
+    emojiMenuToggleStates
+} from './components/emoji.js';
+
+import {
+    storageSet, 
+    storageGet, 
+    dropdownToggle, 
+    previewImage
+} from '../utils.js';
+
+import {
+    clearFileModalForm,
+    clearImageModalForm,
+    copyToClipboard,
+    showError,
+    BackendURLS
+} from '../utils.js'
+
 import { updateDropdownMenu } from './components/chat-dropdown-menu.js';
-import { openEmojiMenu, closeEmojiMenu, toggleEmojiMenu, emojiMenuToggleStates } from './components/emoji.js';
-import { storageSet, storageGet, dropdownToggle, previewImage } from '../utils.js';
-import { clearFileModalForm, clearImageModalForm, copyToClipboard, showError, BackendURLS } from '../utils.js'
+import { updateSiteTitle } from './components/site-title.js';
 
 
 let chatSocket;
