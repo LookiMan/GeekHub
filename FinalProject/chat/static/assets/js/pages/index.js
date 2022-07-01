@@ -247,10 +247,10 @@ function processRetrievedMessage(message) {
     storageSet('chatsMessages', chatsMessages);
 
     if (Number(activeChatUcid) === ucid) {
-        if (!message.staff) {
-            renderClientMessage(message);
-        } else {
+        if (message.staff) {
             renderManagerMessage(message);
+        } else {
+            renderClientMessage(message);
         }
     }
 }
@@ -272,13 +272,13 @@ function processCreatedMessage(message) {
     storageSet('chatsMessages', chatsMessages);
 
     if (activeChatUcid === ucid) {
-        if (!message.staff) {
-            renderClientMessage(message);
-        } else {
+        if (message.staff) {
             renderManagerMessage(message);
+        } else {
+            renderClientMessage(message);
         }
     
-    } else if (!message.staff) {
+    } else if (message.user) {
         const messages = unreadMessages[ucid] || {};
         messages[message.id] = message;  
         unreadMessages[ucid] = messages;
