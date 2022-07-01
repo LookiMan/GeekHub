@@ -63,7 +63,13 @@ class ChatConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
             if chat.is_note:
                 await self.create_text_note(chat, text, reply_to_message_id)
             else:
-                await async_send_text_message_to_client(chat, text, reply_to_message_id=reply_to_message_id)
+                try:
+                    await async_send_text_message_to_client(chat, text, reply_to_message_id=reply_to_message_id)
+                except Exception as exc:
+                    await self.send_json({
+                        "action": "error",
+                        "data": str(exc),
+                    })
 
     @action()
     async def subscribe_to_messages_in_chat(self, ucid, **kwargs):
