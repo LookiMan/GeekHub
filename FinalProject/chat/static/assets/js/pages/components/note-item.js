@@ -4,7 +4,7 @@ import { previewText } from './chat-item-preview-text.js';
 export function noteItem(chat) {
     const firstName = chat.first_name;
     const lastMessageText = previewText(chat.last_message);
-    const lastMessagePrefix = 'Вы';
+    const lastMessagePrefix = chat.last_message.id ? 'Вы' : '';
 
     const item = $(`<li class="aside-chat-tab list-group-item d-flex justify-content-between align-items-start" data-chat-ucid="${chat.ucid}">
                 <div>

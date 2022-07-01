@@ -125,7 +125,7 @@ export function updateChatListItem(message) {
 
 export async function openFirstChat() {
     const allChats = storageGet('allChats');
-    const ucid = Object.keys(allChats)[0];
+    const ucid = Number(Object.keys(allChats)[0]);
     const target = $(`li[data-chat-ucid="${ucid}"]`);
 
     await renderChat(ucid);
