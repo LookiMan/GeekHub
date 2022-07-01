@@ -7,7 +7,7 @@ from channels.layers import get_channel_layer
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.safestring import mark_safe
-from django.urls import reverse_lazy
+from django.urls import reverse
 
 from config.settings import (
     TELEGRAM_BOT_TOKEN,
